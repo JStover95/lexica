@@ -1,12 +1,11 @@
 import logging
-from flask import Blueprint
+from l2ai.extensions import socketio
 
-blueprint = Blueprint("generate", __name__)
 logger = logging.getLogger(__name__)
 
 
-@blueprint.route("/prompt", methods=["POST"])
-def prompt():
+@socketio.event
+def generate_prompt():
     """
     Generate content using a prompt.
 
@@ -36,8 +35,8 @@ def prompt():
     pass
 
 
-@blueprint.route("/image", methods=["POST"])
-def image():
+@socketio.event
+def generate_image():
     """
     Generate content using an image.
 
@@ -60,8 +59,8 @@ def image():
     pass
 
 
-@blueprint.route("/file", methods=["POST"])
-def file():
+@socketio.event
+def generate_file():
     """
     Generate content using a file.
 
@@ -84,8 +83,8 @@ def file():
     pass
 
 
-@blueprint.route("/sentences", methods=["POST"])
-def sentences():
+@socketio.event
+def generate_sentences():
     """
     Generate sentences for a given word.
     """

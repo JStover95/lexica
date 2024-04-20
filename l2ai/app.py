@@ -1,6 +1,7 @@
 import os
 from flask import Flask
 from flask_cors import CORS
+from extensions import socketio
 
 
 def create_app(testing=False):
@@ -39,4 +40,4 @@ def register_commands(app):
 
 
 def register_extensions(app):
-    pass
+    socketio.init_app(app)

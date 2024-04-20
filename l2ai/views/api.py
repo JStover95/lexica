@@ -1,11 +1,10 @@
 import logging
-from flask import Blueprint
+from l2ai.extensions import socketio
 
-blueprint = Blueprint("api", __name__)
 logger = logging.getLogger(__name__)
 
 
-blueprint.route("/create-content", methods=["POST"])
+@socketio.event
 def create_content():
     """
     Commit generated content to the database.
@@ -21,7 +20,7 @@ def create_content():
     pass
 
 
-blueprint.route("/get-content")
+@socketio.event
 def get_content():
     """
     Get all of a user's content.
@@ -45,7 +44,7 @@ def get_content():
     pass
 
 
-blueprint.route("/update-content", methods=["POST"])
+@socketio.event
 def update_content():
     """
     Update content.
@@ -64,14 +63,7 @@ def update_content():
         "ID": str,
         "Timestamp": int,
         "Title": "",
-        "Text": str,
-        "SurfaceMap": {
-            "Units": [str, ...],
-            "Ix": [
-                [int, int],
-                ...
-            ]
-        }
+        "Text": str
     }
 
     Response syntax (500)
@@ -83,7 +75,7 @@ def update_content():
     pass
 
 
-blueprint.route("/get-definitions")
+@socketio.event
 def get_definitions():
     """
     Get the definitions of one or more words.
@@ -103,14 +95,7 @@ def get_definitions():
                 {
                     "Score": float,
                     "Definition": str,
-                    "UserScore": str,
-                    "Examples": [
-                        {
-                            "ko_KR": ...,
-                            "en_US": ...
-                        },
-                        ...
-                    ]
+                    "UserScore": str
                 },
                 ...
             ]
@@ -121,7 +106,7 @@ def get_definitions():
     pass
 
 
-@blueprint.route("/update-user-score")
+@socketio.event
 def update_user_score():
     """
     Update the user score of a certain word or definition.

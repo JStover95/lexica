@@ -118,3 +118,66 @@ def update_user_score():
     score: str
     """
     pass
+
+
+@socketio.event
+def create_explanation():
+    """
+    Request Syntax
+    --------------
+    {
+        "Expression": str,
+        "Definitions": [str],
+        "Description": str,
+        "ContentID": str,
+        "ContentPosition": str
+    }
+
+    Response Syntax (500)
+    ---------------------
+    {
+        "ID": str
+    }
+    """
+    pass
+
+
+@socketio.event
+def get_explanations():
+    """
+    Request Syntax
+    --------------
+    {
+        "ContentID": str
+    }
+
+    Response Syntax
+    ---------------
+    {
+        "ID": str,
+        "Expression": str,
+        "Definitions": [str],
+        "Description": str
+    }
+    """
+    pass
+
+
+@socketio.event
+def update_explanation():
+    """
+    Request Syntax
+    --------------
+    {
+        "ID": str,
+        "Expression": str,
+        "Definitions": [str],
+        "Description": str
+    }
+
+    Response Syntax (500)
+    ---------------------
+    {
+        "ID": str
+    }
+    """

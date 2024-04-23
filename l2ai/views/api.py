@@ -5,23 +5,25 @@ logger = logging.getLogger(__name__)
 
 
 @socketio.event
-def create_content():
+def content_create(title: str, text: str, method: str) -> str:
     """
-    Commit generated content to the database.
+    Commit content to the database.
 
-    Request Syntax
-    --------------
-    {
-        "Title": str,
-        "Text": str,
-        "Method": str
-    }
+    Args:
+        title (str): The content's title
+        text (str): The content's text
+        method (str): The content's creation method (i.e., paste, generate,
+            image, file)
+
+    Returns:
+        str: The content's ObjectId
     """
-    pass
+    logger.debug("title=%s text=%s method=%s" % (title, text, method))
+    return "content.Id"
 
 
 @socketio.event
-def get_content():
+def content_get():
     """
     Get all of a user's content.
 
@@ -71,6 +73,15 @@ def update_content():
     {
         "Msg": a formatted traceback if an uncaught error was thrown
     }
+    """
+    pass
+
+
+@socketio.event
+def delete_content():
+    """
+    Request Syntax
+    --------------
     """
     pass
 

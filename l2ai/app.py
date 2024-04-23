@@ -1,10 +1,11 @@
 import os
 from flask import Flask
 from flask_cors import CORS
-from extensions import socketio
+from l2ai.commands import init_user
+from l2ai.extensions import cogauth, mongo, socketio
 
 
-def create_app(testing=False):
+def create_app(testing: bool = False):
     if testing:
         flask_config = "Testing"
 
@@ -31,13 +32,15 @@ def create_app(testing=False):
     return app
 
 
-def register_blueprints(app):
+def register_blueprints(app: Flask):
     pass
 
 
-def register_commands(app):
-    pass
+def register_commands(app: Flask):
+    app.cli.add_command(init_user)
 
 
-def register_extensions(app):
+def register_extensions(app: Flask):
+    cogauth.init_app(app)
+    mongo.init_app(app)
     socketio.init_app(app)

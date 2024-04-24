@@ -2,7 +2,8 @@ import os
 from flask import Flask
 from flask_cors import CORS
 from l2ai.commands import init_user
-from l2ai.extensions import cogauth, mongo, socketio
+from l2ai.extensions import cognito, mongo, socketio
+from l2ai.views import base
 
 
 def create_app(testing: bool = False):
@@ -33,7 +34,7 @@ def create_app(testing: bool = False):
 
 
 def register_blueprints(app: Flask):
-    pass
+    app.register_blueprint(base.blueprint)
 
 
 def register_commands(app: Flask):
@@ -41,6 +42,6 @@ def register_commands(app: Flask):
 
 
 def register_extensions(app: Flask):
-    cogauth.init_app(app)
+    cognito.init_app(app)
     mongo.init_app(app)
     socketio.init_app(app)

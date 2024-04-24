@@ -1,7 +1,5 @@
 import os
 from typing import Generator
-import boto3
-from flask import Flask
 from flask.testing import FlaskClient
 from moto import mock_aws
 import pytest
@@ -10,7 +8,11 @@ from l2ai.extensions import cognito
 
 
 def initialize_cognito_test_environment():
-    res = cognito.client.create_user_pool(PoolName="TestUserPool")
+    res = cognito.client.create_user_pool(
+        PoolName="TestUserPool",
+        AliasAttributes=["email"],
+        UsernameAttributes=["email"],
+    )
 
     try:
         cognito.user_pool_id = res["UserPool"]["Id"]
@@ -33,19 +35,15 @@ def initialize_cognito_test_environment():
     
     username = os.getenv("COGNITO_USERNAME")
     password = os.getenv("COGNITO_PASSWORD")
-    email = os.getenv("COGNITO_EMAIL")
 
-    if not (username and password and email):
-        raise ValueError("Environment variables COGNITO_USERNAME, COGNITO_PASSWORD, and COGNITO_EMAIL must be set.")
+    if not (username and password):
+        raise ValueError("Environment variables COGNITO_USERNAME and COGNITO_PASSWORD must be set.")
 
     else:
         cognito.client.sign_up(
             ClientId=cognito.client_id,
             Username=username,
-            Password=password,
-            UserAttributes=[
-                {"Name": "email", "Value": email}
-            ]
+            Password=password
         )
 
     cognito.client.admin_confirm_sign_up(

@@ -21,15 +21,13 @@ def login():
         auth_decoded = b64decode(auth.split(" ")[1]).decode()
 
     try:
-        email, password = auth_decoded.split(":")
+        username, password = auth_decoded.split(":")
     except ValueError:
         raise ValueError("Error retreiving login credentials.")
 
-    user = users.find_one({"email": email})
+    user = users.find_one({"username": username})
     if user is None:
         return make_response({"Message": "Invalid email."}, 403)
-    else:
-        username = user["username"]
 
     res = cognito.login(username, password)
     return jsonify(res)

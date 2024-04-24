@@ -15,8 +15,8 @@ COGNITO_PASSWORD = os.getenv("COGNITO_PASSWORD")
         (COGNITO_USERNAME, COGNITO_PASSWORD)
     ]
 )
-def test_login(client: FlaskClient, email: str, password: str):
-    res = login(client, email, password)
+def test_login(client: FlaskClient, username: str, password: str):
+    res = login(client, username, password)
 
     if res.json is not None:
         data: InitiateAuthResponseTypeDef = res.json

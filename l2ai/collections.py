@@ -67,7 +67,6 @@ class User(TypedDict):
     _id: ObjectId
     lastLogin: datetime
     username: str
-    email: str
     scores: list[Score]
 
 

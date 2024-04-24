@@ -4,8 +4,7 @@ dotenv.load_dotenv()
 
 import os
 from flask import Flask
-from flask_cors import CORS
-from l2ai.commands import init_user
+from l2ai.commands import drop_database, init_user
 from l2ai.extensions import cors, socketio
 from l2ai.views import base
 
@@ -34,6 +33,7 @@ def register_blueprints(app: Flask):
 
 
 def register_commands(app: Flask):
+    app.cli.add_command(drop_database)
     app.cli.add_command(init_user)
 
 

@@ -3,8 +3,8 @@ from flask.testing import FlaskClient
 from werkzeug.test import TestResponse
 
 
-def login(client: FlaskClient, email: str, password: str) -> TestResponse:
-    cred = b64encode(f"{email}:{password}".encode())
+def login(client: FlaskClient, username: str, password: str) -> TestResponse:
+    cred = b64encode(f"{username}:{password}".encode())
     headers = {"Authorization": "Basic %s" % cred.decode()}
     res = client.post("/login", headers=headers)
 

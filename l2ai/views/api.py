@@ -5,7 +5,7 @@ logger = logging.getLogger(__name__)
 
 
 @socketio.event
-def content_create(title: str, text: str, method: str) -> str:
+def content_create(title: str, text: str, method: str):
     """
     Commit content to the database.
 
@@ -18,8 +18,7 @@ def content_create(title: str, text: str, method: str) -> str:
     Returns:
         str: The content's ObjectId
     """
-    logger.debug("title=%s text=%s method=%s" % (title, text, method))
-    return "content.Id"
+    pass
 
 
 @socketio.event

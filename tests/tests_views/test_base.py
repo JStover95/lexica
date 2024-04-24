@@ -1,9 +1,7 @@
 import os
-import dotenv
 from flask.testing import FlaskClient
 import pytest
 from mypy_boto3_cognito_idp.type_defs import InitiateAuthResponseTypeDef
-from l2ai.extensions import Cognito
 from tests.utils import login
 
 COGNITO_USERNAME = os.getenv("COGNITO_USERNAME")
@@ -11,10 +9,10 @@ COGNITO_PASSWORD = os.getenv("COGNITO_PASSWORD")
 
 
 @pytest.mark.parametrize(
-    "email,password",
+    "username,password",
     [
-        # ("fake@email.com", "fakepassword"),
-        (os.getenv("COGNITO_USERNAME"), os.getenv("COGNITO_PASSWORD"))
+        ("fake@email.com", "fakepassword"),
+        (COGNITO_USERNAME, COGNITO_PASSWORD)
     ]
 )
 def test_login(client: FlaskClient, email: str, password: str):

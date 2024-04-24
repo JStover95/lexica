@@ -8,12 +8,13 @@ def handle_client_error(e):
         code = e.response["Error"]["Code"]
 
     except KeyError:
-        code = ""
+        code = "N/A"
 
     try:
         message = e.response["Error"]["Message"]
 
     except KeyError:
-        message = ""
+        message = "N/A"
 
-    logger.error("Error Code %s: %s", code, message)
+    logger.error("ClientError \"%s\": \"%s\"", code, message)
+    raise RuntimeError("ClientError \"%s\": \"%s\"" % (code, message))

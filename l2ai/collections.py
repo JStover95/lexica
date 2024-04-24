@@ -1,6 +1,8 @@
 from datetime import datetime
 from typing import TypedDict
 from bson.objectid import ObjectId
+from pymongo.collection import Collection
+from l2ai.extensions import mongo
 
 type Ix = list[list[int]]
 
@@ -63,5 +65,13 @@ class Score(TypedDict):
 
 class User(TypedDict):
     _id: ObjectId
+    lastLogin: datetime
+    username: str
     email: str
     scores: list[Score]
+
+
+contents: Collection[Content] = mongo.db["Content"]
+senses: Collection[Sense] = mongo.db["Sense"]
+users: Collection[User] = mongo.db["User"]
+words: Collection[Word] = mongo.db["Word"]

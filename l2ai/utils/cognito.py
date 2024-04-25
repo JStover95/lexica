@@ -147,3 +147,27 @@ class Cognito():
             handle_client_error(e)
 
         return res
+
+    def refresh(
+            self,
+            username: str,
+            refresh_token: str,
+        ) -> InitiateAuthResponseTypeDef:
+        try:
+            kwargs = {
+                "AuthFlow": "REFRESH_TOKEN_AUTH",
+                "AuthParameters": {"REFRESH_TOKEN": refresh_token},
+                "ClientId": self.client_id,
+                "UserPoolId": self.user_pool_id,
+            }
+
+            if self.client_secret is not None:
+                secret_hash = self._secret_hash(username)
+                kwargs["AuthParameters"]["SECRET_HASH"] = secret_hash
+
+            res = self.client.admin_initiate_auth(**kwargs)
+
+        except ClientError as e:
+            handle_client_error(e)
+
+        return res

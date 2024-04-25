@@ -5,7 +5,7 @@ import logging
 import os
 import requests
 import time
-from typing import Dict, Literal
+from typing import Any, Dict, Literal
 import boto3
 from botocore.exceptions import ClientError
 from jose import jwk, jwt
@@ -74,7 +74,7 @@ class Cognito():
         else:
             return key_index
 
-    def verify_token(self, token: str):
+    def verify_claim(self, token: str) -> Dict[str, Any]:
         headers = jwt.get_unverified_headers(token)
         kid = headers["kid"]
 
@@ -100,17 +100,17 @@ class Cognito():
         if not public_key.verify(message.encode("utf8"), decoded_signature):
             raise ValueError("Signature verification failed.")
 
-        claims = jwt.get_unverified_claims(token)
+        claim = jwt.get_unverified_claims(token)
 
         # verify the token expiration
-        if time.time() > claims["exp"]:
+        if time.time() > claim["exp"]:
             raise ValueError("Token is expired.")
 
         # verify the clientId
-        if claims["client_id"] != self.client_id:
+        if claim["client_id"] != self.client_id:
             raise ValueError("Token was not issued for this audience")
 
-        return claims
+        return claim
 
     def login(
             self,

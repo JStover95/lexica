@@ -5,7 +5,7 @@ dotenv.load_dotenv()
 import os
 from flask import Flask
 from l2ai.commands import drop_database, init_user
-from l2ai.extensions import cors, socketio
+from l2ai.extensions import cors, jwt_manager, socketio
 from l2ai.views import base
 
 
@@ -38,5 +38,6 @@ def register_commands(app: Flask):
 
 
 def register_extensions(app: Flask):
-    socketio.init_app(app)
     cors.init_app(app)
+    jwt_manager.init_app(app)
+    socketio.init_app(app)

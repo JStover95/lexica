@@ -1,4 +1,5 @@
 from base64 import b64encode
+from functools import wraps
 from hashlib import sha256
 import hmac
 import logging
@@ -8,12 +9,44 @@ import time
 from typing import Any, Dict, Literal
 import boto3
 from botocore.exceptions import ClientError
+from flask import make_response, request
 from jose import jwk, jwt
 from jose.utils import base64url_decode
 from mypy_boto3_cognito_idp.type_defs import InitiateAuthResponseTypeDef
+from werkzeug import Response
+from werkzeug.exceptions import BadRequestKeyError
 from l2ai.utils.handlers import handle_client_error
 
 logger = logging.getLogger(__name__)
+
+
+def set_access_cookies(
+        response: Response,
+        auth_result: InitiateAuthResponseTypeDef,
+        claim
+    ):
+    try:
+        access_token = auth_result["AuthenticationResult"]["AccessToken"]
+        refresh_token = auth_result["AuthenticationResult"]["RefreshToken"]
+
+    except KeyError:
+        raise RuntimeError("AuthenticationResult not present in auth_result.")
+
+    response.set_cookie(
+        "access_token",
+        access_token,
+        secure=True,
+        httponly=True,
+        samesite="Strict"
+    )
+
+    response.set_cookie(
+        "refresh_token",
+        refresh_token,
+        secure=True,
+        httponly=True,
+        samesite="Strict"
+    )
 
 
 class Cognito():
@@ -78,7 +111,7 @@ class Cognito():
         headers = jwt.get_unverified_headers(token)
         kid = headers["kid"]
 
-        # search for the kid in the downloaded public keys
+        # search for the KID in the downloaded public keys
         try:
             key_index = self._get_key_index(self.keys, kid)
 
@@ -108,9 +141,36 @@ class Cognito():
 
         # verify the clientId
         if claim["client_id"] != self.client_id:
-            raise ValueError("Token was not issued for this audience")
+            raise ValueError("Token was not issued for this client.")
 
         return claim
+
+    def login_required(self, f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            res_unauthorized = {"Message": "Unauthorized request."}, 403
+            res_expired = {"Message": "Expired access token."}, 403
+
+            try:
+                access_token = request.cookies["access_token"]
+
+            except BadRequestKeyError:
+                logger.warn("Request made without AccessToken header.")
+                return make_response(*res_unauthorized)
+
+            try:
+                claim = self.verify_claim(access_token)
+
+            except Exception as e:
+                logger.exception(e)
+                return make_response(*res_unauthorized)
+
+            if time.time() > claim["exp"]:
+                return make_response(*res_expired)
+
+            return f(*args, **kwargs)
+
+        return wrapper
 
     def login(
             self,

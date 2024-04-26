@@ -1,7 +1,8 @@
 from datetime import datetime
-from typing import TypedDict
+from typing import Any, Dict, NotRequired, TypedDict
 from bson.objectid import ObjectId
 from pymongo.collection import Collection
+from pymongo.results import InsertOneResult
 from l2ai.extensions import mongo
 
 type Ix = list[list[int]]
@@ -64,13 +65,24 @@ class Score(TypedDict):
 
 
 class User(TypedDict):
-    _id: ObjectId
-    lastLogin: datetime
+    _id: NotRequired[ObjectId]
+    lastLogin: NotRequired[datetime]
     username: str
-    scores: list[Score]
+    scores: NotRequired[list[Score]]
 
 
 contents: Collection[Content] = mongo.db["Content"]
 senses: Collection[Sense] = mongo.db["Sense"]
-users: Collection[User] = mongo.db["User"]
 words: Collection[Word] = mongo.db["Word"]
+users: Collection[User] = mongo.db["User"]
+
+class Users(Collection):
+    name: str = "User"
+
+    # @classmethod
+    # def find_one(cls, *args, **kwargs) -> User | None:
+    #     return mongo.db[cls.name].find_one(*args, **kwargs)
+
+    # @classmethod
+    # def insert_one(cls, document: Dict[str, Any], *args, **kwargs) -> InsertOneResult:
+    #     return mongo.db[cls.name].insert_one(document, *args, **kwargs)

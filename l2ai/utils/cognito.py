@@ -12,6 +12,7 @@ from botocore.exceptions import ClientError
 from flask import make_response, request
 from jose import jwk, jwt
 from jose.utils import base64url_decode
+from mypy_boto3_cognito_idp.literals import ChallengeNameTypeType, ChallengeResponseType
 from mypy_boto3_cognito_idp.type_defs import InitiateAuthResponseTypeDef
 from werkzeug import Response
 from werkzeug.exceptions import BadRequestKeyError
@@ -23,7 +24,6 @@ logger = logging.getLogger(__name__)
 def set_access_cookies(
         response: Response,
         auth_result: InitiateAuthResponseTypeDef,
-        claim
     ):
     try:
         access_token = auth_result["AuthenticationResult"]["AccessToken"]
@@ -177,22 +177,51 @@ class Cognito():
             username: str,
             password: str
         ) -> InitiateAuthResponseTypeDef | Literal[False]:
+        kwargs = {
+            "AuthFlow": "ADMIN_USER_PASSWORD_AUTH",
+            "AuthParameters": {
+                "USERNAME": username,
+                "PASSWORD": password,
+            },
+            "ClientId": self.client_id,
+            "UserPoolId": self.user_pool_id,
+        }
+
+        if self.client_secret is not None:
+            secret_hash = self._secret_hash(username)
+            kwargs["AuthParameters"]["SECRET_HASH"] = secret_hash
+
         try:
-            kwargs = {
-                "AuthFlow": "ADMIN_USER_PASSWORD_AUTH",
-                "AuthParameters": {
-                    "USERNAME": username,
-                    "PASSWORD": password,
-                },
-                "ClientId": self.client_id,
-                "UserPoolId": self.user_pool_id,
-            }
-
-            if self.client_secret is not None:
-                secret_hash = self._secret_hash(username)
-                kwargs["AuthParameters"]["SECRET_HASH"] = secret_hash
-
             res = self.client.admin_initiate_auth(**kwargs)
+
+        except ClientError as e:
+            try:
+                code = e.response["Error"]["Code"]
+
+                if code == "NotAuthorizedException":
+                    return False
+
+            except Exception:
+                pass
+
+            handle_client_error(e)
+
+        return res
+
+    def respond_to_challenge(
+            self,
+            username: str,
+            challenge_parameters
+        ) -> InitiateAuthResponseTypeDef | Literal[False]:
+        challenge_parameters["ClientId"] = self.client_id
+
+        if self.client_secret is not None:
+            secret_hash = self._secret_hash(username)
+            challenge_parameters["ChallengeResponses"]["SECRET_HASH"] = secret_hash
+
+        try:
+            res = self.client.respond_to_auth_challenge(**challenge_parameters)
+            print(res)
 
         except ClientError as e:
             try:
@@ -213,18 +242,18 @@ class Cognito():
             username: str,
             refresh_token: str,
         ) -> InitiateAuthResponseTypeDef:
+        kwargs = {
+            "AuthFlow": "REFRESH_TOKEN_AUTH",
+            "AuthParameters": {"REFRESH_TOKEN": refresh_token},
+            "ClientId": self.client_id,
+            "UserPoolId": self.user_pool_id,
+        }
+
+        if self.client_secret is not None:
+            secret_hash = self._secret_hash(username)
+            kwargs["AuthParameters"]["SECRET_HASH"] = secret_hash
+
         try:
-            kwargs = {
-                "AuthFlow": "REFRESH_TOKEN_AUTH",
-                "AuthParameters": {"REFRESH_TOKEN": refresh_token},
-                "ClientId": self.client_id,
-                "UserPoolId": self.user_pool_id,
-            }
-
-            if self.client_secret is not None:
-                secret_hash = self._secret_hash(username)
-                kwargs["AuthParameters"]["SECRET_HASH"] = secret_hash
-
             res = self.client.admin_initiate_auth(**kwargs)
 
         except ClientError as e:

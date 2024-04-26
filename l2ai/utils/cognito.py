@@ -209,16 +209,16 @@ class Cognito():
     def respond_to_challenge(
             self,
             username: str,
-            challenge_parameters
+            kwargs: dict[str, Any]
         ) -> InitiateAuthResponseTypeDef | Literal[False]:
-        challenge_parameters["ClientId"] = self.client_id
+        kwargs["ClientId"] = self.client_id
 
         if self.client_secret is not None:
             secret_hash = self._secret_hash(username)
-            challenge_parameters["ChallengeResponses"]["SECRET_HASH"] = secret_hash
+            kwargs["ChallengeResponses"]["SECRET_HASH"] = secret_hash
 
         try:
-            res = self.client.respond_to_auth_challenge(**challenge_parameters)
+            res = self.client.respond_to_auth_challenge(**kwargs)
 
         except ClientError as e:
             try:

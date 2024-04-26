@@ -1,9 +1,11 @@
 from base64 import b64decode
 from flask import Blueprint, make_response, request
+from jsonschema import validate, ValidationError
 from l2ai.collections import users
 from l2ai.extensions import cognito
 from l2ai.utils.cognito import set_access_cookies
 from l2ai.utils.logging import logger
+from l2ai.utils.schemas import base_challenge_schema
 
 blueprint = Blueprint("base", __name__)
 
@@ -63,14 +65,22 @@ def login():
 @blueprint.route("/challenge", methods=["POST"])
 def challenge():
     res_incorrect = {"Message": "Incorrect payload"}, 401
-    res_invalid = {"Message": "Invalid login credentials."}, 403
+    res_invalid = {"Message": "Invalid challenge response."}, 403
     res_token = {"Message": "Failure verifying access token."}, 401
     res_successful = {"Message": "Login successful"}, 200
+
+    try:
+        validate(request.json, base_challenge_schema)
+    except ValidationError:
+        return make_response(*res_incorrect)
 
     if request.json is None:
         return make_response(*res_incorrect)
 
-    auth_result = cognito.respond_to_challenge(request.json["Username"], request.json["ChallengeParameters"])
+    username = request.json["Username"]
+    kwargs = request.json["Challenge"]
+    auth_result = cognito.respond_to_challenge(username, kwargs)
+
     if auth_result is False:
         return make_response(*res_invalid)
 

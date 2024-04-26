@@ -31,3 +31,11 @@ base_challenge_schema = {
     },
     "required": ["Username", "Challenge"]
 }
+
+base_logout_schema = {
+    "type": "object",
+    "parameters": {
+        "Username": {"type": "string"}
+    },
+    "required": ["Username"]
+}

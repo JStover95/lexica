@@ -48,7 +48,8 @@ def set_access_cookies(
 
 
 class Cognito():
-    keys_url = "https://cognito-idp.%s.amazonaws.com/%s/.well-known/jwks.json"
+    public_keys_url = "https://cognito-idp.%s.amazonaws.com/%s/.well-known/jwks.json"
+    user_info_url = "https://l2ai-app.auth.%s.amazoncognito.com/oauth2/userInfo"
 
     def __init__(self):
         self.client = boto3.client("cognito-idp")
@@ -86,7 +87,7 @@ class Cognito():
 
     def get_keys(self) -> list[Dict[str, str]]:
         region = os.getenv("AWS_DEFAULT_REGION")
-        url = self.keys_url % (region, self.user_pool_id)
+        url = self.public_keys_url % (region, self.user_pool_id)
         res = requests.get(url).json()
 
         return res["keys"]
@@ -148,6 +149,7 @@ class Cognito():
         def wrapper(*args, **kwargs):
             res_unauthorized = {"Message": "Unauthorized request."}, 403
             res_expired = {"Message": "Expired access token."}, 403
+            res_exception = {"Message": "Error validating access token"}, 401
 
             try:
                 access_token = request.cookies["access_token"]
@@ -155,6 +157,18 @@ class Cognito():
             except BadRequestKeyError:
                 logger.warn("Request made without AccessToken header.")
                 return make_response(*res_unauthorized)
+
+            res = requests.get(
+                self.user_info_url % os.getenv("AWS_DEFAULT_REGION"),
+                headers={"Authorization": f"Bearer {access_token}"}
+            )
+
+            if res.status_code == 401:
+                return make_response(*res_unauthorized)
+
+            elif res.status_code != 200:
+                logger.error("Error validating access token.")
+                return make_response(*res_exception)
 
             try:
                 claim = self.verify_claim(access_token)
@@ -257,3 +271,13 @@ class Cognito():
             handle_client_error(e)
 
         return res
+
+    def revoke(self, username: str, refresh_token: str) -> None:
+        kwargs = {
+            "Token": refresh_token,
+            "ClientID": self.client_id
+        }
+
+        if self.client_secret is not None:
+            secret_hash = self._secret_hash(username)
+            kwargs["SECRET_HASH"] = secret_hash

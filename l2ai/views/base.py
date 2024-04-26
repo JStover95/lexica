@@ -1,11 +1,12 @@
 from base64 import b64decode
 from flask import Blueprint, make_response, request
 from jsonschema import validate, ValidationError
+from werkzeug.exceptions import BadRequestKeyError
 from l2ai.collections import users
 from l2ai.extensions import cognito
 from l2ai.utils.cognito import set_access_cookies
 from l2ai.utils.logging import logger
-from l2ai.utils.schemas import base_challenge_schema
+from l2ai.utils.schemas import base_challenge_schema, base_logout_schema
 
 blueprint = Blueprint("base", __name__)
 
@@ -97,10 +98,32 @@ def challenge():
     return response
 
 
-@blueprint.route("/logout", methods=["POST"])
+@blueprint.route("/logout")
 @cognito.login_required
 def logout():
-    return make_response("success", 200)
+    res_incorrect = {"Message": "Incorrect payload"}, 401
+    res_invalid = {"Message": "Refresh token cookie not present."}, 401
+    res_success = {"Message": "Logged out successfully"}, 200
+
+    if request.json is None:
+        return make_response(*res_incorrect)
+    try:
+        validate(request.json, base_logout_schema)
+    except ValidationError:
+        return make_response(*res_incorrect)
+
+    try:
+        refresh_token = request.cookies["refresh_token"]
+    except BadRequestKeyError:
+        return make_response(*res_invalid)
+
+    username = request.json["Username"]
+    cognito.revoke(username, refresh_token)
+    response = make_response(*res_success)
+    response.delete_cookie("access_token")
+    response.delete_cookie("refresh_token")
+
+    return response
 
 
 @blueprint.route("/reset-password", methods=["POST"])

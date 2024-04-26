@@ -1,7 +1,6 @@
 import logging
 from l2ai.extensions import socketio
-
-logger = logging.getLogger(__name__)
+from l2ai.utils.logging import logger
 
 
 @socketio.event

@@ -3,10 +3,18 @@ import os
 from flask.testing import FlaskClient
 from werkzeug.test import TestResponse
 
-SIGNUP_USERNAME = "signup@email.com"
-SIGNUP_PASSWORD = "Signup!@34"
-CREATE_USERNAME = "create@email.com"
-CREATE_PASSWORD = "Create!@34"
+
+class Fake:
+    usernames = ["foo@email.com", "bar@email.com", "baz@email.com", "qux@email.com"]
+    passwords = ["Foo!@1234", "Bar!@1234", "Baz!@1234", "Qux!@1234"]
+
+    @classmethod
+    def username(cls, i: int) -> str:
+        return cls.usernames[i]
+
+    @classmethod
+    def password(cls, i: int) -> str:
+        return cls.passwords[i]
 
 
 def login(client: FlaskClient, username: str, password: str) -> TestResponse:
@@ -20,16 +28,16 @@ def login(client: FlaskClient, username: str, password: str) -> TestResponse:
 def initialize_cognito_test_environment():
 
     # import app after initializing mock AWS to ensure no AWS clients are initialized
-    from l2ai.collections import User, users
+    from l2ai.collections import users
     from l2ai.extensions import cognito
 
-    user = users.find_one({"username": SIGNUP_USERNAME})
+    user = users.find_one({"username": Fake.username(0)})
     if user is None:
-        users.insert_one({"username": SIGNUP_USERNAME})
+        users.insert_one({"username": Fake.username(0)})
 
-    user = users.find_one({"username": CREATE_USERNAME})
+    user = users.find_one({"username": Fake.username(1)})
     if user is None:
-        users.insert_one({"username": CREATE_USERNAME})
+        users.insert_one({"username": Fake.username(1)})
 
     res = cognito.client.create_user_pool(
         PoolName="TestUserPool",
@@ -58,17 +66,17 @@ def initialize_cognito_test_environment():
 
     cognito.client.sign_up(
         ClientId=cognito.client_id,
-        Username=SIGNUP_USERNAME,
-        Password=SIGNUP_PASSWORD
+        Username=Fake.username(0),
+        Password=Fake.password(0)
     )
 
     cognito.client.admin_confirm_sign_up(
         UserPoolId=cognito.user_pool_id,
-        Username=SIGNUP_USERNAME
+        Username=Fake.username(0)
     )
 
     cognito.client.admin_create_user(
         UserPoolId=cognito.user_pool_id,
-        Username=CREATE_USERNAME,
-        TemporaryPassword=CREATE_PASSWORD
+        Username=Fake.username(1),
+        TemporaryPassword=Fake.password(1)
     )

@@ -2,10 +2,12 @@ import dotenv
 
 dotenv.load_dotenv()
 
+import logging
 import os
 from flask import Flask
 from l2ai.commands import drop_database, init_user
 from l2ai.extensions import cors, jwt_manager, socketio
+from l2ai.utils.logging import logger
 from l2ai.views import base
 
 
@@ -24,6 +26,10 @@ def create_app(testing: bool = False):
     register_blueprints(app)
     register_commands(app)
     register_extensions(app)
+
+    logger.setLevel(app.config["LOG_LEVEL"])
+    for handler in logger.handlers:
+        handler.setLevel(app.config["LOG_LEVEL"])
 
     return app
 

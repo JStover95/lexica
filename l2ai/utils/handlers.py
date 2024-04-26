@@ -1,6 +1,4 @@
-import logging
-
-logger = logging.getLogger(__name__)
+from l2ai.utils.logging import logger
 
 
 def handle_client_error(e):

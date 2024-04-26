@@ -2,7 +2,6 @@ from base64 import b64encode
 from functools import wraps
 from hashlib import sha256
 import hmac
-import logging
 import os
 import requests
 import time
@@ -17,8 +16,7 @@ from mypy_boto3_cognito_idp.type_defs import InitiateAuthResponseTypeDef
 from werkzeug import Response
 from werkzeug.exceptions import BadRequestKeyError
 from l2ai.utils.handlers import handle_client_error
-
-logger = logging.getLogger(__name__)
+from l2ai.utils.logging import logger
 
 
 def set_access_cookies(
@@ -221,7 +219,6 @@ class Cognito():
 
         try:
             res = self.client.respond_to_auth_challenge(**challenge_parameters)
-            print(res)
 
         except ClientError as e:
             try:

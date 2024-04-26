@@ -20,4 +20,3 @@ def test_login(client: FlaskClient, username: str, password: str):
 
     if res.json is not None:
         data: InitiateAuthResponseTypeDef = res.json
-        print(data)

@@ -1,16 +1,11 @@
 from base64 import b64decode
-from functools import wraps
-import logging
-import time
 from flask import Blueprint, make_response, request
-from mypy_boto3_cognito_idp.type_defs import InitiateAuthResponseTypeDef
-from werkzeug import Response
 from l2ai.collections import users
 from l2ai.extensions import cognito
 from l2ai.utils.cognito import set_access_cookies
+from l2ai.utils.logging import logger
 
 blueprint = Blueprint("base", __name__)
-logger = logging.getLogger(__name__)
 
 
 @blueprint.route("/login", methods=["POST"])
@@ -72,12 +67,10 @@ def challenge():
     res_token = {"Message": "Failure verifying access token."}, 401
     res_successful = {"Message": "Login successful"}, 200
 
-    print("request.json:", request.json)
     if request.json is None:
         return make_response(*res_incorrect)
 
     auth_result = cognito.respond_to_challenge(request.json["Username"], request.json["ChallengeParameters"])
-    print(auth_result)
     if auth_result is False:
         return make_response(*res_invalid)
 

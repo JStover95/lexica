@@ -1,8 +1,7 @@
 import logging
 import os
 import pymongo
-
-logger = logging.getLogger(__name__)
+from l2ai.utils.logging import logger
 
 
 class Mongo():

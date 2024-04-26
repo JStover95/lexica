@@ -98,11 +98,10 @@ def challenge():
     return response
 
 
-@blueprint.route("/logout")
+@blueprint.route("/logout", methods=["POST"])
 @cognito.login_required
 def logout():
     res_incorrect = {"Message": "Incorrect payload"}, 401
-    res_invalid = {"Message": "Refresh token cookie not present."}, 401
     res_success = {"Message": "Logged out successfully"}, 200
 
     if request.json is None:
@@ -112,13 +111,8 @@ def logout():
     except ValidationError:
         return make_response(*res_incorrect)
 
-    try:
-        refresh_token = request.cookies["refresh_token"]
-    except BadRequestKeyError:
-        return make_response(*res_invalid)
-
     username = request.json["Username"]
-    cognito.revoke(username, refresh_token)
+    cognito.sign_out(username)
     response = make_response(*res_success)
     response.delete_cookie("access_token")
     response.delete_cookie("refresh_token")

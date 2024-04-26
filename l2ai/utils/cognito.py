@@ -49,7 +49,6 @@ def set_access_cookies(
 
 class Cognito():
     public_keys_url = "https://cognito-idp.%s.amazonaws.com/%s/.well-known/jwks.json"
-    user_info_url = "https://l2ai-app.auth.%s.amazoncognito.com/oauth2/userInfo"
 
     def __init__(self):
         self.client = boto3.client("cognito-idp")
@@ -149,7 +148,6 @@ class Cognito():
         def wrapper(*args, **kwargs):
             res_unauthorized = {"Message": "Unauthorized request."}, 403
             res_expired = {"Message": "Expired access token."}, 403
-            res_exception = {"Message": "Error validating access token"}, 401
 
             try:
                 access_token = request.cookies["access_token"]
@@ -158,17 +156,20 @@ class Cognito():
                 logger.warn("Request made without AccessToken header.")
                 return make_response(*res_unauthorized)
 
-            res = requests.get(
-                self.user_info_url % os.getenv("AWS_DEFAULT_REGION"),
-                headers={"Authorization": f"Bearer {access_token}"}
-            )
+            try:
+                self.client.get_user(AccessToken=access_token)
 
-            if res.status_code == 401:
-                return make_response(*res_unauthorized)
+            except ClientError as e:
+                try:
+                    code = e.response["Error"]["Code"]
 
-            elif res.status_code != 200:
-                logger.error("Error validating access token.")
-                return make_response(*res_exception)
+                    if code == "NotAuthorizedException":
+                        return make_response(*res_unauthorized)
+
+                except Exception:
+                    pass
+
+                handle_client_error(e)
 
             try:
                 claim = self.verify_claim(access_token)
@@ -272,12 +273,10 @@ class Cognito():
 
         return res
 
-    def revoke(self, username: str, refresh_token: str) -> None:
+    def sign_out(self, username: str) -> None:
         kwargs = {
-            "Token": refresh_token,
-            "ClientID": self.client_id
+            "UserPoolId": self.user_pool_id,
+            "Username": username
         }
 
-        if self.client_secret is not None:
-            secret_hash = self._secret_hash(username)
-            kwargs["SECRET_HASH"] = secret_hash
+        self.client.admin_user_global_sign_out(**kwargs)

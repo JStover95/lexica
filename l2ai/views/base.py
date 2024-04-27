@@ -1,12 +1,10 @@
 from base64 import b64decode
 from flask import Blueprint, make_response, request
-from jsonschema import validate, ValidationError
-from werkzeug.exceptions import BadRequestKeyError
 from l2ai.collections import users
 from l2ai.extensions import cognito
 from l2ai.utils.cognito import set_access_cookies
 from l2ai.utils.logging import logger
-from l2ai.utils.schemas import base_challenge_schema, base_forgot_password_schema, base_logout_schema
+from l2ai.utils.schemas import Base, validate_schema
 
 blueprint = Blueprint("base", __name__)
 
@@ -64,22 +62,14 @@ def login():
 
 
 @blueprint.route("/challenge", methods=["POST"])
-def challenge():
-    res_incorrect = {"Message": "Incorrect payload"}, 401
+@validate_schema(Base.challenge_schema)
+def challenge(validated_data):
     res_invalid = {"Message": "Invalid challenge response."}, 403
     res_token = {"Message": "Failure verifying access token."}, 401
     res_successful = {"Message": "Login successful"}, 200
 
-    try:
-        validate(request.json, base_challenge_schema)
-    except ValidationError:
-        return make_response(*res_incorrect)
-
-    if request.json is None:
-        return make_response(*res_incorrect)
-
-    username = request.json["Username"]
-    kwargs = request.json["Challenge"]
+    username = validated_data["Username"]
+    kwargs = validated_data["Challenge"]
     auth_result = cognito.respond_to_challenge(username, kwargs)
 
     if auth_result is False:
@@ -100,18 +90,10 @@ def challenge():
 
 @blueprint.route("/logout", methods=["POST"])
 @cognito.login_required
-def logout():
-    res_incorrect = {"Message": "Incorrect payload"}, 401
+@validate_schema(Base.logout_schema)
+def logout(validated_data):
     res_success = {"Message": "Logged out successfully"}, 200
-
-    if request.json is None:
-        return make_response(*res_incorrect)
-    try:
-        validate(request.json, base_logout_schema)
-    except ValidationError:
-        return make_response(*res_incorrect)
-
-    username = request.json["Username"]
+    username = validated_data["Username"]
     cognito.sign_out(username)
     response = make_response(*res_success)
     response.delete_cookie("access_token")
@@ -121,17 +103,9 @@ def logout():
 
 
 @blueprint.route("/forgot-password", methods=["POST"])
-def forgot_password():
-    if request.json is None:
-        res = {"Message": "Incorrect payload."}
-        return make_response(res, 401)
-    try:
-        validate(request.json, base_forgot_password_schema)
-    except ValidationError:
-        res = {"Message": "Incorrect payload."}
-        return make_response(res, 401)
-
-    username = request.json["Username"]
+@validate_schema(Base.forgot_password_schema)
+def forgot_password(validated_data):
+    username = validated_data["Username"]
     auth_result = cognito.forgot_password(username)
 
     res = {
@@ -142,6 +116,11 @@ def forgot_password():
     response = make_response(res, 200)
 
     return response
+
+
+@blueprint.route("/confirm-forgot-password", methods=["POST"])
+def confirm_forgot_password():
+    return make_response("success", 200)
 
 
 @blueprint.route("/refresh")

@@ -2,9 +2,9 @@ from base64 import b64decode
 from flask import Blueprint, make_response, request
 from l2ai.collections import users
 from l2ai.extensions import cognito
+from l2ai.schemas import Base, validate_schema
 from l2ai.utils.cognito import set_access_cookies
 from l2ai.utils.logging import logger
-from l2ai.utils.schemas import Base, validate_schema
 
 blueprint = Blueprint("base", __name__)
 
@@ -63,13 +63,18 @@ def login():
 
 @blueprint.route("/challenge", methods=["POST"])
 @validate_schema(Base.challenge_schema)
-def challenge(validated_data):
+def challenge(validated_data: Base.ChallengeRequestType):
     res_invalid = {"Message": "Invalid challenge response."}, 403
     res_token = {"Message": "Failure verifying access token."}, 401
     res_successful = {"Message": "Login successful"}, 200
 
     username = validated_data["Username"]
-    kwargs = validated_data["Challenge"]
+    kwargs = {
+        "ChallengeName": validated_data["ChallengeName"],
+        "ChallengeResponses": validated_data["ChallengeResponses"],
+        "Session": validated_data["Session"],
+    }
+
     auth_result = cognito.respond_to_challenge(username, kwargs)
 
     if auth_result is False:
@@ -91,7 +96,7 @@ def challenge(validated_data):
 @blueprint.route("/logout", methods=["POST"])
 @cognito.login_required
 @validate_schema(Base.logout_schema)
-def logout(validated_data):
+def logout(validated_data: Base.LogoutRequestType):
     res_success = {"Message": "Logged out successfully"}, 200
     username = validated_data["Username"]
     cognito.sign_out(username)
@@ -104,7 +109,7 @@ def logout(validated_data):
 
 @blueprint.route("/forgot-password", methods=["POST"])
 @validate_schema(Base.forgot_password_schema)
-def forgot_password(validated_data):
+def forgot_password(validated_data: Base.ForgotPasswordRequestType):
     username = validated_data["Username"]
     auth_result = cognito.forgot_password(username)
 

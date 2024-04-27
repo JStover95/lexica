@@ -294,3 +294,24 @@ class Cognito():
             kwargs["SecretHash"] = secret_hash
 
         return self.client.forgot_password(**kwargs)
+    
+    def confirm_forgot_password(
+            self,
+            username: str,
+            confirmation_code: str,
+            password: str,
+            kwargs: Dict[str, Any] | None = None
+        ) -> None:
+        kwargs = {
+            "ClientId": self.client_id,
+            "Username": username,
+            "ConfirmationCode": confirmation_code,
+            "Password": password,
+            **(kwargs or {})
+        }
+
+        if self.client_secret is not None:
+            secret_hash = self._secret_hash(username)
+            kwargs["SecretHash"] = secret_hash
+
+        self.client.confirm_forgot_password(**kwargs)

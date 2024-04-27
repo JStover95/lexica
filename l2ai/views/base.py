@@ -124,8 +124,20 @@ def forgot_password(validated_data: Base.ForgotPasswordRequestType):
 
 
 @blueprint.route("/confirm-forgot-password", methods=["POST"])
-def confirm_forgot_password():
-    return make_response("success", 200)
+@validate_schema(Base.confirm_forgot_password_schema)
+def confirm_forgot_password(
+        validated_data: Base.ConfirmForgotPasswordRequestType
+    ):
+    cognito.confirm_forgot_password(
+        username=validated_data["Username"],
+        confirmation_code=validated_data["ConfirmationCode"],
+        password=validated_data["Password"]
+    )
+
+    msg = "Password successfully reset."
+    res = make_response({"Message": msg}, 200)
+
+    return res
 
 
 @blueprint.route("/refresh")

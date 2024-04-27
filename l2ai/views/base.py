@@ -6,7 +6,7 @@ from l2ai.collections import users
 from l2ai.extensions import cognito
 from l2ai.utils.cognito import set_access_cookies
 from l2ai.utils.logging import logger
-from l2ai.utils.schemas import base_challenge_schema, base_logout_schema
+from l2ai.utils.schemas import base_challenge_schema, base_forgot_password_schema, base_logout_schema
 
 blueprint = Blueprint("base", __name__)
 
@@ -120,9 +120,28 @@ def logout():
     return response
 
 
-@blueprint.route("/reset-password", methods=["POST"])
-def reset_password():
-    return make_response("success", 200)
+@blueprint.route("/forgot-password", methods=["POST"])
+def forgot_password():
+    if request.json is None:
+        res = {"Message": "Incorrect payload."}
+        return make_response(res, 401)
+    try:
+        validate(request.json, base_forgot_password_schema)
+    except ValidationError:
+        res = {"Message": "Incorrect payload."}
+        return make_response(res, 401)
+
+    username = request.json["Username"]
+    auth_result = cognito.forgot_password(username)
+
+    res = {
+        "Message": "Confirmation code sent successfully.",
+        "CodeDeliveryDetails": auth_result["CodeDeliveryDetails"]
+    }
+
+    response = make_response(res, 200)
+
+    return response
 
 
 @blueprint.route("/refresh")

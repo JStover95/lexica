@@ -39,3 +39,11 @@ base_logout_schema = {
     },
     "required": ["Username"]
 }
+
+base_forgot_password_schema = {
+    "type": "object",
+    "parameters": {
+        "Username": {"type": "string"}
+    },
+    "required": ["Username"]
+}

@@ -11,8 +11,10 @@ from botocore.exceptions import ClientError
 from flask import make_response, request
 from jose import jwk, jwt
 from jose.utils import base64url_decode
-from mypy_boto3_cognito_idp.literals import ChallengeNameTypeType, ChallengeResponseType
-from mypy_boto3_cognito_idp.type_defs import InitiateAuthResponseTypeDef
+from mypy_boto3_cognito_idp.type_defs import (
+    ForgotPasswordResponseTypeDef,
+    InitiateAuthResponseTypeDef,
+)
 from werkzeug import Response
 from werkzeug.exceptions import BadRequestKeyError
 from l2ai.utils.handlers import handle_client_error
@@ -190,7 +192,7 @@ class Cognito():
             username: str,
             password: str
         ) -> InitiateAuthResponseTypeDef | Literal[False]:
-        kwargs = {
+        kwargs: dict[str, Any] = {
             "AuthFlow": "ADMIN_USER_PASSWORD_AUTH",
             "AuthParameters": {
                 "USERNAME": username,
@@ -254,7 +256,7 @@ class Cognito():
             username: str,
             refresh_token: str,
         ) -> InitiateAuthResponseTypeDef:
-        kwargs = {
+        kwargs: dict[str, Any] = {
             "AuthFlow": "REFRESH_TOKEN_AUTH",
             "AuthParameters": {"REFRESH_TOKEN": refresh_token},
             "ClientId": self.client_id,
@@ -274,9 +276,21 @@ class Cognito():
         return res
 
     def sign_out(self, username: str) -> None:
-        kwargs = {
+        kwargs: dict[str, Any] = {
             "UserPoolId": self.user_pool_id,
             "Username": username
         }
 
         self.client.admin_user_global_sign_out(**kwargs)
+
+    def forgot_password(self, username: str) -> ForgotPasswordResponseTypeDef:
+        kwargs: dict[str, Any] = {
+            "ClientId": self.client_id,
+            "Username": username
+        }
+
+        if self.client_secret is not None:
+            secret_hash = self._secret_hash(username)
+            kwargs["SecretHash"] = secret_hash
+
+        return self.client.forgot_password(**kwargs)

@@ -39,10 +39,22 @@ def initialize_cognito_test_environment():
     if user is None:
         users.insert_one({"username": Fake.username(1)})
 
+    user = users.find_one({"username": Fake.username(2)})
+    if user is None:
+        users.insert_one({"username": Fake.username(2)})
+
     res = cognito.client.create_user_pool(
         PoolName="TestUserPool",
         AliasAttributes=["email"],
         UsernameAttributes=["email"],
+        AccountRecoverySetting={
+            "RecoveryMechanisms": [
+                {
+                    "Priority": 1,
+                    "Name": "verified_email"
+                },
+            ]
+        }
     )
 
     try:
@@ -79,4 +91,15 @@ def initialize_cognito_test_environment():
         UserPoolId=cognito.user_pool_id,
         Username=Fake.username(1),
         TemporaryPassword=Fake.password(1)
+    )
+
+    cognito.client.sign_up(
+        ClientId=cognito.client_id,
+        Username=Fake.username(2),
+        Password=Fake.password(2)
+    )
+
+    cognito.client.admin_confirm_sign_up(
+        UserPoolId=cognito.user_pool_id,
+        Username=Fake.username(2)
     )

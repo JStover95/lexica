@@ -1,10 +1,31 @@
-import logging
 import os
 import pymongo
+from pymongo.database import Database
 from l2ai.utils.logging import logger
 
 
 class Mongo():
+    """
+    A helper class for using MongoDB.
+
+    This class will initialize using the following environment variables. If
+    they are not initialized, default values will be used.
+     - MONGO_NAME (default: "l2ai")
+     - MONGO_HOST (default: "localhost")
+     - MONGO_PORT (default: 27107)
+     - MONGO_USERNAME (default: None)
+     - MONGO_PASSWORD (default: None)
+
+    Attributes:
+        name (str)
+        host (str)
+        port (int)
+        username (str | None)
+        password (str | None)
+        client (MongoClient)
+
+
+    """
     def __init__(self):
         name = os.getenv("MONGO_NAME")
         if name is None:
@@ -43,5 +64,11 @@ class Mongo():
         )
 
     @property
-    def db(self):
+    def db(self) -> Database:
+        """
+        Return the Mongo database defined by Mongo.name.
+
+        Returns:
+            Database
+        """
         return self.client[self.name]

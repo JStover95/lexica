@@ -66,6 +66,14 @@ class Cognito():
     be made without a secret. Upon initialization, this class will automatically
     download the relevant public keys from a JWKS URI.
 
+    Attributes:
+        client (CognitoIdentityProviderClient)
+        user_pool_id (str)
+        client_id (str)
+        client_secret (str | None)
+        public_keys (list[Dict[str, str]]): a list of public keys as returned
+            from the AWS JWKS URI when calling Cognito.get_public_keys
+
     Raises:
         ValueError: When the environment variables COGNITO_USERPOOL_ID or
             COGNITO_CLIENT_ID are not set.

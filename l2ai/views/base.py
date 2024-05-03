@@ -50,7 +50,7 @@ def login():
 
     try:
         access_token = auth_result["AuthenticationResult"]["AccessToken"]
-        cognito.verify_claim(access_token)
+        cognito.get_claim_from_access_token(access_token)
 
     except Exception as e:
         logger.exception(e)
@@ -82,7 +82,7 @@ def challenge(validated_data: Base.ChallengeRequestType):
 
     try:
         access_token = auth_result["AuthenticationResult"]["AccessToken"]
-        cognito.verify_claim(access_token)
+        cognito.get_claim_from_access_token(access_token)
 
     except Exception as e:
         logger.exception(e)
@@ -150,7 +150,7 @@ def refresh():
     refresh_token = request.cookies["refresh_token"]
 
     try:
-        claim = cognito.verify_claim(access_token)
+        claim = cognito.get_claim_from_access_token(access_token)
 
     except Exception as e:
         logger.exception(e)

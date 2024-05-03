@@ -5,7 +5,7 @@ import hmac
 import os
 import requests
 import time
-from typing import Any, Dict, Literal
+from typing import Any, Callable, Dict, Literal
 import boto3
 from botocore.exceptions import ClientError
 from flask import make_response, request
@@ -17,14 +17,29 @@ from mypy_boto3_cognito_idp.type_defs import (
 )
 from werkzeug import Response
 from werkzeug.exceptions import BadRequestKeyError
-from l2ai.utils.handlers import handle_client_error
+from l2ai.utils.handlers import handle_client_error, handle_server_error
 from l2ai.utils.logging import logger
 
 
 def set_access_cookies(
         response: Response,
         auth_result: InitiateAuthResponseTypeDef,
-    ):
+    ) -> None:
+    """
+    Add the user's AccessToken and RefreshToken to a response using cookies.
+    Cookies are always set to secure, HTTP only, and "Strict" same-site mode.
+
+    Args:
+        response (Response)
+        auth_result (InitiateAuthResponseTypeDef): The authentication result
+            returned from Cognito.login or Cognito.respond_to_challenge upon a
+            successful login.
+
+    Raises:
+        RuntimeError: When the Access Token or Refresh Token are not found in
+            auth_result. This may occur when Cognito.login returns with an
+            authentication challenge.
+    """
     try:
         access_token = auth_result["AuthenticationResult"]["AccessToken"]
         refresh_token = auth_result["AuthenticationResult"]["RefreshToken"]
@@ -32,24 +47,31 @@ def set_access_cookies(
     except KeyError:
         raise RuntimeError("AuthenticationResult not present in auth_result.")
 
-    response.set_cookie(
-        "access_token",
-        access_token,
-        secure=True,
-        httponly=True,
-        samesite="Strict"
-    )
-
-    response.set_cookie(
-        "refresh_token",
-        refresh_token,
-        secure=True,
-        httponly=True,
-        samesite="Strict"
-    )
+    opts = {"secure": True, "httponly": True, "samesite": "Strict"}
+    response.set_cookie("access_token", access_token, **opts)
+    response.set_cookie("refresh_token", refresh_token, **opts)
 
 
 class Cognito():
+    """
+    A helper class for working with the AWS Cognito Identity Provider client.
+
+    This class will initialize using the following environment variables:
+        - COGNITO_USERPOOL_ID
+        - COGNITO_CLIENT_ID
+        - COGNITO_CLIENT_SECRET
+
+    A ValueError will be raised if the UserPoolId or ClientId are not found. If
+    a ClientSecret is not set, a warning will be logged and all API calls will
+    be made without a secret. Upon initialization, this class will automatically
+    download the relevant public keys from a JWKS URI.
+
+    Raises:
+        ValueError: When the environment variables COGNITO_USERPOOL_ID or
+            COGNITO_CLIENT_ID are not set.
+    """
+
+    # the format JWKS URI (https://cognito-idp.<Region>.amazonaws.com/<userPoolId>/.well-known/jwks.json)
     public_keys_url = "https://cognito-idp.%s.amazonaws.com/%s/.well-known/jwks.json"
 
     def __init__(self):
@@ -71,9 +93,21 @@ class Cognito():
         if self.client_secret is None:
             logger.warn("Environment variable COGNITO_CLIENT_SECRET is not set. A secret will not be used during user authentication")
 
-        self.keys = self.get_keys()
+        self.public_keys = self.get_public_keys()
 
     def _secret_hash(self, username: str) -> str:
+        """
+        Return a secret hash to be included on relevant API calls.
+
+        Args:
+            username (str): The relevant user's username.
+
+        Raises:
+            ValueError: If client_secret is None.
+
+        Returns:
+            str
+        """
         if self.client_secret is not None:
             key = self.client_secret.encode()
         
@@ -86,39 +120,77 @@ class Cognito():
 
         return secret_hash
 
-    def get_keys(self) -> list[Dict[str, str]]:
+    def get_public_keys(self) -> list[Dict[str, str]]:
+        """
+        Get public keys from the JWKS URI.
+
+        Returns:
+            list[Dict[str, str]]
+        """
         region = os.getenv("AWS_DEFAULT_REGION")
         url = self.public_keys_url % (region, self.user_pool_id)
         res = requests.get(url).json()
 
         return res["keys"]
     
-    @staticmethod
-    def _get_key_index(keys, kid):
+    def get_public_key_index(self, kid: str) -> int:
+        """
+        Given the Key ID of an Access Token, get the index of the public key
+        that was used to encrpyt the Access Key.
+
+        Args:
+            kid (str): The Key ID of an Access Token
+
+        Raises:
+            ValueError: When the Key ID is not found in Cognito.public_keys
+
+        Returns:
+            int
+        """
         key_index = -1
-        for i in range(len(keys)):
-            if kid == keys[i]["kid"]:
+        for i in range(len(self.public_keys)):
+            if kid == self.public_keys[i]["kid"]:
                 key_index = i
                 break
 
         if key_index == -1:
-            raise ValueError("Public key not found in jwks.json")
+            raise ValueError("Public key not found.")
 
         else:
             return key_index
 
-    def verify_claim(self, token: str) -> Dict[str, Any]:
+    def get_claim_from_access_token(self, token: str) -> Dict[str, Any]:
+        """
+        Validate and inspect a user's Access Token and return the decoded claim.
+        See https://docs.aws.amazon.com/cognito/latest/developerguide/amazon-cognito-user-pools-using-tokens-verifying-a-jwt.html.
+
+        If the Access Token's Key ID is not found in the public keys that were
+        downloaded from the JWKS URI, the public keys will be redownloaded.
+
+        Args:
+            token (str): The user's Access Token
+
+        Raises:
+            ValueError: When verification of the Access Token fails. This can
+                happen when validation of the token's signature fails, when the
+                token is expired, or when the token was not issued for the
+                current client (according to ClientId).
+
+        Returns:
+            Dict[str, str]: The Access Token's decoded claim.
+        """
         headers = jwt.get_unverified_headers(token)
         kid = headers["kid"]
 
-        # search for the KID in the downloaded public keys
+        # search for the Key ID in the downloaded public keys
         try:
-            key_index = self._get_key_index(self.keys, kid)
+            key_index = self.get_public_key_index(kid)
 
+        # if it's not found, redownload keys and retry
         except ValueError:
-            logger.warn("KID not found in AWS public keys. Re-downloading public keys and retrying.")
-            self.keys = self.get_keys()
-            key_index = self._get_key_index(self.keys, kid)
+            logger.warn("Key ID not found in public keys. Re-downloading public keys and retrying.")
+            self.keys = self.get_public_keys()
+            key_index = self.get_public_key_index(kid)
 
         # construct the public key
         public_key = jwk.construct(self.keys[key_index])
@@ -145,43 +217,71 @@ class Cognito():
 
         return claim
 
-    def login_required(self, f):
+    def login_required(
+            self,
+            f: Callable[..., Any]
+        ) -> Response | Callable[..., Any]:
+        """
+        Decorate a view function to restrict access to only users who have
+        logged in and provide a valid Access Token. The Access Token must be
+        saved in a cookie named access_token.
+        
+        In the case when a user's Access Token is not valid or when there is no
+        Access Token present, this decorator will return a Response object that
+        should be automatically handleded by the Flask client.
+
+        Args:
+            f (Callable[..., Any]): The wrapped function.
+
+        Returns:
+            Response | Callable[..., Any]
+        """
         @wraps(f)
         def wrapper(*args, **kwargs):
-            res_unauthorized = {"Message": "Unauthorized request."}, 403
-            res_expired = {"Message": "Expired access token."}, 403
 
+            # get the Access Token from the access_token cookie.
             try:
                 access_token = request.cookies["access_token"]
 
+            # if no Access Token is present
             except BadRequestKeyError:
-                logger.warn("Request made without AccessToken header.")
-                return make_response(*res_unauthorized)
+                return make_response({"Message": "Unauthorized request."}, 403)
 
+            # make an API call to check whether the Access Token is valid
             try:
                 self.client.get_user(AccessToken=access_token)
 
+            # if an error occurs during the API call
             except ClientError as e:
                 try:
                     code = e.response["Error"]["Code"]
 
+                    # if the Access Token is invalid
                     if code == "NotAuthorizedException":
-                        return make_response(*res_unauthorized)
+                        return make_response(
+                            {"Message": "Unauthorized request."}, 403
+                        )
+
+                    # if any other reason, throw an exception to send a response
+                    else:
+                        raise Exception
 
                 except Exception:
-                    pass
+                    msg = "An unexpected AWS client error occured during credential verification. %(exc)s"
+                    return handle_server_error(msg, 500, e)
 
-                handle_client_error(e)
-
+            # inspect and validate the Access Token's claim
             try:
-                claim = self.verify_claim(access_token)
+                claim = self.get_claim_from_access_token(access_token)
 
+            # if the claim is not valid
+            except ValueError:  # TODO: make a separate exception for expired tokens
+                return make_response({"Unauthorized request."}, 403)
+
+            # if any other exception occured during validation
             except Exception as e:
-                logger.exception(e)
-                return make_response(*res_unauthorized)
-
-            if time.time() > claim["exp"]:
-                return make_response(*res_expired)
+                msg = "An unexpected error occured during credential verification. %(exc)s"
+                return handle_server_error(msg, 500, e)
 
             return f(*args, **kwargs)
 
@@ -192,6 +292,18 @@ class Cognito():
             username: str,
             password: str
         ) -> InitiateAuthResponseTypeDef | Literal[False]:
+        """
+        Log a user in. Returns False when the user provides invalid credentials.
+
+        Args:
+            username (str)
+            password (str)
+
+        Returns:
+            InitiateAuthResponseTypeDef | Literal[False]: Either the response
+                from the AWS Cognito AdminInitiateUserAuth endpoint or False
+                when the user provides invalid credentials.
+        """
         kwargs: dict[str, Any] = {
             "AuthFlow": "ADMIN_USER_PASSWORD_AUTH",
             "AuthParameters": {
@@ -213,6 +325,7 @@ class Cognito():
             try:
                 code = e.response["Error"]["Code"]
 
+                # when login was attempted with incorrect credentials
                 if code == "NotAuthorizedException":
                     return False
 
@@ -228,6 +341,25 @@ class Cognito():
             username: str,
             kwargs: dict[str, Any]
         ) -> InitiateAuthResponseTypeDef | Literal[False]:
+        """
+        Respond to an authorization challenge. Returns False when the challenge
+        fails.
+
+        Args:
+            username (str)
+            kwargs (dict[str, Any]): Keyword arguments to pass to 
+                Client.respond_to_auth_challenge. See the AWS Cognito
+                RespondToAuthChallenge endpoint documentation for more
+                information:
+                 - ChallengeName
+                 - ChallengeResponses
+                 - Session
+
+        Returns:
+            InitiateAuthResponseTypeDef | Literal[False]: The response from the
+                AWS Cognito RespondToAuthChallenge endpoint or False if the
+                challenge failed.
+        """
         kwargs["ClientId"] = self.client_id
 
         if self.client_secret is not None:
@@ -241,6 +373,7 @@ class Cognito():
             try:
                 code = e.response["Error"]["Code"]
 
+                # if the challenge failed
                 if code == "NotAuthorizedException":
                     return False
 
@@ -255,7 +388,18 @@ class Cognito():
             self,
             username: str,
             refresh_token: str,
-        ) -> InitiateAuthResponseTypeDef:
+        ) -> InitiateAuthResponseTypeDef:  # TODO: what happens when the refresh token is expired?
+        """
+        Generate a new Access Token using a Refresh Token. 
+
+        Args:
+            username (str)
+            refresh_token (str)
+
+        Returns:
+            InitiateAuthResponseTypeDef: The response from the AWS Cognito
+                AdminInitiateAuth endpoint.
+        """
         kwargs: dict[str, Any] = {
             "AuthFlow": "REFRESH_TOKEN_AUTH",
             "AuthParameters": {"REFRESH_TOKEN": refresh_token},
@@ -276,6 +420,12 @@ class Cognito():
         return res
 
     def sign_out(self, username: str) -> None:
+        """
+        Sign out a user.
+
+        Args:
+            username (str)
+        """
         kwargs: dict[str, Any] = {
             "UserPoolId": self.user_pool_id,
             "Username": username
@@ -284,6 +434,17 @@ class Cognito():
         self.client.admin_user_global_sign_out(**kwargs)
 
     def forgot_password(self, username: str) -> ForgotPasswordResponseTypeDef:
+        """
+        Send a request for a password reset. This will either send an email or
+        SMS message depending on the client's configuration.
+
+        Args:
+            username (str)
+
+        Returns:
+            ForgotPasswordResponseTypeDef: The response from the AWS
+                ForgotPassword endpoint.
+        """
         kwargs: dict[str, Any] = {
             "ClientId": self.client_id,
             "Username": username
@@ -302,6 +463,17 @@ class Cognito():
             password: str,
             kwargs: Dict[str, Any] | None = None
         ) -> None:
+        """
+        Using a confirmation code received by the user after calling
+        Cognito.forgot_password, reset the user's password.
+
+        Args:
+            username (str)
+            confirmation_code (str)
+            password (str)
+            kwargs (Dict[str, Any] | None, optional): Other arguments to pass to
+                the AWS Cognito ConfirmForgotPassword enpoint. Defaults to None
+        """
         kwargs = {
             "ClientId": self.client_id,
             "Username": username,

@@ -4,6 +4,7 @@ from l2ai.collections import users
 from l2ai.extensions import cognito
 from l2ai.schemas import Base, validate_schema
 from l2ai.utils.cognito import set_access_cookies
+from l2ai.utils.handlers import handle_server_error
 from l2ai.utils.logging import logger
 
 blueprint = Blueprint("base", __name__)
@@ -11,16 +12,10 @@ blueprint = Blueprint("base", __name__)
 
 @blueprint.route("/login", methods=["POST"])
 def login():
-    res_missing = {"Message": "Login credentials are required."}, 401
-    res_retrieve = {"Message": "Error retrieving login credentials."}, 401
-    res_invalid = {"Message": "Invalid login credentials."}, 403
-    res_token = {"Message": "Failure verifying access token."}, 401
-    res_successful = {"Message": "Login successful"}, 200
-
     auth = request.headers.get("Authorization")
 
     if auth is None:
-        return make_response(*res_missing)
+        return make_response({"Message": "Login credentials are required."}, 401)
     else:
         auth_decoded = b64decode(auth.split(" ")[1]).decode()
 
@@ -28,25 +23,24 @@ def login():
         username, password = auth_decoded.split(":")
     except ValueError as e:
         logger.exception(e)
-        return make_response(*res_retrieve)
+        return make_response({"Message": "Error retrieving login credentials."}, 401)
 
     user = users.find_one({"username": username})
     if user is None:
-        return make_response(*res_invalid)
+        return make_response({"Message": "Invalid login credentials."}, 403)
 
     auth_result = cognito.login(username, password)
     if auth_result is False:
-        return make_response(*res_invalid)
+        return make_response({"Message": "Invalid login credentials."}, 403)
 
     if "ChallengeName" in auth_result:
-        return make_response(
-            {
-                "ChallengeName": auth_result["ChallengeName"],
-                "Session": auth_result["Session"],
-                "ChallengeParameters": auth_result["ChallengeParameters"]
-            },
-            200
-        )
+        res = {
+            "ChallengeName": auth_result["ChallengeName"],
+            "Session": auth_result["Session"],
+            "ChallengeParameters": auth_result["ChallengeParameters"]
+        }
+
+        return make_response(res, 200)
 
     try:
         access_token = auth_result["AuthenticationResult"]["AccessToken"]
@@ -54,21 +48,19 @@ def login():
 
     except Exception as e:
         logger.exception(e)
-        return make_response(*res_token)
+        return make_response({"Message": "Failure verifying access token."}, 401)
 
-    response = make_response(*res_successful)
+    response = make_response({"Message": "Login successful"}, 200)
     set_access_cookies(response, auth_result)
+
     return response
 
 
 @blueprint.route("/challenge", methods=["POST"])
 @validate_schema(Base.challenge_schema)
 def challenge(validated_data: Base.ChallengeRequestType):
-    res_invalid = {"Message": "Invalid challenge response."}, 403
-    res_token = {"Message": "Failure verifying access token."}, 401
-    res_successful = {"Message": "Login successful"}, 200
-
     username = validated_data["Username"]
+
     kwargs = {
         "ChallengeName": validated_data["ChallengeName"],
         "ChallengeResponses": validated_data["ChallengeResponses"],
@@ -78,7 +70,7 @@ def challenge(validated_data: Base.ChallengeRequestType):
     auth_result = cognito.respond_to_challenge(username, kwargs)
 
     if auth_result is False:
-        return make_response(*res_invalid)
+        return make_response({"Message": "Invalid challenge response."}, 403)
 
     try:
         access_token = auth_result["AuthenticationResult"]["AccessToken"]
@@ -86,10 +78,11 @@ def challenge(validated_data: Base.ChallengeRequestType):
 
     except Exception as e:
         logger.exception(e)
-        return make_response(*res_token)
+        return make_response({"Message": "Failure verifying access token."}, 401)
 
-    response = make_response(*res_successful)
+    response = make_response({"Message": "Login successful"}, 200)
     set_access_cookies(response, auth_result)
+
     return response
 
 
@@ -97,10 +90,9 @@ def challenge(validated_data: Base.ChallengeRequestType):
 @cognito.login_required
 @validate_schema(Base.logout_schema)
 def logout(validated_data: Base.LogoutRequestType):
-    res_success = {"Message": "Logged out successfully"}, 200
     username = validated_data["Username"]
     cognito.sign_out(username)
-    response = make_response(*res_success)
+    response = make_response({"Message": "Logged out successfully"}, 200)
     response.delete_cookie("access_token")
     response.delete_cookie("refresh_token")
 
@@ -129,42 +121,34 @@ def confirm_forgot_password(
         validated_data: Base.ConfirmForgotPasswordRequestType
     ):
     cognito.confirm_forgot_password(
-        username=validated_data["Username"],
-        confirmation_code=validated_data["ConfirmationCode"],
-        password=validated_data["Password"]
+        validated_data["Username"],
+        validated_data["ConfirmationCode"],
+        validated_data["Password"]
     )
 
-    msg = "Password successfully reset."
-    res = make_response({"Message": msg}, 200)
+    res = make_response({"Message": "Password successfully reset."}, 200)
 
     return res
 
 
 @blueprint.route("/refresh")
 def refresh():
-    res_unauthorized = {"Message": "Unauthorized request."}, 403
-    res_exception = {"Message": "Error refreshing access token."}, 500
-    res_success = {"Message": "Access token successfully refreshed"}, 200
-
     access_token = request.cookies["access_token"]
     refresh_token = request.cookies["refresh_token"]
 
     try:
         claim = cognito.get_claim_from_access_token(access_token)
-
     except Exception as e:
-        logger.exception(e)
-        return make_response(*res_unauthorized)
+        return handle_server_error("Error refreshing access token.", 500, e)
 
     try:
         auth_result = cognito.refresh(claim["username"], refresh_token)
-
     except Exception as e:
-        logger.exception(e)
-        return make_response(*res_exception)
+        return handle_server_error("Error refreshing access token.", 500, e)
 
-    response = make_response(*res_success)
+    response = make_response({"Message": "Access token successfully refreshed"}, 200)
     set_access_cookies(response, auth_result)
+
     return response
 
 

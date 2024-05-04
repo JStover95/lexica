@@ -266,21 +266,19 @@ class Cognito():
 
                     # if the Access Token is invalid
                     if code == "NotAuthorizedException":
-                        return make_response(
-                            {"Message": "Unauthorized request."}, 403
-                        )
+                        return make_response({"Message": "Unauthorized request."}, 403)
 
                     # if any other reason, throw an exception to send a response
                     else:
                         raise Exception
 
                 except Exception:
-                    msg = "An unexpected AWS client error occured during credential verification. %(exc)s"
+                    msg = "An unexpected AWS client error occured during credential verification."
                     return handle_server_error(msg, 500, e)
 
             # inspect and validate the Access Token's claim
             try:
-                claim = self.get_claim_from_access_token(access_token)
+                self.get_claim_from_access_token(access_token)
 
             # if the claim is not valid
             except ValueError:  # TODO: make a separate exception for expired tokens
@@ -288,7 +286,7 @@ class Cognito():
 
             # if any other exception occured during validation
             except Exception as e:
-                msg = "An unexpected error occured during credential verification. %(exc)s"
+                msg = "An unexpected error occured during credential verification."
                 return handle_server_error(msg, 500, e)
 
             return f(*args, **kwargs)

@@ -30,35 +30,20 @@ def handle_client_error(e):
     raise RuntimeError("ClientError \"%s\": \"%s\"" % (code, message))
 
 
-def handle_server_error(
-        msg: str,
-        code: int,
-        e: Exception | None = None
-    ) -> Response:
+def handle_server_error(msg: str, code: int, e: Exception) -> Response:
     """
     Handle errors in server endpoints. Generate a logging message and return the
-    a response with a message to the client. The message will also be logged.
-    The message string can include the following formatting keys:
-
-     - %(exc)s: the formatted exception.
+    a response with a message to the client.
 
     Args:
-        msg (str): The message to return to the client with optional formatting
-            keys
+        msg (str): The message to return to the client
         code (int): The response code to return to the client (e.g., 401, 500)
-        e (Exception | None, optional): The exception. Defaults to None
+        e (Exception)
 
     Returns:
         Response: The response to return to the client.
     """
-    if e is not None:
-        exc = traceback.format_exception_only(e).pop().strip()
-        s = msg % {"exc": exc}
-        logger.error(s)
-        logger.exception(e)
-        res = {"Message": s}
+    logger.error(msg)
+    logger.exception(e)
 
-    else:
-        res = {"Message": msg}
-
-    return make_response(res, code)
+    return make_response({"Message": msg}, code)

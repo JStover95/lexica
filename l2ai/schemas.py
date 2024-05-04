@@ -16,7 +16,7 @@ def validate_schema(schema):
             try:
                 validate(request.json, schema)
             except ValidationError as e:
-                return handle_server_error(e, "Invalid paylod. %(exc)s", 401)
+                return handle_server_error(e, "Invalid paylod.", 401)
 
             return f(*args, validated_data=request.json, **kwargs)
 

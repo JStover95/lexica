@@ -10,8 +10,58 @@ from l2ai.utils.logging import logger
 blueprint = Blueprint("base", __name__)
 
 
-@blueprint.route("/login", methods=["POST"])
+@blueprint.route("/login")
 def login():
+    """
+    Login a user using the username and password in the Authorization header.
+    Upon successful login, an Access Token and Refresh Token are sent to the
+    client in "access_token" and "refresh_token" cookies.
+
+    Methods:
+        GET
+
+    Required Headers:
+        Authorization
+
+    Responses:
+        code: 200
+        body:
+         - Message: "Challenge requested by server."
+         - ChallengeName: A challenge name as returned by the AWS
+           InitiateAdminAuth endpoint.
+         - Session: The session key as returned by the AWS InitiateAdminAuth
+           endpoint.
+         - ChallengeParameters: The challenge parameters as returned by the AWS
+           InitiateAdminAuth endpoint.
+        Generated when the Cognito Identity Client responds to a login request
+        with an authorization challenge.
+
+        code: 200
+        body:
+         - Message: "Successful login."
+        Generated upon successful login.
+
+        code: 401
+        body:
+         - Message: "Login credentials are required."
+        Generated when a request is made without an Authorization header.
+
+        code: 401
+        body:
+         - Message: "Error retrieving login credentials"
+        Generated when the Authorization header is formatted incorrectly.
+
+        code: 403
+        body:
+         - Message: "Invalid login credentials"
+        Generated when the client provides incorrect credentials.
+
+        code: 500
+        body:
+         - Message: "Failure verifying access token."
+        Generated when the Access Token returned from the Cognito Identity
+        Provider could not be verified after successful login.
+    """
     auth = request.headers.get("Authorization")
 
     if auth is None:
@@ -21,8 +71,7 @@ def login():
 
     try:
         username, password = auth_decoded.split(":")
-    except ValueError as e:
-        logger.exception(e)
+    except ValueError:
         return make_response({"Message": "Error retrieving login credentials."}, 401)
 
     user = users.find_one({"username": username})
@@ -35,6 +84,7 @@ def login():
 
     if "ChallengeName" in auth_result:
         res = {
+            "Message": "Challenge requested by server.",
             "ChallengeName": auth_result["ChallengeName"],
             "Session": auth_result["Session"],
             "ChallengeParameters": auth_result["ChallengeParameters"]
@@ -45,10 +95,8 @@ def login():
     try:
         access_token = auth_result["AuthenticationResult"]["AccessToken"]
         cognito.get_claim_from_access_token(access_token)
-
     except Exception as e:
-        logger.exception(e)
-        return make_response({"Message": "Failure verifying access token."}, 401)
+        return handle_server_error("Failure verifying access token.", 500, e)
 
     response = make_response({"Message": "Login successful"}, 200)
     set_access_cookies(response, auth_result)
@@ -59,6 +107,50 @@ def login():
 @blueprint.route("/challenge", methods=["POST"])
 @validate_schema(Base.challenge_schema)
 def challenge(validated_data: Base.ChallengeRequestType):
+    """
+    Respond to an authorization challenge if one was requested by the Cognito
+    Identity Provider. Upon successful login, an Access Token and Refresh Token
+    are sent to the client in "access_token" and "refresh_token" cookies.
+
+    Methods:
+        POST
+
+    Request Body:
+        Username (str): The user responding to the challenge.
+        ChallengeName (str): The name of the challenge as required by the
+            Cognito RespondToAuthChallenge endpoint.
+        Session (str): The session key as required by the Cognito
+            RespondToAuthChallenge endpoint.
+        ChallengeResponses (object): The challenge response parameters as
+            required by the Cognito RespondToAuthChallenge endpoint.
+
+    Responses:
+        code: 200
+        body:
+         - Message: "Login successful."
+        Generated upon successful login.
+
+        code: 401
+        body:
+         - Message: "Missing paylod."
+        Generated when no payload is sent with the request.
+
+        code: 401
+        body:
+         - Message: "Incorrect payload."
+        Generated when an incorrect payload is sent with the request.
+
+        code: 403
+        body:
+         - Message: "Invalid challenge response."
+        Generated when the challenge response fails.
+
+        code: 500
+        body:
+         - Message: "Failure verifying access token."
+        Generated when the Access Token returned from the Cognito Identity
+        Provider could not be verified after successful login. 
+    """
     username = validated_data["Username"]
 
     kwargs = {
@@ -75,10 +167,8 @@ def challenge(validated_data: Base.ChallengeRequestType):
     try:
         access_token = auth_result["AuthenticationResult"]["AccessToken"]
         cognito.get_claim_from_access_token(access_token)
-
     except Exception as e:
-        logger.exception(e)
-        return make_response({"Message": "Failure verifying access token."}, 401)
+        return handle_server_error("Failure verifying access token.", 500, e)
 
     response = make_response({"Message": "Login successful"}, 200)
     set_access_cookies(response, auth_result)

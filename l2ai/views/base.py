@@ -1,5 +1,6 @@
 from base64 import b64decode
 from flask import Blueprint, make_response, request
+from werkzeug.exceptions import BadRequestKeyError
 from l2ai.collections import users
 from l2ai.extensions import cognito
 from l2ai.schemas import Base, validate_schema
@@ -26,39 +27,39 @@ def login():
     Responses:
         code: 200
         body:
-         - Message: "Challenge requested by server."
-         - ChallengeName: A challenge name as returned by the AWS
+         - Message (str): "Challenge requested by server."
+         - ChallengeName (str): A challenge name as returned by the AWS
            InitiateAdminAuth endpoint.
-         - Session: The session key as returned by the AWS InitiateAdminAuth
+         - Session (str): The session key as returned by the AWS InitiateAdminAuth
            endpoint.
-         - ChallengeParameters: The challenge parameters as returned by the AWS
+         - ChallengeParameters (object): The challenge parameters as returned by the AWS
            InitiateAdminAuth endpoint.
         Generated when the Cognito Identity Client responds to a login request
         with an authorization challenge.
 
         code: 200
         body:
-         - Message: "Successful login."
+         - Message (str): "Successful login."
         Generated upon successful login.
 
         code: 401
         body:
-         - Message: "Login credentials are required."
+         - Message (str): "Login credentials are required."
         Generated when a request is made without an Authorization header.
 
         code: 401
         body:
-         - Message: "Error retrieving login credentials"
+         - Message (str): "Error retrieving login credentials"
         Generated when the Authorization header is formatted incorrectly.
 
         code: 403
         body:
-         - Message: "Invalid login credentials"
+         - Message (str): "Invalid login credentials"
         Generated when the client provides incorrect credentials.
 
         code: 500
         body:
-         - Message: "Failure verifying access token."
+         - Message (str): "Failure verifying access token."
         Generated when the Access Token returned from the Cognito Identity
         Provider could not be verified after successful login.
     """
@@ -127,27 +128,27 @@ def challenge(validated_data: Base.ChallengeRequestType):
     Responses:
         code: 200
         body:
-         - Message: "Login successful."
+         - Message (str): "Login successful."
         Generated upon successful login.
 
         code: 401
         body:
-         - Message: "Missing paylod."
+         - Message (str): "Missing paylod."
         Generated when no payload is sent with the request.
 
         code: 401
         body:
-         - Message: "Incorrect payload."
+         - Message (str): "Incorrect payload."
         Generated when an incorrect payload is sent with the request.
 
         code: 403
         body:
-         - Message: "Invalid challenge response."
+         - Message (str): "Invalid challenge response."
         Generated when the challenge response fails.
 
         code: 500
         body:
-         - Message: "Failure verifying access token."
+         - Message (str): "Failure verifying access token."
         Generated when the Access Token returned from the Cognito Identity
         Provider could not be verified after successful login. 
     """
@@ -180,6 +181,33 @@ def challenge(validated_data: Base.ChallengeRequestType):
 @cognito.login_required
 @validate_schema(Base.logout_schema)
 def logout(validated_data: Base.LogoutRequestType):
+    """
+    Logout a user. This will invalidate the user's Access Token with the Cognito
+    Identity Provider and attempt to delete the access_token and refresh_token
+    cookies from the client's browser.
+
+    Methods:
+        POST
+
+    Request body:
+        Username (str): the user to log out.
+
+    Responses:
+        code: 200
+        body:
+         - Message (str): "Logged out successfully."
+        Generated upon successful logout.
+
+        code: 401
+        body:
+         - Message (str): "Missing paylod."
+        Generated when no payload is sent with the request.
+
+        code: 401
+        body:
+         - Message (str): "Incorrect payload."
+        Generated when an incorrect payload is sent with the request.
+    """
     username = validated_data["Username"]
     cognito.sign_out(username)
     response = make_response({"Message": "Logged out successfully"}, 200)
@@ -192,6 +220,34 @@ def logout(validated_data: Base.LogoutRequestType):
 @blueprint.route("/forgot-password", methods=["POST"])
 @validate_schema(Base.forgot_password_schema)
 def forgot_password(validated_data: Base.ForgotPasswordRequestType):
+    """
+    Create a request to reset a user's password. This will send a confirmation
+    code to the user's default verification method.
+
+    Methods:
+        POST
+
+    Request body:
+        Username (str): the user to request the password reset for
+
+    Responses:
+        code: 200
+        body:
+         - Message (str): "Confirmation code sent successfully."
+         - CodeDeliveryDetails (object): details of how the verification code
+           was sent, according to the Cognito ForgotPassword API endpoint.
+        Generated upon successfully sending the verification code.
+
+        code: 401
+        body:
+         - Message (str): "Missing paylod."
+        Generated when no payload is sent with the request.
+
+        code: 401
+        body:
+         - Message (str): "Incorrect payload."
+        Generated when an incorrect payload is sent with the request.
+    """
     username = validated_data["Username"]
     auth_result = cognito.forgot_password(username)
 
@@ -210,6 +266,35 @@ def forgot_password(validated_data: Base.ForgotPasswordRequestType):
 def confirm_forgot_password(
         validated_data: Base.ConfirmForgotPasswordRequestType
     ):
+    """
+    Reset a user's password using the Confirmation Code returned by the
+    forgot_password endpoint.
+
+    Methods:
+        POST
+
+    Request body:
+        Username (str): the user to reset the password of
+        ConfirmationCode (str): the Confirmation Code as returned by the
+            forgot_password endpoint
+        Password (str): the user's new password
+
+    Responses:
+        code: 200
+        body:
+         - Message (str): "Password successfully resey."
+        Generated upon successfully resetting the user's password.
+
+        code: 401
+        body:
+         - Message (str): "Missing paylod."
+        Generated when no payload is sent with the request.
+
+        code: 401
+        body:
+         - Message (str): "Incorrect payload."
+        Generated when an incorrect payload is sent with the request.
+    """
     cognito.confirm_forgot_password(
         validated_data["Username"],
         validated_data["ConfirmationCode"],
@@ -223,8 +308,38 @@ def confirm_forgot_password(
 
 @blueprint.route("/refresh")
 def refresh():
-    access_token = request.cookies["access_token"]
-    refresh_token = request.cookies["refresh_token"]
+    """
+    Refresh a user's Access Token using the refrest_token cookie. Upon
+    successful verification of the user's Refresh Token, this endpoint sets a
+    new access_token and refresh_token cookies.
+
+    Methods:
+        GET
+
+    Responses:
+        code: 200
+        body:
+         - Message (str): "Access token successfully refreshed."
+        Generated upon successful refresh.
+
+        code: 401
+        body:
+         - Message (str): "access_token or refresh_token cookies are not
+           present."
+        Generated if the required cookies are not present in the request.
+
+        code: 500
+        body:
+         - Message (str): "Error refreshing access token."
+        Generated either when the claim from the access token could not be
+        verified or when the Access Token could not be refreshed.
+    """
+    try:
+        access_token = request.cookies["access_token"]
+        refresh_token = request.cookies["refresh_token"]
+
+    except BadRequestKeyError as e:
+        return make_response({"Message": "access_token or refresh_token cookies are not present."}, 401)
 
     try:
         claim = cognito.get_claim_from_access_token(access_token)

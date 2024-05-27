@@ -1,7 +1,9 @@
 from base64 import b64encode
 import os
+from typing import Any
 from flask.testing import FlaskClient
 from werkzeug.test import TestResponse
+from werkzeug import Response
 
 
 class Fake:
@@ -57,10 +59,10 @@ def initialize_cognito_test_environment():
         }
     )
 
-    try:
+    if "Id" in res["UserPool"]:
         cognito.user_pool_id = res["UserPool"]["Id"]
 
-    except KeyError:
+    else:
         raise RuntimeError("Error retrieving UserPoolId.")
 
     res = cognito.client.create_user_pool_client(
@@ -69,12 +71,15 @@ def initialize_cognito_test_environment():
         GenerateSecret=True
     )
 
-    try:
+    if "ClientId" in res["UserPoolClient"]:
         cognito.client_id = res["UserPoolClient"]["ClientId"]
+    else:
+        raise RuntimeError("Error retrieving Client ID.")
+
+    if "ClientSecret" in res["UserPoolClient"]:
         cognito.client_secret = res["UserPoolClient"]["ClientSecret"]
-    
-    except KeyError:
-        raise RuntimeError("Error retrieving UserPoolClient Id or Secret.")
+    else:
+        raise RuntimeError("Error retrieving Client Secret.")
 
     cognito.client.sign_up(
         ClientId=cognito.client_id,
@@ -103,3 +108,26 @@ def initialize_cognito_test_environment():
         UserPoolId=cognito.user_pool_id,
         Username=Fake.username(2)
     )
+
+
+def get_cookie_from_response(
+        response: Response,
+        cookie_name: str
+    ) -> dict[Any, Any]:
+    cookie_headers = response.headers.getlist("Set-Cookie")
+
+    for header in cookie_headers:
+        attributes = header.split(";")
+
+        if cookie_name in attributes[0]:
+            cookie = {}
+
+            for attr in attributes:
+                split = attr.split("=")
+                key = split[0].strip().lower()
+                val = split[1] if len(split) > 1 else True
+                cookie[key] = val
+
+            return cookie
+
+    raise ValueError("Cookie %s not found." % cookie_name)

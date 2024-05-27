@@ -40,12 +40,15 @@ def set_access_cookies(
             auth_result. This may occur when Cognito.login returns with an
             authentication challenge.
     """
-    try:
+    if "AccessToken" in auth_result["AuthenticationResult"]:
         access_token = auth_result["AuthenticationResult"]["AccessToken"]
-        refresh_token = auth_result["AuthenticationResult"]["RefreshToken"]
+    else:
+        raise RuntimeError("Error retrieving Access Token from auth_result.")
 
-    except KeyError:
-        raise RuntimeError("AuthenticationResult not present in auth_result.")
+    if "RefreshToken" in auth_result["AuthenticationResult"]:
+        refresh_token = auth_result["AuthenticationResult"]["RefreshToken"]
+    else:
+        raise RuntimeError("Error retrieving Refresh Token from auth_result.")
 
     opts = {"secure": True, "httponly": True, "samesite": "Strict"}
     response.set_cookie("access_token", access_token, **opts)
@@ -261,6 +264,14 @@ class Cognito():
 
             # if an error occurs during the API call
             except ClientError as e:
+                if "Error" not in e.response:
+                    msg = "An unexpected AWS client error occured during credential verification."
+                    return handle_server_error(msg, 500, e)
+                
+                if "Code" not in e.response["Error"]:
+                    msg = "An unexpected AWS client error occured during credential verification."
+                    return handle_server_error(msg, 500, e)
+
                 try:
                     code = e.response["Error"]["Code"]
 
@@ -328,15 +339,22 @@ class Cognito():
             res = self.client.admin_initiate_auth(**kwargs)
 
         except ClientError as e:
-            try:
-                code = e.response["Error"]["Code"]
-
-                # when login was attempted with incorrect credentials
-                if code == "NotAuthorizedException":
-                    return False
-
-            except Exception:
+            if "Error" not in e.response:
                 pass
+
+            elif "Code" not in e.response["Error"]:
+                pass
+
+            else:
+                try:
+                    code = e.response["Error"]["Code"]
+
+                    # when login was attempted with incorrect credentials
+                    if code == "NotAuthorizedException":
+                        return False
+
+                except Exception:
+                    pass
 
             handle_client_error(e)
 
@@ -376,15 +394,22 @@ class Cognito():
             res = self.client.respond_to_auth_challenge(**kwargs)
 
         except ClientError as e:
-            try:
-                code = e.response["Error"]["Code"]
-
-                # if the challenge failed
-                if code == "NotAuthorizedException":
-                    return False
-
-            except Exception:
+            if "Error" not in e.response:
                 pass
+
+            elif "Code" not in e.response["Error"]:
+                pass
+
+            else:
+                try:
+                    code = e.response["Error"]["Code"]
+
+                    # if the challenge failed
+                    if code == "NotAuthorizedException":
+                        return False
+
+                except Exception:
+                    pass
 
             handle_client_error(e)
 

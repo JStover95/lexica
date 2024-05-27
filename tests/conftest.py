@@ -3,6 +3,7 @@ from typing import Generator
 from flask.testing import FlaskClient
 from moto import mock_aws
 import pytest
+from l2ai.utils.cognito import Cognito
 from tests.utils import initialize_cognito_test_environment
 
 

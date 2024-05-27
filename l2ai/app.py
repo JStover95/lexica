@@ -2,7 +2,6 @@ import dotenv
 
 dotenv.load_dotenv()
 
-import logging
 import os
 from flask import Flask
 from l2ai.commands import drop_database, init_user

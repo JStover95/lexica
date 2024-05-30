@@ -1,9 +1,12 @@
 from base64 import b64encode
 import os
-from typing import Any
+from typing import Any, TypedDict
 from flask.testing import FlaskClient
 from werkzeug.test import TestResponse
 from werkzeug import Response
+# from l2ai.collections import users
+from l2ai.utils.cognito import Cognito
+from l2ai.utils.logging import logger
 
 
 class Fake:
@@ -22,16 +25,19 @@ class Fake:
 def login(client: FlaskClient, username: str, password: str) -> TestResponse:
     cred = b64encode(f"{username}:{password}".encode())
     headers = {"Authorization": "Basic %s" % cred.decode()}
-    res = client.post("/login", headers=headers)
+    res = client.get("/login", headers=headers)
+    access_token_cookie = get_cookie_from_response(res, "access_token")
+    refresh_token_cookie = get_cookie_from_response(res, "refresh_token")
+    client.set_cookie(**access_token_cookie)
+    client.set_cookie(**refresh_token_cookie)
 
     return res
 
 
-def initialize_cognito_test_environment():
+def initialize_cognito_test_environment(cognito: Cognito):
 
-    # import app after initializing mock AWS to ensure no AWS clients are initialized
+    # avoid importing before moto.mock_aws is called
     from l2ai.collections import users
-    from l2ai.extensions import cognito
 
     user = users.find_one({"username": Fake.username(0)})
     if user is None:
@@ -113,7 +119,7 @@ def initialize_cognito_test_environment():
 def get_cookie_from_response(
         response: Response,
         cookie_name: str
-    ) -> dict[Any, Any]:
+    ) -> dict[str, Any]:
     cookie_headers = response.headers.getlist("Set-Cookie")
 
     for header in cookie_headers:
@@ -122,7 +128,13 @@ def get_cookie_from_response(
         if cookie_name in attributes[0]:
             cookie = {}
 
-            for attr in attributes:
+            # store the key and value of the first attribute separately to
+            # easily pass to set_cookie
+            key, value = attributes[0].split("=")
+            cookie["key"] = key
+            cookie["value"] = value
+
+            for attr in attributes[1:]:
                 split = attr.split("=")
                 key = split[0].strip().lower()
                 val = split[1] if len(split) > 1 else True

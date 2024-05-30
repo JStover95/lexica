@@ -10,6 +10,7 @@ import boto3
 from botocore.exceptions import ClientError
 from flask import make_response, request
 from jose import jwk, jwt
+from jose.exceptions import JWTError
 from jose.utils import base64url_decode
 from mypy_boto3_cognito_idp.type_defs import (
     ForgotPasswordResponseTypeDef,
@@ -186,7 +187,12 @@ class Cognito():
         Returns:
             Dict[str, str]: The Access Token's decoded claim.
         """
-        headers = jwt.get_unverified_headers(token)
+        try:
+            headers = jwt.get_unverified_headers(token)
+
+        except JWTError:
+            raise ValueError("Invalid token.")
+
         kid = headers["kid"]
 
         # search for the Key ID in the downloaded public keys
@@ -200,7 +206,7 @@ class Cognito():
             key_index = self.get_public_key_index(kid)
 
         # construct the public key
-        public_key = jwk.construct(self.keys[key_index])
+        public_key = jwk.construct(self.public_keys[key_index])
 
         # get the last two sections of the token, message and signature
         message, encoded_signature = str(token).rsplit(".", 1)

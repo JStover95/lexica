@@ -40,14 +40,10 @@ def set_access_cookies(
             auth_result. This may occur when Cognito.login returns with an
             authentication challenge.
     """
-    if "AccessToken" in auth_result["AuthenticationResult"]:
-        access_token = auth_result["AuthenticationResult"]["AccessToken"]
-    else:
-        raise RuntimeError("Error retrieving Access Token from auth_result.")
-
-    if "RefreshToken" in auth_result["AuthenticationResult"]:
-        refresh_token = auth_result["AuthenticationResult"]["RefreshToken"]
-    else:
+    try:
+        access_token = auth_result["AuthenticationResult"]["AccessToken"]  # type: ignore
+        refresh_token = auth_result["AuthenticationResult"]["RefreshToken"]  # type: ignore
+    except KeyError:
         raise RuntimeError("Error retrieving Refresh Token from auth_result.")
 
     opts = {"secure": True, "httponly": True, "samesite": "Strict"}
@@ -121,7 +117,7 @@ class Cognito():
         """
         if self.client_secret is not None:
             key = self.client_secret.encode()
-        
+
         else:
             raise ValueError("Cognito._secret_hash was called when client_secret is None.")
 
@@ -264,16 +260,8 @@ class Cognito():
 
             # if an error occurs during the API call
             except ClientError as e:
-                if "Error" not in e.response:
-                    msg = "An unexpected AWS client error occured during credential verification."
-                    return handle_server_error(msg, 500, e)
-                
-                if "Code" not in e.response["Error"]:
-                    msg = "An unexpected AWS client error occured during credential verification."
-                    return handle_server_error(msg, 500, e)
-
                 try:
-                    code = e.response["Error"]["Code"]
+                    code = e.response["Error"]["Code"]  # type: ignore
 
                     # if the Access Token is invalid
                     if code == "NotAuthorizedException":
@@ -283,7 +271,7 @@ class Cognito():
                     else:
                         raise Exception
 
-                except Exception:
+                except KeyError as e:
                     msg = "An unexpected AWS client error occured during credential verification."
                     return handle_server_error(msg, 500, e)
 
@@ -339,22 +327,15 @@ class Cognito():
             res = self.client.admin_initiate_auth(**kwargs)
 
         except ClientError as e:
-            if "Error" not in e.response:
+            try:
+                code = e.response["Error"]["Code"]  # type: ignore
+
+                # when login was attempted with incorrect credentials
+                if code == "NotAuthorizedException":
+                    return False
+
+            except KeyError:
                 pass
-
-            elif "Code" not in e.response["Error"]:
-                pass
-
-            else:
-                try:
-                    code = e.response["Error"]["Code"]
-
-                    # when login was attempted with incorrect credentials
-                    if code == "NotAuthorizedException":
-                        return False
-
-                except Exception:
-                    pass
 
             handle_client_error(e)
 
@@ -394,22 +375,15 @@ class Cognito():
             res = self.client.respond_to_auth_challenge(**kwargs)
 
         except ClientError as e:
-            if "Error" not in e.response:
+            try:
+                code = e.response["Error"]["Code"]  # type: ignore
+
+                # if the challenge failed
+                if code == "NotAuthorizedException":
+                    return False
+
+            except KeyError:
                 pass
-
-            elif "Code" not in e.response["Error"]:
-                pass
-
-            else:
-                try:
-                    code = e.response["Error"]["Code"]
-
-                    # if the challenge failed
-                    if code == "NotAuthorizedException":
-                        return False
-
-                except Exception:
-                    pass
 
             handle_client_error(e)
 

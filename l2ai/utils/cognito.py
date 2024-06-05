@@ -371,6 +371,12 @@ class Cognito():
                 AWS Cognito RespondToAuthChallenge endpoint or False if the
                 challenge failed.
         """
+        required_kwargs = ["ChallengeName", "ChallengeResponses", "Session"]
+
+        for kwarg in required_kwargs:
+            if kwarg not in kwargs:
+                raise ValueError("Missing keyword argument for Cognito.respond_to_challenge: %s" % kwarg)
+
         kwargs["ClientId"] = self.client_id
 
         if self.client_secret is not None:

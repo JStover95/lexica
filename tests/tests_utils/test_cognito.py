@@ -119,3 +119,90 @@ class TestCognito:
 
     def test_login_required_invalid_claim(self, client: FlaskClient):
         logger.info("Test for making an invalid claim with Cognito.login_required is not implemented.")
+
+    def test_login(self, cognito: Cognito):
+        auth_result = cognito.login(Fake.username(0), Fake.password(0))
+
+        assert auth_result is not False
+        assert "AccessToken" in auth_result["AuthenticationResult"]
+
+    def test_login_challenge_required(self, cognito: Cognito):
+        auth_result = cognito.login(Fake.username(1), Fake.password(1))
+
+        assert auth_result is not False
+        assert "ChallengeName" in auth_result
+
+    def test_login_invalid_credentials(self, cognito: Cognito):
+        auth_result = cognito.login("fake username", "fake password")
+
+        assert auth_result is False
+
+    def test_respond_to_challenge(self, cognito: Cognito):
+        auth_result = cognito.login(Fake.username(1), Fake.password(1))
+
+        assert auth_result is not False
+        assert "ChallengeName" in auth_result
+        assert auth_result["ChallengeName"] == "NEW_PASSWORD_REQUIRED"
+
+        kwargs = {
+            "ChallengeName": "NEW_PASSWORD_REQUIRED",
+            "ChallengeResponses": {
+                "NEW_PASSWORD": Fake.password(2),
+                "USERNAME": Fake.username(1)
+            },
+            "Session": auth_result["Session"]
+        }
+
+        challenge_result = cognito.respond_to_challenge(Fake.username(1), kwargs)
+
+        assert challenge_result is not False
+        assert "AccessToken" in challenge_result["AuthenticationResult"]
+
+    def test_respond_to_challenge_missing_kwarg(self, cognito: Cognito):
+        kwargs = {}
+
+        with pytest.raises(ValueError):
+            cognito.respond_to_challenge(Fake.username(1), kwargs)
+
+    def test_refresh(self, cognito: Cognito):
+        auth_result = cognito.login(Fake.username(0), Fake.password(0))
+
+        assert auth_result is not False
+        assert "RefreshToken" in auth_result["AuthenticationResult"]
+
+        refresh_token = auth_result["AuthenticationResult"]["RefreshToken"]
+        refresh_result = cognito.refresh(Fake.username(0), refresh_token)
+
+        assert "AccessToken" in refresh_result["AuthenticationResult"]
+
+    def test_refresh_expired_token(self, cognito: Cognito):
+        logger.info("Test for refreshing an expired token not implemented.")
+
+    def test_sign_out(self, cognito: Cognito, client: FlaskClient):
+        res = login(client, Fake.username(0), Fake.password(0))
+        res = client.get("/protected")
+
+        assert res.status_code == 200
+
+        cognito.sign_out(Fake.username(0))
+        res = client.get("/protected")
+
+        assert res.status_code == 403
+
+    def test_forgot_password(self, cognito: Cognito):
+        forgot_result = cognito.forgot_password(Fake.username(0))
+
+        assert "Destination" in forgot_result["CodeDeliveryDetails"]
+        assert forgot_result["CodeDeliveryDetails"]["Destination"] == Fake.username(0)
+
+    def test_confirm_forgot_password(self, cognito: Cognito):
+        cognito.confirm_forgot_password(
+            Fake.username(0),
+            "123456",
+            Fake.password(1)
+        )
+
+        auth_result = cognito.login(Fake.username(0), Fake.password(1))
+
+        assert auth_result is not False
+        assert "AccessToken" in auth_result["AuthenticationResult"]

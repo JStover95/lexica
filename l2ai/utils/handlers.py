@@ -1,33 +1,32 @@
 from flask import make_response, Response
-import traceback
+from botocore.exceptions import ClientError
 from l2ai.utils.logging import logger
 
 
-def handle_client_error(e):
+def handle_client_error(e: ClientError) -> None:
     """
-    Handle AWS boto3 client errors. Get the error's code and message, create a
-    log output, and raise a RuntimeError.
+    Handle AWS boto3 client errors. Get the error's code and message and create
+    a log output.
 
     Args:
-        e (_type_)
+        e (ClientError)
 
     Raises:
         RuntimeError
     """
     try:
-        code = e.response["Error"]["Code"]
+        code = e.response["Error"]["Code"]  # type: ignore
 
     except KeyError:
         code = "N/A"
 
     try:
-        message = e.response["Error"]["Message"]
+        message = e.response["Error"]["Message"]  # type: ignore
 
     except KeyError:
         message = "N/A"
 
     logger.error("ClientError \"%s\": \"%s\"", code, message)
-    raise RuntimeError("ClientError \"%s\": \"%s\"" % (code, message))
 
 
 def handle_server_error(msg: str, code: int, e: Exception) -> Response:

@@ -1,12 +1,10 @@
 from base64 import b64encode
-import os
-from typing import Any, TypedDict
+from typing import Any
 from flask.testing import FlaskClient
 from werkzeug.test import TestResponse
 from werkzeug import Response
 # from l2ai.collections import users
 from l2ai.utils.cognito import Cognito
-from l2ai.utils.logging import logger
 
 
 class Fake:

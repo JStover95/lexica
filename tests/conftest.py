@@ -1,22 +1,23 @@
 import os
 from typing import Generator
-from flask import Flask, make_response
+from flask import Flask
 from flask.testing import FlaskClient
 from moto import mock_aws
 import pytest
 from l2ai.utils.cognito import Cognito
-from l2ai.utils.logging import logger
-from tests.utils import initialize_cognito_test_environment
+from l2ai.utils.mongo import Mongo
+from tests.utils import (
+    initialize_app_test_environment,
+    initialize_cognito_test_environment,
+    initialize_mongo_test_environment
+)
+
+os.environ["MONGO_NAME"] = "testing"
 
 
 @pytest.fixture
 def cognito() -> Generator[Cognito, None, None]:
-    os.environ["AWS_ACCESS_KEY_ID"] = "testing"
-    os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
-
     with mock_aws():
-
-        # import Cognito after initializing mock AWS to ensure no AWS clients are initialized
         from l2ai.extensions import cognito
         initialize_cognito_test_environment(cognito)
 
@@ -24,20 +25,19 @@ def cognito() -> Generator[Cognito, None, None]:
 
 
 @pytest.fixture
-def app(cognito: Cognito) -> Generator[Flask, None, None]:
+def mongo(cognito: Cognito) -> Generator[Mongo, None, None]:
+    from l2ai.extensions import mongo
+    initialize_mongo_test_environment(mongo)
+    yield mongo
 
-    # import app after initializing mock AWS to ensure no AWS clients are initialized
+
+@pytest.fixture
+def app(cognito: Cognito, mongo: Mongo) -> Generator[Flask, None, None]:
     from l2ai.app import create_app
 
     app = create_app(testing=True)
+    initialize_app_test_environment(app, cognito)
     with app.app_context():
-
-        # create a protected route for testing
-        @app.route("/protected")
-        @cognito.login_required
-        def protected():
-            return make_response("foo", 200)
-        
         yield app
 
 

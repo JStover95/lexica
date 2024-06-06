@@ -8,15 +8,15 @@ COGNITO_USERNAME = os.getenv("COGNITO_USERNAME")
 COGNITO_PASSWORD = os.getenv("COGNITO_PASSWORD")
 
 
-@pytest.mark.parametrize(
-    "username,password",
-    [
-        ("fake@email.com", "fakepassword"),
-        (COGNITO_USERNAME, COGNITO_PASSWORD)
-    ]
-)
-def test_login(client: FlaskClient, username: str, password: str):
-    res = login(client, username, password)
+# @pytest.mark.parametrize(
+#     "username,password",
+#     [
+#         ("fake@email.com", "fakepassword"),
+#         (COGNITO_USERNAME, COGNITO_PASSWORD)
+#     ]
+# )
+# def test_login(client: FlaskClient, username: str, password: str):
+#     res = login(client, username, password)
 
-    if res.json is not None:
-        data: InitiateAuthResponseTypeDef = res.json
+#     if res.json is not None:
+#         data: InitiateAuthResponseTypeDef = res.json

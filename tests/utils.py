@@ -1,10 +1,14 @@
 from base64 import b64encode
+import os
 from typing import Any
+from flask import Flask, make_response
 from flask.testing import FlaskClient
 from werkzeug.test import TestResponse
 from werkzeug import Response
 # from l2ai.collections import users
 from l2ai.utils.cognito import Cognito
+from l2ai.utils.logging import logger
+from l2ai.utils.mongo import Mongo
 
 
 class Fake:
@@ -32,22 +36,26 @@ def login(client: FlaskClient, username: str, password: str) -> TestResponse:
     return res
 
 
+def initialize_app_test_environment(app: Flask, cognito: Cognito):
+    @app.route("/protected")
+    @cognito.login_required
+    def protected():
+        return make_response("Success", 200)
+
+
+def initialize_mongo_test_environment(mongo: Mongo):
+    if mongo.name != "testing":
+        raise RuntimeError("Attempted to initialize test environment with real database. MONGO_NAME must be set to \"testing.\"")
+
+    mongo.db["User"].drop()
+    mongo.db["User"].insert_one({"username": Fake.username(0)})
+    mongo.db["User"].insert_one({"username": Fake.username(1)})
+    mongo.db["User"].insert_one({"username": Fake.username(2)})
+
+
 def initialize_cognito_test_environment(cognito: Cognito):
-
-    # avoid importing before moto.mock_aws is called
-    from l2ai.collections import users
-
-    user = users.find_one({"username": Fake.username(0)})
-    if user is None:
-        users.insert_one({"username": Fake.username(0)})
-
-    user = users.find_one({"username": Fake.username(1)})
-    if user is None:
-        users.insert_one({"username": Fake.username(1)})
-
-    user = users.find_one({"username": Fake.username(2)})
-    if user is None:
-        users.insert_one({"username": Fake.username(2)})
+    if os.environ["AWS_ACCESS_KEY_ID"] != "FOOBARKEY":
+        raise RuntimeError("Attempted to initialize test environment with real AWS credentials. Ensure to only initialize the test environment in a mock_aws block.")
 
     res = cognito.client.create_user_pool(
         PoolName="TestUserPool",

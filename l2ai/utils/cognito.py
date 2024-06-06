@@ -344,6 +344,7 @@ class Cognito():
                 pass
 
             handle_client_error(e)
+            res = False
 
         return res
 

@@ -4,7 +4,7 @@ from l2ai.utils.logging import logger
 
 
 @socketio.event
-def content_create(title: str, text: str, method: str):
+def create_content(title: str, text: str, method: str):
     """
     Commit content to the database.
 
@@ -21,7 +21,7 @@ def content_create(title: str, text: str, method: str):
 
 
 @socketio.event
-def content_get():
+def get_content():
     """
     Get all of a user's content.
 

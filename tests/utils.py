@@ -28,10 +28,14 @@ def login(client: FlaskClient, username: str, password: str) -> TestResponse:
     cred = b64encode(f"{username}:{password}".encode())
     headers = {"Authorization": "Basic %s" % cred.decode()}
     res = client.get("/login", headers=headers)
-    access_token_cookie = get_cookie_from_response(res, "access_token")
-    refresh_token_cookie = get_cookie_from_response(res, "refresh_token")
-    client.set_cookie(**access_token_cookie)
-    client.set_cookie(**refresh_token_cookie)
+
+    try:
+        access_token_cookie = get_cookie_from_response(res, "access_token")
+        refresh_token_cookie = get_cookie_from_response(res, "refresh_token")
+        client.set_cookie(**access_token_cookie)
+        client.set_cookie(**refresh_token_cookie)
+    except ValueError:
+        pass
 
     return res
 

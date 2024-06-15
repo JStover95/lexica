@@ -206,3 +206,6 @@ class TestCognito:
 
         assert auth_result is not False
         assert "AccessToken" in auth_result["AuthenticationResult"]
+
+    def test_confirm_forgot_password_invalid_code(self, cognito: Cognito):
+        logger.info("Test for Cognito.confirm_forgot_password with an invalid confirmation code not implemented.")

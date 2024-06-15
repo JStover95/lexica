@@ -41,15 +41,19 @@ def set_access_cookies(
             auth_result. This may occur when Cognito.login returns with an
             authentication challenge.
     """
+    opts = {"secure": True, "httponly": True, "samesite": "Strict"}
+
     try:
         access_token = auth_result["AuthenticationResult"]["AccessToken"]  # type: ignore
-        refresh_token = auth_result["AuthenticationResult"]["RefreshToken"]  # type: ignore
+        response.set_cookie("access_token", access_token, **opts)
     except KeyError:
-        raise RuntimeError("Error retrieving Refresh Token from auth_result.")
+        raise RuntimeError("Error retrieving Access Token from auth_result.")
 
-    opts = {"secure": True, "httponly": True, "samesite": "Strict"}
-    response.set_cookie("access_token", access_token, **opts)
-    response.set_cookie("refresh_token", refresh_token, **opts)
+    try:
+        refresh_token = auth_result["AuthenticationResult"]["RefreshToken"]  # type: ignore
+        response.set_cookie("refresh_token", refresh_token, **opts)
+    except KeyError:
+        pass
 
 
 class Cognito():

@@ -99,7 +99,7 @@ def login():
     except Exception as e:
         return handle_server_error("Failure verifying access token.", 500, e)
 
-    response = make_response({"Message": "Login successful"}, 200)
+    response = make_response({"Message": "Successful login."}, 200)
     set_access_cookies(response, auth_result)
 
     return response
@@ -171,7 +171,7 @@ def challenge(validated_data: Base.ChallengeRequestType):
     except Exception as e:
         return handle_server_error("Failure verifying access token.", 500, e)
 
-    response = make_response({"Message": "Login successful"}, 200)
+    response = make_response({"Message": "Login successful."}, 200)
     set_access_cookies(response, auth_result)
 
     return response
@@ -282,7 +282,7 @@ def confirm_forgot_password(
     Responses:
         code: 200
         body:
-         - Message (str): "Password successfully resey."
+         - Message (str): "Password successfully reset."
         Generated upon successfully resetting the user's password.
 
         code: 401
@@ -351,13 +351,7 @@ def refresh():
     except Exception as e:
         return handle_server_error("Error refreshing access token.", 500, e)
 
-    response = make_response({"Message": "Access token successfully refreshed"}, 200)
+    response = make_response({"Message": "Access token successfully refreshed."}, 200)
     set_access_cookies(response, auth_result)
 
     return response
-
-
-@blueprint.route("/protected")
-@cognito.login_required
-def protected():
-    return make_response("success", 200)

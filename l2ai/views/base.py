@@ -166,7 +166,7 @@ def challenge(validated_data: Base.ChallengeRequestType):
         return make_response({"Message": "Invalid challenge response."}, 403)
 
     try:
-        access_token = auth_result["AuthenticationResult"]["AccessToken"]  # type: ignore
+        access_token = auth_result["AuthenticationResult"]["AccessToken"]
         cognito.get_claim_from_access_token(access_token)
     except Exception as e:
         return handle_server_error("Failure verifying access token.", 500, e)

@@ -15,13 +15,13 @@ def handle_client_error(e: ClientError) -> None:
         RuntimeError
     """
     try:
-        code = e.response["Error"]["Code"]  # type: ignore
+        code = e.response["Error"]["Code"]
 
     except KeyError:
         code = "N/A"
 
     try:
-        message = e.response["Error"]["Message"]  # type: ignore
+        message = e.response["Error"]["Message"]
 
     except KeyError:
         message = "N/A"

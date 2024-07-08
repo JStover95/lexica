@@ -44,13 +44,13 @@ def set_access_cookies(
     opts = {"secure": True, "httponly": True, "samesite": "Strict"}
 
     try:
-        access_token = auth_result["AuthenticationResult"]["AccessToken"]  # type: ignore
+        access_token = auth_result["AuthenticationResult"]["AccessToken"]
         response.set_cookie("access_token", access_token, **opts)
     except KeyError:
         raise RuntimeError("Error retrieving Access Token from auth_result.")
 
     try:
-        refresh_token = auth_result["AuthenticationResult"]["RefreshToken"]  # type: ignore
+        refresh_token = auth_result["AuthenticationResult"]["RefreshToken"]
         response.set_cookie("refresh_token", refresh_token, **opts)
     except KeyError:
         pass
@@ -271,7 +271,7 @@ class Cognito():
             # if an error occurs during the API call
             except ClientError as e:
                 try:
-                    code = e.response["Error"]["Code"]  # type: ignore
+                    code = e.response["Error"]["Code"]
 
                     # if the Access Token is invalid
                     if code == "NotAuthorizedException":
@@ -338,7 +338,7 @@ class Cognito():
 
         except ClientError as e:
             try:
-                code = e.response["Error"]["Code"]  # type: ignore
+                code = e.response["Error"]["Code"]
 
                 # when login was attempted with incorrect credentials
                 if code == "NotAuthorizedException":
@@ -393,7 +393,7 @@ class Cognito():
 
         except ClientError as e:
             try:
-                code = e.response["Error"]["Code"]  # type: ignore
+                code = e.response["Error"]["Code"]
 
                 # if the challenge failed
                 if code == "NotAuthorizedException":

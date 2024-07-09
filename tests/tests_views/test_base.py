@@ -14,12 +14,19 @@ def test_login(client: FlaskClient):
     assert res.json is not None
     assert "Message" in res.json
     assert res.json["Message"] == "Successful login."
+    assert "AccessToken" in res.json
+    assert "RefreshToken" in res.json
 
-    access_token_cookie = get_cookie_from_response(res, "access_token")
-    refresh_token_cookie = get_cookie_from_response(res, "refresh_token")
+    headers = {"Authorization": "Bearer %s" % res.json["AccessToken"]}
+    res = client.get("/protected", headers=headers)
 
-    assert access_token_cookie
-    assert refresh_token_cookie
+    assert res.status_code == 200
+
+    # access_token_cookie = get_cookie_from_response(res, "access_token")
+    # refresh_token_cookie = get_cookie_from_response(res, "refresh_token")
+
+    # assert access_token_cookie
+    # assert refresh_token_cookie
 
 
 def test_login_challenge(client: FlaskClient):
@@ -91,6 +98,13 @@ def test_challenge(client: FlaskClient):
     assert res.json is not None
     assert "Message" in res.json
     assert res.json["Message"] == "Login successful."
+    assert "AccessToken" in res.json
+    assert "RefreshToken" in res.json
+
+    headers = {"Authorization": "Bearer %s" % res.json["AccessToken"]}
+    res = client.get("/protected", headers=headers)
+
+    assert res.status_code == 200
 
 
 def test_challenge_invalid_response(client: FlaskClient):
@@ -137,37 +151,46 @@ def test_confirm_forgot_password_invalid_code(client: FlaskClient):
 
 def test_refresh(cognito: Cognito, client: FlaskClient):
     res = login(client, Fake.username(0), Fake.password(0))
-    access_token_cookie = get_cookie_from_response(res, "access_token")
-    claim = cognito.get_claim_from_access_token(access_token_cookie["value"])
+    # access_token_cookie = get_cookie_from_response(res, "access_token")
+    access_token = res.json["AccessToken"]
+    refresh_token = res.json["RefreshToken"]
+    claim = cognito.get_claim_from_access_token(access_token)
     expiry = claim["exp"]
 
     sleep(1)
-    res = client.get("/refresh")
+    body = {"AccessToken": access_token, "RefreshToken": refresh_token}
+    res = client.post("/refresh", json=body)
 
     assert res.status_code == 200
     assert res.json is not None
     assert "Message" in res.json
     assert res.json["Message"] == "Access token successfully refreshed."
+    assert "AccessToken" in res.json
 
-    access_token_cookie = get_cookie_from_response(res, "access_token")
-    access_token_cookie = get_cookie_from_response(res, "access_token")
-    claim = cognito.get_claim_from_access_token(access_token_cookie["value"])
+    access_token = res.json["AccessToken"]
+    headers = {"Authorization": "Bearer %s" % access_token}
+    res = client.get("/protected", headers=headers)
+
+    assert res.status_code == 200
+
+    # access_token_cookie = get_cookie_from_response(res, "access_token")
+    # access_token_cookie = get_cookie_from_response(res, "access_token")
+    # claim = cognito.get_claim_from_access_token(access_token_cookie["value"])
+    claim = cognito.get_claim_from_access_token(access_token)
 
     assert expiry < claim["exp"]
 
 
-def test_refresh_no_token(client: FlaskClient):
-    res = client.get("/refresh")
+def test_refresh_invalid_token(client: FlaskClient):
+    res = login(client, Fake.username(0), Fake.password(0))
+    access_token = res.json["AccessToken"]
+    body = {"AccessToken": access_token, "RefreshToken": "Fake Token"}
+    res = client.post("/refresh", json=body)
 
-    assert res.status_code == 401
+    assert res.status_code == 403
     assert res.json is not None
     assert "Message" in res.json
-    assert res.json["Message"] == "access_token or refresh_token cookies are not present."
-    logger.info("Test for base.refresh with missing token cookies not implemented.")
-
-
-def test_refresh_invalid_token(client: FlaskClient):
-    logger.info("Test for base.refresh with invalid refresh token not implemented.")
+    assert res.json["Message"] == "Error refreshing access token."
 
 
 def test_connect(client: FlaskClient):

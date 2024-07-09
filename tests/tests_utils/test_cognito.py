@@ -4,38 +4,38 @@ import hmac
 from flask import Flask, make_response
 from flask.testing import FlaskClient
 import pytest
-from l2ai.utils.cognito import Cognito, set_access_cookies
+from l2ai.utils.cognito import Cognito  # , set_access_cookies
 from l2ai.utils.logging import logger
 from tests.utils import Fake, get_cookie_from_response, login
 
 
-def test_set_access_cookies(cognito: Cognito, client: FlaskClient):
-    auth_result = cognito.login(Fake.username(0), Fake.password(0))
+# def test_set_access_cookies(cognito: Cognito, client: FlaskClient):
+#     auth_result = cognito.login(Fake.username(0), Fake.password(0))
 
-    assert auth_result is not False
-    assert "AccessToken" in auth_result["AuthenticationResult"]
-    assert "RefreshToken" in auth_result["AuthenticationResult"]
+#     assert auth_result is not False
+#     assert "AccessToken" in auth_result["AuthenticationResult"]
+#     assert "RefreshToken" in auth_result["AuthenticationResult"]
 
-    response = make_response("foo", 200)
-    set_access_cookies(response, auth_result)
-    access_token_cookie = get_cookie_from_response(response, "access_token")
-    refresh_token_cookie = get_cookie_from_response(response, "refresh_token")
+#     response = make_response("foo", 200)
+#     set_access_cookies(response, auth_result)
+#     access_token_cookie = get_cookie_from_response(response, "access_token")
+#     refresh_token_cookie = get_cookie_from_response(response, "refresh_token")
 
-    assert auth_result["AuthenticationResult"]["AccessToken"] == access_token_cookie["value"]
-    assert auth_result["AuthenticationResult"]["RefreshToken"] == refresh_token_cookie["value"]
+#     assert auth_result["AuthenticationResult"]["AccessToken"] == access_token_cookie["value"]
+#     assert auth_result["AuthenticationResult"]["RefreshToken"] == refresh_token_cookie["value"]
 
 
-def test_set_access_cookies_runtime_error(cognito: Cognito, client: FlaskClient):
-    auth_result = cognito.login(Fake.username(0), Fake.password(0))
+# def test_set_access_cookies_runtime_error(cognito: Cognito, client: FlaskClient):
+#     auth_result = cognito.login(Fake.username(0), Fake.password(0))
 
-    assert auth_result is not False
+#     assert auth_result is not False
 
-    # delete "AccessToken" to emulate receiving an auth challenge
-    del auth_result["AuthenticationResult"]["AccessToken"]
-    response = make_response("foo", 200)
+#     # delete "AccessToken" to emulate receiving an auth challenge
+#     del auth_result["AuthenticationResult"]["AccessToken"]
+#     response = make_response("foo", 200)
 
-    with pytest.raises(RuntimeError):
-        set_access_cookies(response, auth_result)
+#     with pytest.raises(RuntimeError):
+#         set_access_cookies(response, auth_result)
 
 
 class TestCognito:
@@ -105,7 +105,8 @@ class TestCognito:
 
     def test_login_required(self, client: FlaskClient):
         res = login(client, Fake.username(0), Fake.password(0))
-        res = client.get("/protected")
+        headers = {"Authorization": "Bearer %s" % res.json["AccessToken"]}
+        res = client.get("/protected", headers=headers)
         assert res.status_code == 200
 
     def test_login_required_no_token(self, client: FlaskClient):
@@ -113,8 +114,9 @@ class TestCognito:
         assert res.status_code == 403
 
     def test_login_required_fake_token(self, client: FlaskClient):
-        client.set_cookie("access_token", "fake token")
-        res = client.get("/protected")
+        # client.set_cookie("access_token", "fake token")
+        headers = {"Authorization": "Fake Header"}
+        res = client.get("/protected", headers=headers)
         assert res.status_code == 403
 
     def test_login_required_invalid_claim(self, client: FlaskClient):
@@ -125,6 +127,7 @@ class TestCognito:
 
         assert auth_result is not False
         assert "AccessToken" in auth_result["AuthenticationResult"]
+        assert "RefreshToken" in auth_result["AuthenticationResult"]
 
     def test_login_challenge_required(self, cognito: Cognito):
         auth_result = cognito.login(Fake.username(1), Fake.password(1))
@@ -157,6 +160,7 @@ class TestCognito:
 
         assert challenge_result is not False
         assert "AccessToken" in challenge_result["AuthenticationResult"]
+        assert "RefreshToken" in challenge_result["AuthenticationResult"]
 
     def test_respond_to_challenge_missing_kwarg(self, cognito: Cognito):
         kwargs = {}
@@ -180,12 +184,13 @@ class TestCognito:
 
     def test_sign_out(self, cognito: Cognito, client: FlaskClient):
         res = login(client, Fake.username(0), Fake.password(0))
-        res = client.get("/protected")
+        headers = {"Authorization": "Bearer %s" % res.json["AccessToken"]}
+        res = client.get("/protected", headers=headers)
 
         assert res.status_code == 200
 
         cognito.sign_out(Fake.username(0))
-        res = client.get("/protected")
+        res = client.get("/protected", headers=headers)
 
         assert res.status_code == 403
 
@@ -206,6 +211,7 @@ class TestCognito:
 
         assert auth_result is not False
         assert "AccessToken" in auth_result["AuthenticationResult"]
+        assert "RefreshToken" in auth_result["AuthenticationResult"]
 
     def test_confirm_forgot_password_invalid_code(self, cognito: Cognito):
         logger.info("Test for Cognito.confirm_forgot_password with an invalid confirmation code not implemented.")

@@ -22,38 +22,55 @@ from l2ai.utils.handlers import handle_client_error, handle_server_error
 from l2ai.utils.logging import logger
 
 
-def set_access_cookies(
-        response: Response,
-        auth_result: InitiateAuthResponseTypeDef,
-    ) -> None:
-    """
-    Add the user's AccessToken and RefreshToken to a response using cookies.
-    Cookies are always set to secure, HTTP only, and "Strict" same-site mode.
-
-    Args:
-        response (Response)
-        auth_result (InitiateAuthResponseTypeDef): The authentication result
-            returned from Cognito.login or Cognito.respond_to_challenge upon a
-            successful login.
-
-    Raises:
-        RuntimeError: When the Access Token or Refresh Token are not found in
-            auth_result. This may occur when Cognito.login returns with an
-            authentication challenge.
-    """
-    opts = {"secure": True, "httponly": True, "samesite": "Strict"}
-
+def get_access_token_from_request():
+    # get the Access Token from the access_token cookie.
     try:
-        access_token = auth_result["AuthenticationResult"]["AccessToken"]
-        response.set_cookie("access_token", access_token, **opts)
-    except KeyError:
-        raise RuntimeError("Error retrieving Access Token from auth_result.")
+        auth_header = request.headers["Authorization"]
+    except BadRequestKeyError:
+        logger.info("Bad requesst: Authorization header missing from request: %s" % request)
+        raise ValueError  # TODO: create custom error handler
 
-    try:
-        refresh_token = auth_result["AuthenticationResult"]["RefreshToken"]
-        response.set_cookie("refresh_token", refresh_token, **opts)
-    except KeyError:
-        pass
+    bearer_split = auth_header.split()
+
+    if len(bearer_split) != 2:
+        logger.info("Bad request: Header with bearer token incorrectly formatted: %s" % request)
+        raise ValueError
+
+    return bearer_split[1]
+
+
+# def set_access_cookies(
+#         response: Response,
+#         auth_result: InitiateAuthResponseTypeDef,
+#     ) -> None:
+#     """
+#     Add the user's AccessToken and RefreshToken to a response using cookies.
+#     Cookies are always set to secure, HTTP only, and "Strict" same-site mode.
+
+#     Args:
+#         response (Response)
+#         auth_result (InitiateAuthResponseTypeDef): The authentication result
+#             returned from Cognito.login or Cognito.respond_to_challenge upon a
+#             successful login.
+
+#     Raises:
+#         RuntimeError: When the Access Token or Refresh Token are not found in
+#             auth_result. This may occur when Cognito.login returns with an
+#             authentication challenge.
+#     """
+#     opts = {"secure": True, "httponly": True, "samesite": "Strict"}
+
+#     try:
+#         access_token = auth_result["AuthenticationResult"]["AccessToken"]
+#         response.set_cookie("access_token", access_token, **opts)
+#     except KeyError:
+#         raise RuntimeError("Error retrieving Access Token from auth_result.")
+
+#     try:
+#         refresh_token = auth_result["AuthenticationResult"]["RefreshToken"]
+#         response.set_cookie("refresh_token", refresh_token, **opts)
+#     except KeyError:
+#         pass
 
 
 class Cognito():
@@ -255,14 +272,10 @@ class Cognito():
         """
         @wraps(f)
         def wrapper(*args, **kwargs):
-
-            # get the Access Token from the access_token cookie.
             try:
-                access_token = request.cookies["access_token"]
-
-            # if no Access Token is present
-            except BadRequestKeyError:
-                return make_response({"Message": "Unauthorized request."}, 403)
+                access_token = get_access_token_from_request()
+            except Exception:
+                return make_response({"Message": "Unauthorized request"}, 403)
 
             # make an API call to check whether the Access Token is valid
             try:
@@ -411,6 +424,8 @@ class Cognito():
             username: str,
             refresh_token: str,
         ) -> InitiateAuthResponseTypeDef:  # TODO: what happens when the refresh token is expired?
+        # TODO: implement refresh token rotation
+        # TODO: is it possible to check client sessions? Only refresh tokens issued from the same client the token was issued.
         """
         Generate a new Access Token using a Refresh Token. 
 

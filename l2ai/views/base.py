@@ -4,7 +4,7 @@ from werkzeug.exceptions import BadRequestKeyError
 from l2ai.collections import users
 from l2ai.extensions import cognito
 from l2ai.schemas import Base, validate_schema
-from l2ai.utils.cognito import set_access_cookies
+from l2ai.utils.cognito import get_access_token_from_request
 from l2ai.utils.handlers import handle_server_error
 from l2ai.utils.logging import logger
 
@@ -95,12 +95,24 @@ def login():
 
     try:
         access_token = auth_result["AuthenticationResult"]["AccessToken"]
+        refresh_token = auth_result["AuthenticationResult"]["RefreshToken"]
+    except KeyError:
+        return handle_server_error("Failure retrieving access and refresh tokens.", 500, e)
+
+    try:
         cognito.get_claim_from_access_token(access_token)
     except Exception as e:
         return handle_server_error("Failure verifying access token.", 500, e)
 
-    response = make_response({"Message": "Successful login."}, 200)
-    set_access_cookies(response, auth_result)
+    response = make_response(
+        {
+            "Message": "Successful login.",
+            "AccessToken": access_token,
+            "RefreshToken": refresh_token
+        },
+        200
+    )
+    # set_access_cookies(response, auth_result)
 
     return response
 
@@ -167,12 +179,24 @@ def challenge(validated_data: Base.ChallengeRequestType):
 
     try:
         access_token = auth_result["AuthenticationResult"]["AccessToken"]
+        refresh_token = auth_result["AuthenticationResult"]["RefreshToken"]
+    except Exception as e:
+        return handle_server_error("Failure retrieving access and refresh tokens.", 500, e)
+
+    try:
         cognito.get_claim_from_access_token(access_token)
     except Exception as e:
         return handle_server_error("Failure verifying access token.", 500, e)
 
-    response = make_response({"Message": "Login successful."}, 200)
-    set_access_cookies(response, auth_result)
+    response = make_response(
+        {
+            "Message": "Login successful.",
+            "AccessToken": access_token,
+            "RefreshToken": refresh_token
+        },
+        200
+    )
+    # set_access_cookies(response, auth_result)
 
     return response
 
@@ -306,8 +330,9 @@ def confirm_forgot_password(
     return res
 
 
-@blueprint.route("/refresh")
-def refresh():
+@blueprint.route("/refresh", methods=["POST"])
+@validate_schema(Base.refresh_schema)
+def refresh(validated_data: Base.RefreshRequestType):
     """
     Refresh a user's Access Token using the refrest_token cookie. Upon
     successful verification of the user's Refresh Token, this endpoint sets a
@@ -334,24 +359,44 @@ def refresh():
         Generated either when the claim from the access token could not be
         verified or when the Access Token could not be refreshed.
     """
-    try:
-        access_token = request.cookies["access_token"]
-        refresh_token = request.cookies["refresh_token"]
+    # try:
+    #     access_token = request.cookies["access_token"]
+    #     refresh_token = request.cookies["refresh_token"]
 
-    except BadRequestKeyError as e:
-        return make_response({"Message": "access_token or refresh_token cookies are not present."}, 401)
+    # except BadRequestKeyError as e:
+    #     return make_response({"Message": "access_token or refresh_token cookies are not present."}, 401)
+
+    access_token = validated_data["AccessToken"]
 
     try:
         claim = cognito.get_claim_from_access_token(access_token)
     except Exception as e:
         return handle_server_error("Error refreshing access token.", 500, e)
 
+    refresh_token = validated_data["RefreshToken"]
+
     try:
         auth_result = cognito.refresh(claim["username"], refresh_token)
     except Exception as e:
-        return handle_server_error("Error refreshing access token.", 500, e)
+        return handle_server_error("Error refreshing access token.", 403, e)
 
-    response = make_response({"Message": "Access token successfully refreshed."}, 200)
-    set_access_cookies(response, auth_result)
+    try:  # TODO: create function with duplicate code
+        access_token = auth_result["AuthenticationResult"]["AccessToken"]
+    except Exception as e:
+        return handle_server_error("Failure retrieving access token.", 500, e)
+
+    try:
+        cognito.get_claim_from_access_token(access_token)
+    except Exception as e:
+        return handle_server_error("Failure verifying access token.", 500, e)
+
+    response = make_response(
+        {
+            "Message": "Access token successfully refreshed.",
+            "AccessToken": access_token
+        },
+        200
+    )
+    # set_access_cookies(response, auth_result)
 
     return response

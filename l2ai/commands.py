@@ -23,9 +23,7 @@ def drop_database(name: str | None):
 @click.option("--username", default=None)
 @with_appcontext
 def init_user(username: str | None):
-    username = os.getenv("COGNITO_USERNAME", username)
-
-    username = os.getenv("COGNITO_USERNAME", username)
+    username = username or os.getenv("COGNITO_USERNAME")
     if username is None:
         raise ValueError("Either the environment vairable COGNITO_USERNAME or option --username must be set.")
 

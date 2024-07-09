@@ -117,3 +117,20 @@ class Base:
         },
         "required": ["Username", "ConfirmationCode", "Password"]
     }
+
+    RefreshRequestType = TypedDict(
+        "RefreshRequestType",
+        {
+            "AccessToken": str,
+            "RefreshToken": str
+        }
+    )
+
+    refresh_schema = {
+        "type": "object",
+        "parameters": {
+            "AccessToken": {"type": "string"},
+            "RefreshToken": {"type": "string"}
+        },
+        "required": ["AccessToken", "RefreshToken"]
+    }

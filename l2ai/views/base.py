@@ -117,6 +117,23 @@ def login():
     return response
 
 
+@blueprint.route("/verify")
+def verify():
+    logger.info("Tests for base.verify not implemented.")
+
+    try:
+        access_token = get_access_token_from_request()
+        claim = cognito.get_claim_from_access_token(access_token)
+
+    except Exception as e:
+        logger.exception(e)
+        res = {"IsAuthenticated": False}
+        return make_response(res, 403)
+
+    res = {"IsAuthenticated": True, "Username": claim["username"]}
+    return make_response(res, 200)
+
+
 @blueprint.route("/challenge", methods=["POST"])
 @validate_schema(Base.challenge_schema)
 def challenge(validated_data: Base.ChallengeRequestType):

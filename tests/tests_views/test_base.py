@@ -18,6 +18,7 @@ def test_login(client: FlaskClient):
     assert "RefreshToken" in res.json
 
     headers = {"Authorization": "Bearer %s" % res.json["AccessToken"]}
+    client.get("/verify", headers=headers)
     res = client.get("/protected", headers=headers)
 
     assert res.status_code == 200

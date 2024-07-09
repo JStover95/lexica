@@ -4,3 +4,7 @@ export interface IResponseBody {
   AccessToken?: string;
   RefreshToken?: string;
 }
+
+export interface IUser {
+  Username: string;
+}

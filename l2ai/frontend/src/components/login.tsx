@@ -1,43 +1,46 @@
 import { Buffer } from "buffer";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { makeRequest } from "../utils";
 import { IResponseBody } from "../interfaces";
 import AsyncButton from "./buttons/asyncButton";
 import TextField from "./fields/textField";
+import { AuthContext } from "../authContext";
 
-interface IMessage {
-  id: number;
-  element: React.ReactElement;
+interface ILoginProps {
+  onLogin: () => null;
 }
 
 
-const login = (email: string, password: string): Promise<IResponseBody> => {
+const login = async (email: string, password: string): Promise<IResponseBody> => {
   const auth = Buffer.from(`${email}:${password}`).toString("base64");
   const headers = { Authorization: "Basic " + auth };
   const opts = { method: "POST", headers: headers };
-  return makeRequest("/iam/login", opts);
+  const res = await makeRequest("/iam/login", opts);
+
+  if (res.isAuthenticated) return res
+  else throw res.message
 }
 
 
-const handleLogin = (res: IResponseBody) => {}
-
-
-const handleFailure = (res: IResponseBody) => {}
-
-
-const pushMessage = (message: IMessage) => {}
-
-
-const popMessage = (id: number) => {}
-
-
 const Login = () => {
-  const [messages, setMessages] = useState<IMessage[]>([]);
+  const { setAuthenticated } = useContext(AuthContext);
+  const [message, setMessage] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const tryLogIn = async () => {
-    await login(email, password).then(handleLogin, handleFailure)
+    try {
+      const res = await login(email, password);
+      if (!(res.AccessToken && res.RefreshToken)) throw Error("Failed login.");
+      localStorage.setItem("accessToken", res.AccessToken);
+      localStorage.setItem("refreshToken", res.RefreshToken);
+      setAuthenticated(true);
+    }
+
+    catch (error) {
+      if (typeof(error) == "string") setMessage(error);
+      else console.error(error);
+    }
   }
 
   const emailField = (
@@ -73,12 +76,12 @@ const Login = () => {
   )
 
   return (
-    <div className="login-container bg-light">
-      <div className="login-menu bg-white">
+    <div className="login-container">
+      <div className="login-menu">
         <div className="login-menu-content">
           <h1>MM</h1>
-          <div className="login-flash-message-container">
-            {messages.map((m) => m.element)}
+          <div className="login-message-container">
+            <p>{message}</p>
           </div>
           {emailField}
           {passwordField}
@@ -88,5 +91,6 @@ const Login = () => {
     </div>
   )
 }
+
 
 export default Login;

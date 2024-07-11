@@ -1,7 +1,7 @@
 from base64 import b64decode
 from flask import Blueprint, make_response, request
 from werkzeug.exceptions import BadRequestKeyError
-from l2ai.collections import users
+from l2ai.collections import users, User
 from l2ai.extensions import cognito
 from l2ai.schemas import Base, validate_schema
 from l2ai.utils.cognito import get_access_token_from_request
@@ -75,7 +75,7 @@ def login():
     except ValueError:
         return make_response({"Message": "Error retrieving login credentials."}, 401)
 
-    user = users.find_one({"username": username})
+    user: User | None = users.find_one({"username": username})
     if user is None:
         return make_response({"Message": "Invalid login credentials."}, 403)
 
@@ -106,7 +106,8 @@ def login():
 
     response = make_response(
         {
-            "Message": "Successful login.",
+            "ID": user._id,
+            "Username": user.username,
             "AccessToken": access_token,
             "RefreshToken": refresh_token
         },

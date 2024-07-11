@@ -1,16 +1,38 @@
-import React, { useContext } from "react";
-import "./App.css";
-import { AuthContext } from "./authContext";
-import Login from "./components/login";
 import Dashboard from "./components/dashboard";
+import Login from "./components/login";
+import AuthContext from "./context/authContext";
+import useAuth from "./hooks/useAuth";
+
 
 const App = () => {
-  const { isAuthenticated, loading } = useContext(AuthContext);
+  const {
+    user,
+    setUser,
+    isAuthenticated,
+    setIsAuthenticated,
+    accessToken,
+    setAccessToken,
+    refreshToken,
+    setRefreshToken
+  } = useAuth();
 
-  const loadingPage = <p>Loading...</p>;
-  if (loading) return loadingPage;
+  return (
+    <AuthContext.Provider value={
+      {
+        user,
+        setUser,
+        isAuthenticated,
+        setIsAuthenticated,
+        accessToken,
+        setAccessToken,
+        refreshToken,
+        setRefreshToken
+      }
+    }>
+      {isAuthenticated ? <Dashboard /> : <Login />}
+    </AuthContext.Provider>
+  );
+};
 
-  return isAuthenticated ? Dashboard : Login
-}
 
 export default App;

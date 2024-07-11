@@ -1,3 +1,4 @@
+import useAuth from "./hooks/useAuth";
 import { IResponseBody, IUser } from "./interfaces";
 
 const crossorigin = Boolean(process.env.CROSSORIGIN);
@@ -7,12 +8,11 @@ const crossorigin = Boolean(process.env.CROSSORIGIN);
 // TODO: implement CSRF protection
 export const makeRequest = async (url: string, opts?: any): Promise<any> => {
   const csrfToken = localStorage.getItem("csrfToken");
+  const { accessToken } = useAuth();
 
-  // set credentials and crossorigin options
   if (opts) opts.crossorigin = crossorigin;
   else opts = {crossorigin: crossorigin}
 
-  const accessToken = localStorage.getItem("accessToken");
   if (accessToken) {
     if (opts.headers) opts.headers["Authorization"] = `Bearer ${accessToken}`;
     else opts.headers = {"Authorization": `Bearer ${accessToken}`};
@@ -35,14 +35,10 @@ export const makeRequest = async (url: string, opts?: any): Promise<any> => {
   // make the request
   return fetch(process.env.API_ENDPOINT + url, opts ? opts : {}).then(
     async (res) => {
-      const body: IResponseBody = await res.json();
+      const body = await res.json();
 
       if (res.status == 200 && body.CSRFToken)
         localStorage.setItem("csrfToken", body.CSRFToken);
-      if (res.status == 200 && body.AccessToken)
-        localStorage.setItem("accessToken", body.AccessToken);
-      if (res.status == 200 && body.RefreshToken)
-        localStorage.setItem("refreshToken", body.RefreshToken);
 
       // TODO: handle server errors
       return body;
@@ -51,24 +47,24 @@ export const makeRequest = async (url: string, opts?: any): Promise<any> => {
 };
 
 
-export const getCurrentAuthenticatedUser = async (): Promise<IUser> => {
-  let res = await makeRequest("/verify");
+// export const getCurrentAuthenticatedUser = async (): Promise<IUser> => {
+//   let res = await makeRequest("/verify");
 
-  if (res.IsAuthenticated) {
-    const user: IUser = {"Username": res.Username};
-    return user
-  }
+//   if (res.IsAuthenticated) {
+//     const user: IUser = {"Username": res.Username};
+//     return user
+//   }
 
-  const accessToken = localStorage.getItem("accessToken");
-  const refreshToken = localStorage.getItem("refreshToken");
-  const body = {"AccessToken": accessToken, "RefreshToken": refreshToken}
-  const opts = {"method": "POST", "body": JSON.stringify(body)}
-  res = await makeRequest("/refresh", opts);
+//   const accessToken = localStorage.getItem("accessToken");
+//   const refreshToken = localStorage.getItem("refreshToken");
+//   const body = {"AccessToken": accessToken, "RefreshToken": refreshToken}
+//   const opts = {"method": "POST", "body": JSON.stringify(body)}
+//   res = await makeRequest("/refresh", opts);
 
-  if (res.IsAuthenticated) {
-    const user: IUser = {"Username": res.Username};
-    return user
-  }
-
-  throw "Unauthorized request";
-}
+//   if (res.IsAuthenticated) {
+//     const user: IUser = {"Username": res.Username};
+//     return user
+//   } else {
+//     throw "Unauthorized request.";
+//   }
+// }

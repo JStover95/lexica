@@ -3,17 +3,16 @@ import dotenv
 dotenv.load_dotenv()
 
 import os
-from flask import Flask
+from flask import Flask, Response
 from l2ai.commands import drop_database, init_user
 from l2ai.extensions import cors, jwt_manager, socketio
 from l2ai.utils.logging import logger
 from l2ai.views import base
 
 
-def create_app(testing: bool = False):
+def create_app(testing: bool = False) -> Flask:
     if testing:
         flask_config = "Testing"
-
     else:
         flask_config = os.getenv("FLASK_CONFIG", "Development")
 

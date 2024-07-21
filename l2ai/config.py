@@ -3,14 +3,11 @@ import dotenv
 
 
 class Default:
+    ENV = "development"
     SECRET_KEY = os.getenv("FLASK_SECRET_KEY", "secret")
     DEBUG = os.getenv("FLASK_DEBUG", True)
     LOG_LEVEL = os.getenv("FLASK_LOG_LEVEL", "INFO")
     TESTING = False
-
-
-class Development(Default):
-    ENV = "development"
 
 
 class Production(Default):

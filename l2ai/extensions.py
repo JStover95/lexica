@@ -7,7 +7,7 @@ from l2ai.utils.mongo import Mongo
 cognito = Cognito()
 
 cors = CORS(
-    allow_headers=["authorization", "content-type"],
+    allow_headers=["Authorization", "Content-Type"],
     supports_credentials=True
 )
 

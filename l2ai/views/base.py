@@ -1,9 +1,8 @@
 from base64 import b64decode
 from flask import Blueprint, make_response, request
-from werkzeug.exceptions import BadRequestKeyError
 from l2ai.collections import users, User
 from l2ai.extensions import cognito
-from l2ai.schemas import Base, validate_schema
+from l2ai.json_schemas import Base, validate_schema
 from l2ai.utils.cognito import get_access_token_from_request
 from l2ai.utils.handlers import handle_server_error
 from l2ai.utils.logging import logger

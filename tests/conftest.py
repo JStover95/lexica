@@ -13,6 +13,8 @@ from tests.utils import (
 )
 
 os.environ["MONGO_NAME"] = "testing"
+os.environ["COGNITO_CLIENT_ID"] = "testing"
+os.environ["COGNITO_CLIENT_SECRET"] = "testing"
 
 
 @pytest.fixture

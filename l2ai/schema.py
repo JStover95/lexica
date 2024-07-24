@@ -1,68 +1,73 @@
-import graphene
+from graphene import Field, ID, Mutation, ObjectType, Schema, String
 from graphene_mongo import MongoengineObjectType, MongoengineConnectionField
 from l2ai import models
 
 
-class EquivalentType(MongoengineObjectType):
+class Equivalent(MongoengineObjectType):
     class Meta:
         model = models.Equivalent
 
 
-class ContentSurfacesType(MongoengineObjectType):
+class ContentSurfaces(MongoengineObjectType):
     class Meta:
         model = models.ContentSurfaces
 
 
-class ContentIxType(MongoengineObjectType):
+class ContentIx(MongoengineObjectType):
     class Meta:
         model = models.ContentIx
 
 
-class ExplanationType(MongoengineObjectType):
+class Explanation(MongoengineObjectType):
     class Meta:
         model = models.Explanation
 
 
-class HighlightType(MongoengineObjectType):
+class Highlight(MongoengineObjectType):
     class Meta:
         model = models.Highlight
 
 
-class SenseRankType(MongoengineObjectType):
+class SenseRank(MongoengineObjectType):
     class Meta:
         model = models.SenseRank
 
 
-class UserType(MongoengineObjectType):
+class User(MongoengineObjectType):
     class Meta:
         model = models.User
 
 
-class SenseType(MongoengineObjectType):
+class Sense(MongoengineObjectType):
     class Meta:
         model = models.Sense
 
 
-class DictionaryEntryType(MongoengineObjectType):
+class DictionaryEntry(MongoengineObjectType):
     class Meta:
         model = models.DictionaryEntry
 
 
-class ContentType(MongoengineObjectType):
+class Content(MongoengineObjectType):
     class Meta:
         model = models.Content
 
 
-class Query(graphene.ObjectType):
-    all_users = MongoengineConnectionField(UserType)
-    all_dictionary_entries = MongoengineConnectionField(DictionaryEntryType)
-    all_senses = MongoengineConnectionField(SenseType)
-    all_contents = MongoengineConnectionField(ContentType)
+class Query(ObjectType):
+    all_users = MongoengineConnectionField(User)
+    all_dictionary_entries = MongoengineConnectionField(DictionaryEntry)
+    all_senses = MongoengineConnectionField(Sense)
+    all_contents = MongoengineConnectionField(Content)
 
-    user_by_id = graphene.Field(UserType, id=graphene.String(required=True))
-    dictionary_entry_by_id = graphene.Field(DictionaryEntryType, id=graphene.String(required=True))
-    sense_by_id = graphene.Field(SenseType, id=graphene.String(required=True))
-    content_by_id = graphene.Field(ContentType, id=graphene.String(required=True))
+    user_by_id = Field(User, id=String(required=True))
+    dictionary_entry_by_id = Field(DictionaryEntry, id=String(required=True))
+    sense_by_id = Field(Sense, id=String(required=True))
+    content_by_id = Field(Content, id=String(required=True))
+
+    content_by_user_id = Field(Content, user_id=ID(required=True))
+    dictionary_entry_by_written_form = Field(
+        DictionaryEntry, written_form=String(required=True)
+    )
 
     def resolve_user_by_id(self, info, id):
         return models.User.objects.get(id=id)
@@ -76,13 +81,21 @@ class Query(graphene.ObjectType):
     def resolve_content_by_id(self, info, id):
         return models.Content.objects.get(id=id)
 
+    def resolve_content_by_user_id(self, info, user_id):
+        return models.Content.objects.get(user=user_id)
+
+    def resolve_dictionary_entry_by_written_form(self, info, written_form):
+        return models.DictionaryEntry.objects.find(
+            {"$text": {"$search": written_form}}
+        )
 
 
-class CreateUser(graphene.Mutation):
+
+class CreateUser(Mutation):
     class Arguments:
-        username = graphene.String(required=True)
+        username = String(required=True)
 
-    user = graphene.Field(UserType)
+    user = Field(User)
 
     def mutate(self, info, username):
         user = models.User(username=username)
@@ -90,8 +103,8 @@ class CreateUser(graphene.Mutation):
         return CreateUser(user=user)
 
 
-class Mutation(graphene.ObjectType):
+class Mutation(ObjectType):
     create_user = CreateUser.Field()
 
 
-schema = graphene.Schema(query=Query, mutation=Mutation)
+schema = Schema(query=Query, mutation=Mutation)

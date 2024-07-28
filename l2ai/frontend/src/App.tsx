@@ -17,18 +17,17 @@ const App = () => {
   } = useAuth();
 
   return (
-    <AuthContext.Provider value={
-      {
-        user,
-        setUser,
-        isAuthenticated,
-        setIsAuthenticated,
-        accessToken,
-        setAccessToken,
-        refreshToken,
-        setRefreshToken
-      }
-    }>
+    <AuthContext.Provider value={{
+      user,
+      setUser,
+      isAuthenticated,
+      setIsAuthenticated,
+      accessToken,
+      setAccessToken,
+      refreshToken,
+      setRefreshToken
+    }}
+    >
       {isAuthenticated ? <Dashboard /> : <Login />}
     </AuthContext.Provider>
   );

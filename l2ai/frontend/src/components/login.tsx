@@ -1,17 +1,13 @@
 import { Buffer } from "buffer";
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import { makeRequest } from "../utils";
-import { IResponseBody } from "../interfaces";
+import { ILoginResponseBody } from "../interfaces";
 import AsyncButton from "./buttons/asyncButton";
 import TextField from "./fields/textField";
-import { AuthContext } from "../authContext";
-
-interface ILoginProps {
-  onLogin: () => null;
-}
+import AuthContext from "../context/authContext";
 
 
-const login = async (email: string, password: string): Promise<IResponseBody> => {
+const login = async (email: string, password: string): Promise<ILoginResponseBody> => {
   const auth = Buffer.from(`${email}:${password}`).toString("base64");
   const headers = { Authorization: "Basic " + auth };
   const opts = { method: "POST", headers: headers };
@@ -23,18 +19,18 @@ const login = async (email: string, password: string): Promise<IResponseBody> =>
 
 
 const Login = () => {
-  const { setAuthenticated } = useContext(AuthContext);
+  const { setIsAuthenticated } = useContext(AuthContext);
   const [message, setMessage] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const tryLogIn = async () => {
+  const handleLogin = async () => {
     try {
       const res = await login(email, password);
       if (!(res.AccessToken && res.RefreshToken)) throw Error("Failed login.");
       localStorage.setItem("accessToken", res.AccessToken);
       localStorage.setItem("refreshToken", res.RefreshToken);
-      setAuthenticated(true);
+      setIsAuthenticated(true);
     }
 
     catch (error) {
@@ -70,7 +66,7 @@ const Login = () => {
       <AsyncButton
         text="Log In"
         type="primary"
-        onClick={tryLogIn}
+        onClick={handleLogin}
       ></AsyncButton>
     </div>
   )

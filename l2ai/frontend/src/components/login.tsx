@@ -7,7 +7,10 @@ import TextField from "./fields/textField";
 import AuthContext from "../context/authContext";
 
 
-const login = async (email: string, password: string): Promise<ILoginResponseBody> => {
+const login = async (
+  email: string,
+  password: string
+): Promise<ILoginResponseBody> => {
   const auth = Buffer.from(`${email}:${password}`).toString("base64");
   const headers = { Authorization: "Basic " + auth };
   const opts = { method: "POST", headers: headers };

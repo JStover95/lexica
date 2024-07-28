@@ -1,5 +1,4 @@
 import useAuth from "./hooks/useAuth";
-import { IResponseBody, IUser } from "./interfaces";
 
 const crossorigin = Boolean(process.env.CROSSORIGIN);
 
@@ -45,26 +44,3 @@ export const makeRequest = async (url: string, opts?: any): Promise<any> => {
     }
   );
 };
-
-
-// export const getCurrentAuthenticatedUser = async (): Promise<IUser> => {
-//   let res = await makeRequest("/verify");
-
-//   if (res.IsAuthenticated) {
-//     const user: IUser = {"Username": res.Username};
-//     return user
-//   }
-
-//   const accessToken = localStorage.getItem("accessToken");
-//   const refreshToken = localStorage.getItem("refreshToken");
-//   const body = {"AccessToken": accessToken, "RefreshToken": refreshToken}
-//   const opts = {"method": "POST", "body": JSON.stringify(body)}
-//   res = await makeRequest("/refresh", opts);
-
-//   if (res.IsAuthenticated) {
-//     const user: IUser = {"Username": res.Username};
-//     return user
-//   } else {
-//     throw "Unauthorized request.";
-//   }
-// }

@@ -8,20 +8,20 @@ from l2ai.extensions import mongo
 class User(TypedDict):
     _id: ObjectId
     username: str
-    last_login: datetime
+    lastLogin: datetime
 
 
 class Equivalent(TypedDict):
-    language: str
+    equivalentLanguage: str
     equivalent: str
     definition: str
 
 
 class Sense(TypedDict):
     _id: ObjectId
-    sense_no: str
+    senseNo: str
     definition: str
-    part_of_speech: str
+    partOfSpeech: str
     examples: list[str]
     type: str
     equivalents: list[Equivalent]
@@ -30,13 +30,13 @@ class Sense(TypedDict):
 
 class DictionaryEntry(TypedDict):
     _id: ObjectId
-    source_id: str
-    language: str
-    written_form: str
+    sourceId: str
+    sourceLanguage: str
+    writtenForm: str
     variations: str
-    part_of_speech: str
+    partOfSpeech: str
     grade: str
-    query_strs: str
+    queryStrs: str
 
 
 class SenseRank(TypedDict):
@@ -47,7 +47,7 @@ class SenseRank(TypedDict):
 class Highlight(TypedDict):
     position: int
     score: int
-    sense_ranks: list[SenseRank]
+    senseRanks: list[SenseRank]
 
 
 class Explanation(TypedDict):
@@ -68,7 +68,7 @@ class Ix(TypedDict):
 
 class Content(TypedDict):
     _id: ObjectId
-    last_modified: datetime
+    lastModified: datetime
     method: str
     level: str
     length: str
@@ -78,8 +78,8 @@ class Content(TypedDict):
     title: str
     text: str
     # media: file
-    surfaces: list[Surfaces]
-    ix: list[Ix]
+    surfaces: Surfaces
+    ix: Ix
     explanations: list[Explanation]
     highlights: list[Highlight]
     userId: ObjectId

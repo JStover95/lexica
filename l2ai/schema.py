@@ -24,23 +24,23 @@ class User(ObjectType):
     @staticmethod
     def from_mongo(document):
         return User(
-            id=str(document['_id']),
-            username=document['username'],
-            last_login=document['last_login']
+            id=str(document["_id"]),
+            username=document["username"],
+            last_login=document["last_login"]
         )
 
 
 class Equivalent(ObjectType):
-    language = String()
+    equivalentLanguage = String()
     equivalent = String()
     definition = String()
 
     @staticmethod
     def from_mongo(document):
         return Equivalent(
-            language=document['language'],
-            equivalent=document['equivalent'],
-            definition=document['definition']
+            equivalentLanguage=document["equivalentLanguage"],
+            equivalent=document["equivalent"],
+            definition=document["definition"]
         )
 
 
@@ -57,23 +57,23 @@ class Sense(ObjectType):
     @staticmethod
     def from_mongo(document):
         return Sense(
-            id=str(document['_id']),
-            sense_no=document['sense_no'],
-            definition=document['definition'],
-            part_of_speech=document['part_of_speech'],
-            examples=document['examples'],
-            type=document['type'],
+            id=str(document["_id"]),
+            sense_no=document["sense_no"],
+            definition=document["definition"],
+            part_of_speech=document["part_of_speech"],
+            examples=document["examples"],
+            type=document["type"],
             equivalents=[
-                Equivalent.from_mongo(eq) for eq in document['equivalents']
+                Equivalent.from_mongo(eq) for eq in document["equivalents"]
             ],
-            dictionaryEntryId=str(document['dictionaryEntryId'])
+            dictionaryEntryId=str(document["dictionaryEntryId"])
         )
 
 
 class DictionaryEntry(ObjectType):
     id = String()
     source_id = String()
-    language = String()
+    sourceLanguage = String()
     written_form = String()
     variations = String()
     part_of_speech = String()
@@ -83,14 +83,14 @@ class DictionaryEntry(ObjectType):
     @staticmethod
     def from_mongo(document):
         return DictionaryEntry(
-            id=str(document['_id']),
-            source_id=document['source_id'],
-            language=document['language'],
-            written_form=document['written_form'],
-            variations=document['variations'],
-            part_of_speech=document['part_of_speech'],
-            grade=document['grade'],
-            query_strs=document['query_strs']
+            id=str(document["_id"]),
+            source_id=document["source_id"],
+            sourceLanguage=document["sourceLanguage"],
+            written_form=document["written_form"],
+            variations=document["variations"],
+            part_of_speech=document["part_of_speech"],
+            grade=document["grade"],
+            query_strs=document["query_strs"]
         )
 
 
@@ -101,8 +101,8 @@ class SenseRank(ObjectType):
     @staticmethod
     def from_mongo(document):
         return SenseRank(
-            rank=document['rank'],
-            senseId=str(document['senseId'])
+            rank=document["rank"],
+            senseId=str(document["senseId"])
         )
 
 
@@ -114,10 +114,10 @@ class Highlight(ObjectType):
     @staticmethod
     def from_mongo(document):
         return Highlight(
-            position=document['position'],
-            score=document['score'],
+            position=document["position"],
+            score=document["score"],
             sense_ranks=[
-                SenseRank.from_mongo(sr) for sr in document['sense_ranks']
+                SenseRank.from_mongo(sr) for sr in document["sense_ranks"]
             ]
         )
 
@@ -130,9 +130,9 @@ class Explanation(ObjectType):
     @staticmethod
     def from_mongo(document):
         return Explanation(
-            expression=document['expression'],
-            position=document['position'],
-            description=document['description']
+            expression=document["expression"],
+            position=document["position"],
+            description=document["description"]
         )
 
 
@@ -143,8 +143,8 @@ class Surfaces(ObjectType):
     @staticmethod
     def from_mongo(document):
         return Surfaces(
-            units=document['units'],
-            modifiers=document['modifiers']
+            units=document["units"],
+            modifiers=document["modifiers"]
         )
 
 
@@ -155,8 +155,8 @@ class Ix(ObjectType):
     @staticmethod
     def from_mongo(document):
         return Ix(
-            units=document['units'],
-            modifiers=document['modifiers']
+            units=document["units"],
+            modifiers=document["modifiers"]
         )
 
 
@@ -180,28 +180,28 @@ class Content(ObjectType):
     @staticmethod
     def from_mongo(document):
         return Content(
-            id=str(document['_id']),
-            last_modified=document['last_modified'],
-            method=document['method'],
-            level=document['level'],
-            length=document['length'],
-            format=document['format'],
-            style=document['style'],
-            prompt=document['prompt'],
-            title=document['title'],
-            text=document['text'],
+            id=str(document["_id"]),
+            last_modified=document["last_modified"],
+            method=document["method"],
+            level=document["level"],
+            length=document["length"],
+            format=document["format"],
+            style=document["style"],
+            prompt=document["prompt"],
+            title=document["title"],
+            text=document["text"],
             surfaces=[
                 Surfaces.from_mongo(surface)
-                for surface in document['surfaces']
+                for surface in document["surfaces"]
             ],
-            ix=[Ix.from_mongo(ix) for ix in document['ix']],
+            ix=[Ix.from_mongo(ix) for ix in document["ix"]],
             explanations=[
-                Explanation.from_mongo(exp) for exp in document['explanations']
+                Explanation.from_mongo(exp) for exp in document["explanations"]
             ],
             highlights=[
-                Highlight.from_mongo(hl) for hl in document['highlights']
+                Highlight.from_mongo(hl) for hl in document["highlights"]
             ],
-            userId=str(document['userId'])
+            userId=str(document["userId"])
         )
 
 
@@ -279,8 +279,8 @@ class UpdateContent(Mutation):
         content_id = ObjectId(id)
         updates = {k: v for k, v in kwargs.items() if v is not None}
 
-        if 'last_modified' not in updates:
-            updates['last_modified'] = datetime.now(UTC)
+        if "last_modified" not in updates:
+            updates["last_modified"] = datetime.now(UTC)
 
         result = contents.find_one_and_update(
             {"_id": content_id},
@@ -290,7 +290,9 @@ class UpdateContent(Mutation):
 
         return UpdateContent(content=Content.from_mongo(result), ok=True)
 
+
 class Mutation(ObjectType):
     update_content = UpdateContent.Field()
+
 
 schema = Schema(query=Query, mutation=Mutation)

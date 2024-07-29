@@ -4,7 +4,9 @@ import os
 import click
 
 from flask.cli import with_appcontext
-from l2ai.collections import contents, User, users
+from tqdm import tqdm
+
+from l2ai.collections import contents, dictionary_entries, senses, User, users
 from l2ai.extensions import mecab, mongo
 from l2ai.utils.morphs.parse import get_smap_from_morphs
 
@@ -16,38 +18,74 @@ def init_database():
         raise RuntimeError("The flask init-database command can only be used when MONGO_HOST is set to localhost.")
     
     with open("content.json") as f:
-        data: list[dict] = json.load(f)
+        content: list[dict] = json.load(f)
 
-    user: User = users.find_one()
-    to_insert = []
+    with open("dict.json") as f:
+        dictionary: list[dict] = json.load(f)
 
-    for row in data:
+    user: User | None = users.find_one()
+    if user is None:
+        raise RuntimeError("No user present in the database. Run flask init-user before running flask init-database")
+
+    content_data = []
+
+    for row in content:
         text = row["text"].strip()
         morphs = mecab.parse(text)
         units, modfs = get_smap_from_morphs(morphs)
 
-        to_insert.append({
-            "userId": user._id,
-            "timestamp": datetime.now(),
-            "title": "",
+        content_data.append({
+            "userId": user["_id"],
+            "lastModified": datetime.datetime.now(datetime.UTC),
+            "method": "",
+            "level": "",
+            "length": "",
+            "format": "",
+            "style": "",
             "prompt": "",
+            "title": row["title"],
             "text": text,
             "surfaces": {
                 "units": units["surfaces"],
-                "modifiers": modfs["surfaces"]
+                "modifiers": modfs["surfaces"],
             },
             "ix": {
                 "units": units["ix"],
-                "modifiers": modfs["ix"]
+                "modifiers": modfs["ix"],
             },
             "explanations": [],
-            "translation": row["translation"]
+            "highlights": [],
         })
 
     contents.create_index(["userId", "timestamp"])
     contents.create_index({"surfaces": "text"})
-    result = contents.insert_many(to_insert)
+    result = contents.insert_many(content_data)
 
+    print("Initializing dictionary...")
+    for entry in tqdm(dictionary):
+        dictionary_entry = dictionary_entries.insert_one({
+            "sourceId": entry["sourceId"],
+            "sourceLanguage": entry["sourceLanguage"],
+            "writtenForm": entry["writtenForm"],
+            "variations": entry["variations"],
+            "partOfSpeech": entry["partOfSpeech"],
+            "grade": entry["grade"],
+            "queryStrs": entry["queryStrs"],
+        })
+        dictionary_entry_id = dictionary_entry.inserted_id
+
+        for sense in entry["senses"]:
+            senses.insert_one({
+                "senseNo": sense["senseNo"],
+                "definition": sense["definition"],
+                "partOfSpeech": sense["partOfSpeech"],
+                "examples": sense["examples"],
+                "type": sense["type"],
+                "equivalents": sense["equivalents"],
+                "dictionaryEntryId": dictionary_entry_id,
+            })
+
+    dictionary_entries.create_index({"queryStrs": "text"})
     return result
 
 

@@ -14,6 +14,7 @@ from graphene import (
     Schema,
     String
 )
+from graphene.relay import Node
 from graphene_mongo import MongoengineObjectType, MongoengineConnectionField
 from l2ai import models
 
@@ -21,54 +22,77 @@ from l2ai import models
 class Equivalent(MongoengineObjectType):
     class Meta:
         model = models.Equivalent
+        interfaces = (Node,)
 
 
 class ContentSurfaces(MongoengineObjectType):
     class Meta:
         model = models.ContentSurfaces
+        interfaces = (Node,)
+
+
+class UnitsIx(MongoengineObjectType):
+    class Meta:
+        model = models.UnitsIx
+        interfaces = (Node,)
+
+
+class ModifiersIx(MongoengineObjectType):
+    class Meta:
+        model = models.ModifiersIx
+        interfaces = (Node,)
 
 
 class ContentIx(MongoengineObjectType):
     class Meta:
         model = models.ContentIx
+        interfaces = (Node,)
 
 
 class Explanation(MongoengineObjectType):
     class Meta:
         model = models.Explanation
+        interfaces = (Node,)
 
 
 class Highlight(MongoengineObjectType):
     class Meta:
         model = models.Highlight
+        interfaces = (Node,)
 
 
 class SenseRank(MongoengineObjectType):
     class Meta:
         model = models.SenseRank
+        interfaces = (Node,)
 
 
 class User(MongoengineObjectType):
     class Meta:
         model = models.User
+        interfaces = (Node,)
 
 
 class Sense(MongoengineObjectType):
     class Meta:
         model = models.Sense
+        interfaces = (Node,)
 
 
 class DictionaryEntry(MongoengineObjectType):
     class Meta:
         model = models.DictionaryEntry
+        interfaces = (Node,)
 
 
 class Content(MongoengineObjectType):
     class Meta:
         model = models.Content
+        interfaces = (Node,)
 
 
 class Query(ObjectType):
+    node = Node.Field()
     all_users = MongoengineConnectionField(User)
     all_dictionary_entries = MongoengineConnectionField(DictionaryEntry)
     all_senses = MongoengineConnectionField(Sense)
@@ -77,9 +101,9 @@ class Query(ObjectType):
     user_by_id = Field(User, id=String())
     dictionary_entry_by_id = Field(DictionaryEntry, id=String())
     sense_by_id = Field(Sense, id=String())
-    content_by_id = Field(Content, id=String())
+    # content_by_id = Field(Content, id=String())
 
-    content_by_user_id = Field(Content, user_id=ID())
+    # content_by_user_id = Field(Content, user_id=ID())
     dictionary_entry_by_written_form = Field(
         DictionaryEntry, written_form=String()
     )
@@ -93,11 +117,11 @@ class Query(ObjectType):
     def resolve_sense_by_id(self, info, id):
         return models.Sense.objects.get(id=id)
 
-    def resolve_content_by_id(self, info, id):
-        return models.Content.objects.get(id=id)
+    # def resolve_content_by_id(self, info, id):
+    #     return models.Content.objects.get(id=id)
 
-    def resolve_content_by_user_id(self, info, user_id):
-        return models.Content.objects.get(user=user_id)
+    # def resolve_content_by_user_id(self, info, user_id):
+    #     return models.Content.objects.get(user=user_id)
 
     def resolve_dictionary_entry_by_written_form(self, info, written_form):
         return models.DictionaryEntry.objects.find(

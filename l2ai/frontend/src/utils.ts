@@ -10,11 +10,11 @@ export const makeRequest = async (url: string, opts?: any): Promise<any> => {
   const { accessToken } = useAuth();
 
   if (opts) opts.crossorigin = crossorigin;
-  else opts = {crossorigin: crossorigin}
+  else opts = { crossorigin: crossorigin }
 
   if (accessToken) {
     if (opts.headers) opts.headers["Authorization"] = `Bearer ${accessToken}`;
-    else opts.headers = {"Authorization": `Bearer ${accessToken}`};
+    else opts.headers = { "Authorization": `Bearer ${accessToken}` };
   }
 
   // if making a POST request

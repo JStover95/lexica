@@ -1,17 +1,7 @@
 import { APP_ENV } from "./environment";
+import { ILogFn, ILogger } from "./interfaces";
+import { LogLevel } from "./types";
 
-export interface LogFn {
-  (message: any, ...optionalParams: any[]): void;
-}
-
-export interface ILogger {
-  debug: LogFn;
-  info: LogFn;
-  warn: LogFn;
-  error: LogFn;
-}
-
-export type LogLevel = "debug" | "info" | "warn" | "error";
 
 function isValidLogLevel(level: any): level is LogLevel {
   return ["debug", "info", "warn", "error"].includes(level);
@@ -32,15 +22,15 @@ export const LOG_LEVEL: LogLevel = (
 );
 
 
-const NO_OP: LogFn = (message?: any, ...optionalParams: any[]) => {};
+const NO_OP: ILogFn = (message?: any, ...optionalParams: any[]) => {};
 
 
 /** Logger which outputs to the browser console */
 export class Logger implements ILogger {
-  readonly debug: LogFn;
-  readonly info: LogFn;
-  readonly warn: LogFn;
-  readonly error: LogFn;
+  readonly debug: ILogFn;
+  readonly info: ILogFn;
+  readonly warn: ILogFn;
+  readonly error: ILogFn;
 
   constructor(options?: { levelName: LogLevel }) {
     const levelMap: Record<LogLevel, number> = {

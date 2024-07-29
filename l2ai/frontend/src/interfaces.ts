@@ -11,3 +11,14 @@ export interface ILoginResponseBody {
   AccessToken?: string;
   RefreshToken?: string;
 }
+
+export interface ILogFn {
+  (message: any, ...optionalParams: any[]): void;
+}
+
+export interface ILogger {
+  debug: ILogFn;
+  info: ILogFn;
+  warn: ILogFn;
+  error: ILogFn;
+}

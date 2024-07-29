@@ -1,46 +1,50 @@
-import useAuth from "./hooks/useAuth";
-
 const crossorigin = Boolean(process.env.CROSSORIGIN);
 
 
 // make a request with options
 // TODO: implement CSRF protection
-export const makeRequest = async (url: string, opts?: any): Promise<any> => {
+export const makeRequest = async (opts: {
+  url: string,
+  accessToken?: string,
+  options?: any
+}): Promise<[number, any]> => {
   const csrfToken = localStorage.getItem("csrfToken");
-  const { accessToken } = useAuth();
+  const { url, accessToken } = opts
+  let { options } = opts;
 
-  if (opts) opts.crossorigin = crossorigin;
-  else opts = { crossorigin: crossorigin }
+  if (options) options.crossorigin = crossorigin;
+  else options = { crossorigin: crossorigin }
 
   if (accessToken) {
-    if (opts.headers) opts.headers["Authorization"] = `Bearer ${accessToken}`;
-    else opts.headers = { "Authorization": `Bearer ${accessToken}` };
+    if (options.headers)
+      options.headers["Authorization"] = `Bearer ${accessToken}`;
+    else options.headers = { "Authorization": `Bearer ${accessToken}` };
   }
 
   // if making a POST request
-  if (opts && opts.method == "POST") {
+  if (options && options.method === "POST") {
 
     // set the content type and CSRF token headers
-    if (opts.headers) {
-      opts.headers["Content-Type"] = "application/json";
-      opts.headers["X-CSRF-Token"] = csrfToken;
+    if (options.headers) {
+      options.headers["Content-Type"] = "application/json";
+      options.headers["X-CSRF-Token"] = csrfToken;
     } else
-      opts.headers = {
+      options.headers = {
         "Content-Type": "application/json",
         "X-CSRF-Token": csrfToken
       };
   }
 
   // make the request
-  return fetch(process.env.API_ENDPOINT + url, opts ? opts : {}).then(
+  return fetch(process.env.API_ENDPOINT + url, options ? options : {}).then(
     async (res) => {
       const body = await res.json();
 
-      if (res.status == 200 && body.CSRFToken)
+      if (res.status === 200 && body.CSRFToken)
         localStorage.setItem("csrfToken", body.CSRFToken);
 
       // TODO: handle server errors
-      return body;
+      return [res.status, body];
     }
   );
 };

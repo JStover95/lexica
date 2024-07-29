@@ -34,7 +34,7 @@ const useAuth = () => {
   useEffect(() => {
     const user = localStorage.getItem("user");
     if (user) login(JSON.parse(user));
-  }, []);
+  });
 
   return {
     user,

@@ -1,36 +1,32 @@
 import { Buffer } from "buffer";
 import { useContext, useState } from "react";
 import { makeRequest } from "../utils";
-import { ILoginResponseBody } from "../interfaces";
 import AsyncButton from "./buttons/asyncButton";
 import TextField from "./fields/textField";
 import AuthContext from "../context/authContext";
 
 
-const login = async (
-  email: string,
-  password: string
-): Promise<ILoginResponseBody> => {
-  const auth = Buffer.from(`${email}:${password}`).toString("base64");
-  const headers = { Authorization: "Basic " + auth };
-  const opts = { method: "POST", headers: headers };
-  const res = await makeRequest("/iam/login", opts);
-
-  if (res.isAuthenticated) return res
-  else throw res.message
-}
-
-
 const Login = () => {
-  const { setIsAuthenticated } = useContext(AuthContext);
+  const { accessToken, setIsAuthenticated } = useContext(AuthContext);
   const [message, setMessage] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+
   const handleLogin = async () => {
     try {
-      const res = await login(email, password);
-      if (!(res.AccessToken && res.RefreshToken)) throw Error("Failed login.");
+      const auth = Buffer.from(`${email}:${password}`).toString("base64");
+      const headers = { Authorization: "Basic " + auth };
+      const options = { method: "POST", headers: headers };
+      const [status, res] = await makeRequest(
+        { url: "/iam/login", accessToken, options }
+      );
+
+      if (!(status === 200 && res.AccessToken && res.RefreshToken)) {
+        setMessage(res.message ? res.message : "Login failed.");
+        return;
+      }
+
       localStorage.setItem("accessToken", res.AccessToken);
       localStorage.setItem("refreshToken", res.RefreshToken);
       setIsAuthenticated(true);

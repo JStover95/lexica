@@ -1,9 +1,8 @@
 from base64 import b64decode
 from flask import Blueprint, make_response, request
 from l2ai.extensions import cognito
-from l2ai.json_schemas import Base, validate_schema
-from l2ai.models import User
-from l2ai.schema import UserInput
+from l2ai.collections import User, users
+from l2ai.schemas import Base, validate_schema
 from l2ai.utils.cognito import get_access_token_from_request
 from l2ai.utils.handlers import handle_server_error
 from l2ai.utils.logging import logger
@@ -75,7 +74,7 @@ def login():
     except ValueError:
         return make_response({"Message": "Error retrieving login credentials."}, 401)
 
-    user: UserInput | None = User.objects.find_one({"username": username})
+    user: User | None = users.find_one({"username": username})
     if user is None:
         return make_response({"Message": "Invalid login credentials."}, 403)
 

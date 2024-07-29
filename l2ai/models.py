@@ -3,7 +3,6 @@ import os
 import types
 from typing import Generic, Type, TypeVar
 from mongoengine import (
-    connect,
     Document,
     EmbeddedDocument,
     QuerySet,
@@ -23,12 +22,6 @@ from mongoengine.fields import (
 )
 from mongoengine.queryset.queryset import QuerySet
 
-connect(
-    "l2ai-mongo",
-    password=os.getenv("MONGO_PASSWORD"),
-    username=os.getenv("MONGO_USERNAME")
-)
-
 QuerySet.__class_getitem__ = types.MethodType(lambda self, x: self, QuerySet)
 U = TypeVar("U", bound=Document)
 
@@ -44,6 +37,9 @@ class User(Document):
 
     username = StringField(required=True, unique=True)
     last_login = DateTimeField()
+
+    def __repr__(self):
+        return f"<User {self.username}>"
 
 
 class Equivalent(EmbeddedDocument):

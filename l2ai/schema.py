@@ -1,11 +1,10 @@
 from datetime import datetime, UTC
-from typing import Optional
+from bson.objectid import ObjectId
 from graphene import (
     Boolean,
     DateTime,
     Field,
     Float,
-    ID,
     InputObjectType,
     Int,
     List,
@@ -14,239 +13,284 @@ from graphene import (
     Schema,
     String
 )
-from graphene.relay import Node
-from graphene_mongo import MongoengineObjectType, MongoengineConnectionField
-from l2ai import models
+from l2ai.collections import contents, dictionary_entries, senses, users
 
 
-class Equivalent(MongoengineObjectType):
-    class Meta:
-        model = models.Equivalent
-        interfaces = (Node,)
+class User(ObjectType):
+    id = String()
+    username = String()
+    last_login = DateTime()
 
-
-class ContentSurfaces(MongoengineObjectType):
-    class Meta:
-        model = models.ContentSurfaces
-        interfaces = (Node,)
-
-
-class UnitsIx(MongoengineObjectType):
-    class Meta:
-        model = models.UnitsIx
-        interfaces = (Node,)
-
-
-class ModifiersIx(MongoengineObjectType):
-    class Meta:
-        model = models.ModifiersIx
-        interfaces = (Node,)
-
-
-class ContentIx(MongoengineObjectType):
-    class Meta:
-        model = models.ContentIx
-        interfaces = (Node,)
-
-
-class Explanation(MongoengineObjectType):
-    class Meta:
-        model = models.Explanation
-        interfaces = (Node,)
-
-
-class Highlight(MongoengineObjectType):
-    class Meta:
-        model = models.Highlight
-        interfaces = (Node,)
-
-
-class SenseRank(MongoengineObjectType):
-    class Meta:
-        model = models.SenseRank
-        interfaces = (Node,)
-
-
-class User(MongoengineObjectType):
-    class Meta:
-        model = models.User
-        interfaces = (Node,)
-
-
-class Sense(MongoengineObjectType):
-    class Meta:
-        model = models.Sense
-        interfaces = (Node,)
-
-
-class DictionaryEntry(MongoengineObjectType):
-    class Meta:
-        model = models.DictionaryEntry
-        interfaces = (Node,)
-
-
-class Content(MongoengineObjectType):
-    class Meta:
-        model = models.Content
-        interfaces = (Node,)
-
-
-class Query(ObjectType):
-    node = Node.Field()
-    all_users = MongoengineConnectionField(User)
-    all_dictionary_entries = MongoengineConnectionField(DictionaryEntry)
-    all_senses = MongoengineConnectionField(Sense)
-    all_contents = MongoengineConnectionField(Content)
-
-    user_by_id = Field(User, id=String())
-    dictionary_entry_by_id = Field(DictionaryEntry, id=String())
-    sense_by_id = Field(Sense, id=String())
-    # content_by_id = Field(Content, id=String())
-
-    # content_by_user_id = Field(Content, user_id=ID())
-    dictionary_entry_by_written_form = Field(
-        DictionaryEntry, written_form=String()
-    )
-
-    def resolve_user_by_id(self, info, id):
-        return models.User.objects.get(id=id)
-
-    def resolve_dictionary_entry_by_id(self, info, id):
-        return models.DictionaryEntry.objects.get(id=id)
-
-    def resolve_sense_by_id(self, info, id):
-        return models.Sense.objects.get(id=id)
-
-    # def resolve_content_by_id(self, info, id):
-    #     return models.Content.objects.get(id=id)
-
-    # def resolve_content_by_user_id(self, info, user_id):
-    #     return models.Content.objects.get(user=user_id)
-
-    def resolve_dictionary_entry_by_written_form(self, info, written_form):
-        return models.DictionaryEntry.objects.find(
-            {"$text": {"$search": written_form}}
+    @staticmethod
+    def from_mongo(document):
+        return User(
+            id=str(document['_id']),
+            username=document['username'],
+            last_login=document['last_login']
         )
 
 
-class UserInput(InputObjectType):
-    id: str = ID(required=True)
-    username: str = String(required=True)
-    last_login = DateTime(required=True)
+class Equivalent(ObjectType):
+    language = String()
+    equivalent = String()
+    definition = String()
+
+    @staticmethod
+    def from_mongo(document):
+        return Equivalent(
+            language=document['language'],
+            equivalent=document['equivalent'],
+            definition=document['definition']
+        )
+
+
+class Sense(ObjectType):
+    id = String()
+    sense_no = String()
+    definition = String()
+    part_of_speech = String()
+    examples = List(String)
+    type = String()
+    equivalents = List(Equivalent)
+    dictionaryEntryId = String()
+
+    @staticmethod
+    def from_mongo(document):
+        return Sense(
+            id=str(document['_id']),
+            sense_no=document['sense_no'],
+            definition=document['definition'],
+            part_of_speech=document['part_of_speech'],
+            examples=document['examples'],
+            type=document['type'],
+            equivalents=[
+                Equivalent.from_mongo(eq) for eq in document['equivalents']
+            ],
+            dictionaryEntryId=str(document['dictionaryEntryId'])
+        )
+
+
+class DictionaryEntry(ObjectType):
+    id = String()
+    source_id = String()
+    language = String()
+    written_form = String()
+    variations = String()
+    part_of_speech = String()
+    grade = String()
+    query_strs = String()
+
+    @staticmethod
+    def from_mongo(document):
+        return DictionaryEntry(
+            id=str(document['_id']),
+            source_id=document['source_id'],
+            language=document['language'],
+            written_form=document['written_form'],
+            variations=document['variations'],
+            part_of_speech=document['part_of_speech'],
+            grade=document['grade'],
+            query_strs=document['query_strs']
+        )
+
+
+class SenseRank(ObjectType):
+    rank = Float()
+    senseId = String()
+
+    @staticmethod
+    def from_mongo(document):
+        return SenseRank(
+            rank=document['rank'],
+            senseId=str(document['senseId'])
+        )
+
+
+class Highlight(ObjectType):
+    position = Int()
+    score = Int()
+    sense_ranks = List(SenseRank)
+
+    @staticmethod
+    def from_mongo(document):
+        return Highlight(
+            position=document['position'],
+            score=document['score'],
+            sense_ranks=[
+                SenseRank.from_mongo(sr) for sr in document['sense_ranks']
+            ]
+        )
+
+
+class Explanation(ObjectType):
+    expression = String()
+    position = Int()
+    description = String()
+
+    @staticmethod
+    def from_mongo(document):
+        return Explanation(
+            expression=document['expression'],
+            position=document['position'],
+            description=document['description']
+        )
+
+
+class Surfaces(ObjectType):
+    units = List(String)
+    modifiers = List(String)
+
+    @staticmethod
+    def from_mongo(document):
+        return Surfaces(
+            units=document['units'],
+            modifiers=document['modifiers']
+        )
+
+
+class Ix(ObjectType):
+    units = List(List(Int))
+    modifiers = List(List(Int))
+
+    @staticmethod
+    def from_mongo(document):
+        return Ix(
+            units=document['units'],
+            modifiers=document['modifiers']
+        )
+
+
+class Content(ObjectType):
+    id = String()
+    last_modified = DateTime()
+    method = String()
+    level = String()
+    length = String()
+    format = String()
+    style = String()
+    prompt = String()
+    title = String()
+    text = String()
+    surfaces = List(Surfaces)
+    ix = List(Ix)
+    explanations = List(Explanation)
+    highlights = List(Highlight)
+    userId = String()
+
+    @staticmethod
+    def from_mongo(document):
+        return Content(
+            id=str(document['_id']),
+            last_modified=document['last_modified'],
+            method=document['method'],
+            level=document['level'],
+            length=document['length'],
+            format=document['format'],
+            style=document['style'],
+            prompt=document['prompt'],
+            title=document['title'],
+            text=document['text'],
+            surfaces=[
+                Surfaces.from_mongo(surface)
+                for surface in document['surfaces']
+            ],
+            ix=[Ix.from_mongo(ix) for ix in document['ix']],
+            explanations=[
+                Explanation.from_mongo(exp) for exp in document['explanations']
+            ],
+            highlights=[
+                Highlight.from_mongo(hl) for hl in document['highlights']
+            ],
+            userId=str(document['userId'])
+        )
+
+
+class Query(ObjectType):
+    users = List(User)
+    senses = List(Sense)
+    dictionary_entries = List(DictionaryEntry)
+    contents = List(Content)
+
+    def resolve_users(self, info):
+        users = users.find()
+        return [User.from_mongo(u) for u in users]
+
+    def resolve_senses(self, info):
+        senses = senses.find()
+        return [Sense.from_mongo(s) for s in senses]
+
+    def resolve_dictionary_entries(self, info):
+        entries = dictionary_entries.find()
+        return [DictionaryEntry.from_mongo(e) for e in entries]
+
+    def resolve_contents(self, info):
+        contents = contents.find()
+        return [Content.from_mongo(c) for c in contents]
 
 
 class ContentSurfacesInput(InputObjectType):
-    units: list[Optional[str]] = List(String, required=True)
-    modifiers: list[Optional[str]] = List(String, required=True)
+    units = List(String)
+    modifiers = List(String)
 
 
 class ContentIxInput(InputObjectType):
-    units: list[list[Optional[int]]] = List(List(Int), required=True)
-    modifiers: list[list[Optional[int]]] = List(List(Int), required=True)
+    units = List(List(Int))
+    modifiers = List(List(Int))
 
 
 class ExplanationInput(InputObjectType):
-    expression: str = String(required=True)
-    position: int = Int(required=True)
-    description: str = String(required=True)
+    expression = String()
+    position = Int()
+    description = String()
 
 
 class SenseRankInput(InputObjectType):
-    sense: str = ID(required=True)
-    rank: float = Float(required=True)
+    rank = Float()
+    senseId = String()
 
 
 class HighlightInput(InputObjectType):
-    position: int = Int(required=True)
-    score: Optional[int] = Int()
-    dictionary_entry: Optional[str] = ID()
-    sense_ranks: Optional[list[Optional[SenseRankInput]]] = List(SenseRankInput)
-
-
-class ContentInput(InputObjectType):
-    id: str = ID(required=True)
-    method: Optional[str] = String()
-    level: Optional[str] = String()
-    length: Optional[str] = String()
-    format: Optional[str] = String()
-    style: Optional[str] = String()
-    prompt: Optional[str] = String()
-    title: Optional[str] = String()
-    text: Optional[str] = String()
-    media: Optional[str] = String()
-    surfaces: Optional[list[Optional[ContentSurfacesInput]]] = List(
-        ContentSurfacesInput
-    )
-    ix: Optional[list[Optional[ContentIxInput]]] = List(ContentIxInput)
-    explanations: Optional[list[Optional[ExplanationInput]]] = List(
-        ExplanationInput
-    )
-    highlights: Optional[list[Optional[HighlightInput]]] = List(HighlightInput)
-    user: str = ID(required=True)
+    position = Int()
+    score = Int()
+    sense_ranks = List(SenseRankInput)
 
 
 class UpdateContent(Mutation):
     class Arguments:
-        content_data = ContentInput(required=True)
+        id = String(required=True)
+        last_modified = DateTime()
+        method = String()
+        level = String()
+        length = String()
+        format = String()
+        style = String()
+        prompt = String()
+        title = String()
+        text = String()
+        surfaces = List(ContentSurfacesInput)
+        ix = List(ContentIxInput)
+        explanations = List(ExplanationInput)
+        highlights = List(HighlightInput)
 
     ok = Boolean()
     content = Field(lambda: Content)
 
-    def mutate(root, info, content_data: ContentInput = None):
-        content: models.Content = models.Content.objects.get(id=content_data.id)
+    def mutate(self, info, id, **kwargs):
+        content_id = ObjectId(id)
+        updates = {k: v for k, v in kwargs.items() if v is not None}
 
-        if content_data.method is not None:
-            content.method = content_data.method
-        if content_data.level is not None:
-            content.level = content_data.level
-        if content_data.length is not None:
-            content.length = content_data.length
-        if content_data.format is not None:
-            content.format = content_data.format
-        if content_data.style is not None:
-            content.style = content_data.style
-        if content_data.prompt is not None:
-            content.prompt = content_data.prompt
-        if content_data.title is not None:
-            content.title = content_data.title
-        if content_data.text is not None:
-            content.text = content_data.text
-        if content_data.media is not None:
-            content.media = content_data.media
-        if content_data.surfaces is not None:
-            content.surfaces = [
-                models.ContentSurfaces(**surface)
-                for surface in content_data.surfaces
-            ]
+        if 'last_modified' not in updates:
+            updates['last_modified'] = datetime.now(UTC)
 
-        if content_data.ix is not None:
-            content.ix = [models.ContentIx(**ix) for ix in content_data.ix]
-        if content_data.explanations is not None:
-            content.explanations = [
-                models.Explanation(**explanation)
-                for explanation in content_data.explanations
-            ]
+        result = contents.find_one_and_update(
+            {"_id": content_id},
+            {"$set": updates},
+            return_document=True
+        )
 
-        if content_data.highlights is not None:
-            content.highlights = [
-                models.Highlight(
-                    position=highlight.position,
-                    score=highlight.score,
-                    dictionary_entry=highlight.dictionary_entry,
-                    sense_ranks=[
-                        models.SenseRank(**sense_rank)
-                        for sense_rank in highlight.sense_ranks
-                    ] if highlight.sense_ranks else []
-                ) for highlight in content_data.highlights
-            ]
+        return UpdateContent(content=Content.from_mongo(result), ok=True)
 
-        if content_data.user is not None:
-            content.user = content_data.user
-
-        content.last_modified = datetime.now(UTC)
-        content.save()
-
-        return UpdateContent(ok=True, content=content)
-
+class Mutation(ObjectType):
+    update_content = UpdateContent.Field()
 
 schema = Schema(query=Query, mutation=Mutation)

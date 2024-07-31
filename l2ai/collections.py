@@ -39,6 +39,10 @@ class DictionaryEntry(TypedDict):
     queryStrs: str
 
 
+class DictionaryEntryWithSenses(DictionaryEntry):
+    senses: list[Sense]
+
+
 class SenseRank(TypedDict):
     rank: float
     senseId: ObjectId

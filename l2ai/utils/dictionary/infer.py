@@ -76,6 +76,7 @@ def get_inference(query: str) -> InferenceResult:
 
         # all words in a group have the same written form, so use the first
         written_form = group[0]["writtenForm"]
+        pos = group[0]["partOfSpeech"]
 
         # if the word is a common excluded word
         if written_form in exclude_words:
@@ -86,39 +87,36 @@ def get_inference(query: str) -> InferenceResult:
 
         # construct a list of candidate responses using each of the word's
         # senses
-        senses = reduce(
-            lambda l, r: (
-                l + [
-                    "(%s) %s" % (r["partOfSpeechKo"], x) for x in r["sensesKo"]
-                    if "(욕하는 말로)" not in x  # filter offensive words
-                ]
-            ),
+        definitions = reduce(
+            lambda l, r: [
+                f"({pos}) {sense["definition"]}" for sense in r["senses"]
+            ],
             group,
             []
         )
 
         # if the word has only one sense
-        if len(senses) == 1:
+        if len(definitions) == 1:
             infer_result = [1.0]
 
         else:
             candidates = []
 
             # prepare the candidate responses
-            for sense in senses:
+            for definition in definitions:
 
                 # remove ending punctuation
-                if sense.endswith("."):
-                    sense = sense[:-1]
+                if definition.endswith("."):
+                    definition = definition[:-1]
 
                 # remove all characters that are not Hangul, alphanumeric, or
                 # numbers
-                sense_stripped = re.sub(r"[^\u3131-\uD79DA-Za-z\d]", "", sense)
+                definition_stripped = re.sub(r"[^\u3131-\uD79DA-Za-z\d]", "", definition)
 
                 # conjugate the end of the sentence
-                end = "예요." if ends_in_vowel(sense_stripped) else "이에요."
+                end = "예요." if ends_in_vowel(definition_stripped) else "이에요."
 
-                candidates.append("\"%s\"%s" % (sense, end))
+                candidates.append("\"%s\"%s" % (definition, end))
 
             # prepare the model's inputs
             inputs = tokenizer(
@@ -142,20 +140,19 @@ def get_inference(query: str) -> InferenceResult:
         start = 0
         ranks = []
 
-        # for each word
-        for word in group:
+        for entry in group:
 
             # get the end index of this word's results
-            end = start + len(word["sensesKo"])
+            end = start + len(entry["senses"])
 
             # map the results to each sense of this word
-            word["senseScores"] = infer_result[start:end]
+            entry["ranks"] = infer_result[start:end]
 
             # set the start index of the next word's results
             start = end
 
             # make a list of each sense and their scores
-            ranks.extend(list(zip(word["senseScores"], word["sensesEn"])))
+            ranks.extend(list(zip(entry["ranks"], [sense["definition"] for sense in entry["senses"]])))
 
         # sort this word's senses according to its rank
         ranks.sort(key=lambda x: x[0], reverse=True)

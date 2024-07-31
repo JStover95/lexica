@@ -1,19 +1,20 @@
 from itertools import groupby
 
-from l2ai.collections import DictionaryEntry, dictionary_entries, senses
+from l2ai.collections import DictionaryEntry, DictionaryEntryWithSenses, dictionary_entries, senses
 from l2ai.extensions import mecab
 from l2ai.utils.morphs.parse import get_morph_surface
 from l2ai.utils.morphs.types import exclude_dictionary, is_morph_type
 
 
-type QueryResult = dict[str, list[DictionaryEntry]]
+type QueryResult = dict[str, list[DictionaryEntryWithSenses]]
+exclude_words = ["것", "수", "있다", "안", "하다", "되다", ""]
 
 
 def get_query_str(
         query: str,
         context: str | None = None,
         punctuation: bool = False
-    ) -> list[str]:  # TODO: duplicate verbs with suffixes
+    ) -> str:  # TODO: duplicate verbs with suffixes
     """Get keys for querying the dictionary and the parts of speech of each key,
     as they are labeled in the dictionary. These keys are the dictionary forms
     of each word in query. When a word contains suffixes (e.g., auxiliary
@@ -119,7 +120,7 @@ def get_query_str(
     return " ".join(result)
 
 
-def query_dictionary(query: str) -> list[list[DictionaryEntry]]:
+def query_dictionary(query: str) -> list[list[DictionaryEntryWithSenses]]:
     """Query the dictionary for all words, idioms, or proverbs in a string.
     Dictionary entries are only retured if all of at least one of the entry's
     variations is found in the query string. This is done by checking that the
@@ -144,20 +145,26 @@ def query_dictionary(query: str) -> list[list[DictionaryEntry]]:
         query (str)
 
     Returns:
-        list[list[DictionaryEntry]]
+        list[list[DictionaryEntryWithSenses]]
     """
 
     qstr = get_query_str(query, punctuation=True)
-    result: DictionaryEntry = dictionary_entries.find(
+    entries: DictionaryEntry = list(dictionary_entries.find(
         {"$text": {"$search": qstr}}).sort({"writtenForm": 1}
+    ))
+
+    # TODO: this is bad fix this
+    entries_filtered = filter(
+        lambda entry: any(
+            (x in qstr and x not in exclude_words) for x in entry["queryStrs"]
+        ),
+        entries
     )
 
-    in_qstr = lambda x: x in qstr
-    entries = filter(lambda x: any(map(in_qstr, x["queryStrs"])), result)
+    result = []
+    for entry in entries_filtered:
+        entry["senses"] = list(senses.find({"dictionaryEntryId": entry["_id"]}))
+        result.append(entry)
 
-    for entry in entries:
-        entry["senses"] = senses.find({"dictionaryEntryId": entry["_id"]})
-
-    groups = groupby(entries, lambda x: x["writtenForm"])
-
+    groups = groupby(result, lambda x: x["writtenForm"])
     return [list(v) for _, v in groups]

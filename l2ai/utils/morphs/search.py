@@ -5,81 +5,10 @@ from l2ai.utils.types import SurfaceMap
 
 type Ix = list[list[int]]
 type ResultMap = tuple[list[str], Ix]
-type QueryResult = dict[str, list[DictionaryEntry]]
-type InferenceResult = dict[str, list[Tuple[float, str]]]
-type SearchResults = list[Tuple[Ix, Content]]
+type SearchResults = list[tuple[Content, Ix]]
 
 exclude_surfaces = ["하", "되"]
 exclude_words = ["것", "수", "있다", "안", "하다", "되다"]
-
-
-def group_adjacent_ix(
-        rmap: ResultMap,
-        include: list[str] | None = None
-    ) -> list[Ix]:
-    """Group adjacent indices in a result map. Indices that are directly
-    adjacent (separated by 1 character or less) are combined into a single pair
-    of indices. Indices that are adjacent (separated by less than 20 characters)
-    are grouped into a set of indices.
-
-    By default, common surfaces (e.g., 하, 되) are excluded unless their indices
-    are directly adjacent to another pair of indices. This behavior can be
-    overridden by passing a list of surfaces to include.
-
-    Args:
-        rmap (ResultMap)
-        include (list[str] | None, optional): Surfaces to include, overriding
-            the default behavior of excluding common surfaces. Defaults to None.
-
-    Returns:
-        list[Ix]: Sets of indices grouped by adjacency
-    """
-
-    # get surfaces to exclude
-    if include is None:
-        exclude = exclude_surfaces
-    else:
-        exclude = [s for s in exclude_surfaces if not s in include]
-
-    # skip excluded surfaces to get the first indices
-    i = 0
-    while i < len(rmap[0]) and rmap[0][i] in exclude:
-        i = i + 1
-
-    if i == len(rmap[0]):
-        return []
-
-    result: list[Ix] = [[rmap[1][i]]]
-    i = i + 1
-
-    while i < len(rmap[1]):
-
-        # if these indices are directly adjacent to the previous indices
-        if rmap[1][i][0] - result[-1][-1][1] < 2:
-
-            # combine the two indices and continue
-            result[-1][-1][1] = rmap[1][i][1]
-            i = i + 1
-
-        else:
-
-            # if this surface is not excluded
-            if rmap[0][i] not in exclude:
-
-                # if these indices are adjacent to the previous indices
-                if rmap[1][i][0] - result[-1][-1][1] < 20:
-
-                    # append these indices to the previous set of indices
-                    result[-1].append(rmap[1][i])
-
-                else:
-
-                    # append these indices as a new set of indices
-                    result.append([rmap[1][i]])
-
-            i = i + 1
-
-    return result
 
 
 def quicksort_with_key(
@@ -159,7 +88,7 @@ def get_rmap(qsmap: SurfaceMap, qentry: Content, key: str) -> ResultMap:
     i = 0
     for surface in qsmap["surfaces"]:
         while i < len(surfaces) and surfaces[i] < surface:
-            i = i + 1
+            i += 1
         if i == len(surfaces):
             continue
 
@@ -191,11 +120,11 @@ def get_search_results(
         qresult (list[Content]): The result of a database query
 
     Returns:
-        SearchResults: A list of (indices, Content) tuples, where
+        SearchResults: A list of (Content, indidices) tuples, where
             each tuple is a search result. Indices indicate the location of all
             matches in the database entry.
     """
-    result: list[Ix] = []
+    result = []
 
     for qentry in qresult:
 
@@ -205,12 +134,6 @@ def get_search_results(
         quicksort_with_key(urmap[1], urmap[0])
         quicksort_with_key(mrmap[1], mrmap[0])
 
-        include = None
-
-        # force to include excluded words if all queried units are excluded
-        if all(map(lambda x: x in exclude_surfaces, qunits["surfaces"])):
-            include = qunits["surfaces"]
-
         # if units were found
         if len(urmap[1]):
 
@@ -218,32 +141,40 @@ def get_search_results(
             i = 0
             for ix in mrmap[1]:
                 while i < len(urmap[1]) and urmap[1][i][1] < ix[0]:
-                    i = i + 1
+                    i += 1
                 if i < len(urmap[1]) and urmap[1][i][1] == ix[0]:
                     urmap[1][i][1] = ix[1]
-
-            # group adjacent indices of the combined units and modifiers
-            grouped = group_adjacent_ix(urmap, include)
-            result.extend([(ix, qentry) for ix in grouped])
+            rmap = urmap
 
         # else if only modifiers were queried
         elif not len(qunits["ix"]):
-
-            # group adjacent indices of only modifiers
-            grouped = group_adjacent_ix(mrmap, include)
-            result.extend([(ix, qentry) for ix in grouped])
+            rmap = mrmap
 
         # else if any units were queried and none were found
         else:
             continue
 
-    # sort by the largest number of matches
-    by_sum = lambda x: sum(map(lambda y: y[1] - y[0], x[0]))
-    result = sorted(result, key=by_sum, reverse=True)
+        # force to include excluded words if all queried units are excluded
+        force_include = []
+        if all(map(lambda x: x in exclude_surfaces, qunits["surfaces"])):
+            force_include = qunits["surfaces"]
 
-    # sort by the longest match
-    by_max = lambda x: max(map(lambda y: y[1] - y[0], x[0]))
-    result = sorted(result, key=by_max, reverse=True)
+        # remove force included words from excluded words if any
+        if force_include:
+            exclude = [s for s in exclude_surfaces if not s in force_include]
+        else:
+            exclude = exclude_surfaces
+
+        # remove exluded words from the result
+        i = 0
+        to_append = []
+        while i < len(rmap[0]):
+            if rmap[0][i] not in exclude:
+                to_append.append(rmap[1][i])
+            i += 1
+
+        if to_append:
+            result.append((qentry, to_append))
 
     return result
 

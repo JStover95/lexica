@@ -1,6 +1,6 @@
-from typing import Tuple
-
-from l2ai.collections import Content, contents, DictionaryEntry
+from l2ai.extensions import mecab
+from l2ai.collections import Content, contents
+from l2ai.utils.morphs.parse import get_smap_from_morphs
 from l2ai.utils.types import SurfaceMap
 
 type Ix = list[list[int]]
@@ -199,3 +199,10 @@ def query_content(qunits: SurfaceMap, qmodfs: SurfaceMap) -> list[Content]:
         key = "modifiers"
 
     return list(contents.find({"surfaces.%s" % key: {"$in": query}}))
+
+
+def get_query_content_results(query: str) -> SearchResults:
+    qmorphs = mecab.parse(query)
+    qunits, qmodfs = get_smap_from_morphs(qmorphs)
+    qresult = query_content(qunits, qmodfs)
+    return get_search_results(qunits, qmodfs, qresult)

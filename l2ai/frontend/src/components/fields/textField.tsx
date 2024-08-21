@@ -1,18 +1,6 @@
-import * as React from "react";
-import { Component } from "react";
+import React, { useState } from "react";
 import "./textField.css";
 
-/**
- * id (optional): an optional html id
- * type (optional): text, number, date, etc.
- * placeholder (optional): an optional placeholder
- * prefill (optional): a default value (which cannot be changed)
- * value (optional): the field's value (which can be changed)
- * label (optional): the field's label
- * onKeyup (optional): a callback function on keyup
- * feedback (optional): feedback when an error is made
- * disabled (optional): whether to disable the field
- */
 interface ITextFieldProps {
   id?: string;
   type?: string;
@@ -25,80 +13,61 @@ interface ITextFieldProps {
   onKeyup?: (text: string) => void;
 }
 
-/**
- * text: the text to display
- */
-interface ITextFieldState {
-  text: string;
-}
+const TextField: React.FC<ITextFieldProps> = ({
+  id,
+  type = "text",
+  placeholder = "",
+  prefill,
+  value,
+  label,
+  feedback,
+  disabled,
+  onKeyup,
+}) => {
+  const [text, setText] = useState<string>("");
 
-class TextField extends React.Component<ITextFieldProps, ITextFieldState> {
-  state = { text: "" };
+  const handleChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+  ) => {
+    const inputValue = e.target.value;
+    setText(inputValue);
+    if (onKeyup) onKeyup(inputValue);
+  };
 
-  render() {
-    const {
-      id,
-      type,
-      placeholder,
-      prefill,
-      label,
-      feedback,
-      disabled,
-      value,
-      onKeyup
-    } = this.props;
-
-    return (
-      <div className="text-field-container">
-
-        {/* if a label was passed as a prop */}
-        {label ? (
-          <label className="text-field-label" htmlFor={id}>{label}</label>
-        ) : null}
-        <div
-          className={
-            "text-field-content border-light" + (disabled ? " bg-light" : "")
-          }
-        >
-
-          {/* TODO: add optional vector icons here */}
-
-          {/* the input */}
-          <div className="text-field-input">
-            {/* textares require a unique e.target class */}
-            {type == "textarea" ? (
-              <textarea
-                defaultValue={prefill ? prefill : undefined}
-                onChange={
-                  onKeyup
-                    ? (e) => onKeyup((e.target as HTMLTextAreaElement).value)
-                    : () => null
-                }
-              ></textarea>
-            ) : (
-              <input
-                type={type ? type : "text"}
-                placeholder={placeholder ? placeholder : ""}
-                defaultValue={prefill ? prefill : undefined}
-                value={value}
-                onChange={
-                  onKeyup
-                    ? (e) => onKeyup((e.target as HTMLInputElement).value)
-                    : () => null
-                }
-                disabled={disabled}
-              />
-            )}
-          </div>
+  return (
+    <div className="text-field-container">
+      {label && (
+        <label className="text-field-label" htmlFor={id}>
+          {label}
+        </label>
+      )}
+      <div
+        className={
+          "text-field-content border-light" + (disabled ? " bg-light" : "")
+        }
+      >
+        <div className="text-field-input">
+          {type === "textarea" ? (
+            <textarea
+              defaultValue={prefill}
+              onChange={handleChange}
+              disabled={disabled}
+            ></textarea>
+          ) : (
+            <input
+              type={type}
+              placeholder={placeholder}
+              defaultValue={prefill}
+              value={value}
+              onChange={handleChange}
+              disabled={disabled}
+            />
+          )}
         </div>
-
-        {/* feedback on error */}
-        {feedback ? (
-          <span className="text-field-feedback">{feedback}</span>
-        ) : null}
       </div>
-    );
-  }
-}
+      {feedback && <span className="text-field-feedback">{feedback}</span>}
+    </div>
+  );
+};
 
 export default TextField;

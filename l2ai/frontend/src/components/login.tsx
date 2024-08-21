@@ -45,6 +45,7 @@ const Login = () => {
         placeholder="Email"
         onKeyup={setEmail}
         value={email}
+        type={"email"}
       ></TextField>
     </div>
   )
@@ -56,6 +57,7 @@ const Login = () => {
         placeholder="Password"
         onKeyup={setPassword}
         value={password}
+        type={"password"}
       ></TextField>
     </div>
   )

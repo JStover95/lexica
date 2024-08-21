@@ -1,0 +1,170 @@
+.m0-5 {
+  margin: 0.5rem;
+}
+
+.mv0-5 {
+  margin: 0.5rem 0;
+}
+
+.mh0-5 {
+  margin: 0 0.5rem;
+}
+
+.mt0-5 {
+  margin-top: 0.5rem;
+}
+
+.mr0-5 {
+  margin-right: 0.5rem;
+}
+
+.mb0-5 {
+  margin-bottom: 0.5rem;
+}
+
+.ml0-5 {
+  margin-left: 0.5rem;
+}
+
+.m1 {
+  margin: 1rem;
+}
+
+.mv1 {
+  margin: 1rem 0;
+}
+
+.mh1 {
+  margin: 0 1rem;
+}
+
+.mt1 {
+  margin-top: 1rem;
+}
+
+.mr1 {
+  margin-right: 1rem;
+}
+
+.mb1 {
+  margin-bottom: 1rem;
+}
+
+.ml1 {
+  margin-left: 1rem;
+}
+
+.m2 {
+  margin: 2rem;
+}
+
+.mv2 {
+  margin: 2rem 0;
+}
+
+.mh2 {
+  margin: 0 2rem;
+}
+
+.mt2 {
+  margin-top: 2rem;
+}
+
+.mr2 {
+  margin-right: 2rem;
+}
+
+.mb2 {
+  margin-bottom: 2rem;
+}
+
+.ml2 {
+  margin-left: 2rem;
+}
+
+.p1 {
+  padding: 1rem;
+}
+
+.pv1 {
+  padding: 1rem 0;
+}
+
+.ph1 {
+  padding: 0 1rem;
+}
+
+.pt1 {
+  padding-top: 1rem;
+}
+
+.pr1 {
+  padding-right: 1rem;
+}
+
+.pb1 {
+  padding-bottom: 1rem;
+}
+
+.pl1 {
+  padding-left: 1rem;
+}
+
+.font-s {
+  font-size: 0.8rem;
+}
+
+.font-m {
+  font-size: 1rem;
+}
+
+.font-l {
+  font-size: 1.2rem;
+}
+
+.font-red {
+  color: red;
+}
+
+.border-light {
+  border: 1px solid #ccc;
+}
+
+.border-b-light {
+  border-bottom: 1px solid #ccc;
+}
+
+.border-mid {
+  border: 1px solid #888;
+}
+
+.border-b-mid {
+  border-bottom: 1px solid #888;
+}
+
+.border-dark {
+  border: 1px solid black;
+}
+
+.border-b-dark {
+  border-bottom: 1px solid black;
+}
+
+.bg-light {
+  background-color: #ccc;
+}
+
+.bg-dark {
+  background-color: #888;
+}
+
+.flex {
+  display: flex;
+}
+
+/* override default styles */
+input,
+textarea {
+  border: none;
+  outline: none;
+}

@@ -5,6 +5,8 @@ import AsyncButton from "./buttons/asyncButton";
 import TextField from "./fields/textField";
 import AuthContext from "../context/authContext";
 
+import "../styles.css";
+
 
 const Login = () => {
   const { accessToken, setIsAuthenticated } = useContext(AuthContext);
@@ -39,7 +41,7 @@ const Login = () => {
   }
 
   const emailField = (
-    <div className="login-field">
+    <div className="mb1">
       <TextField
         id="login-email"
         placeholder="Email"
@@ -51,7 +53,7 @@ const Login = () => {
   )
 
   const passwordField = (
-    <div className="login-field">
+    <div className="mb1">
       <TextField
         id="login-password"
         placeholder="Password"
@@ -63,7 +65,7 @@ const Login = () => {
   )
 
   const submitButton = (
-    <div className="login-buttons">
+    <div className="mb1">
       <AsyncButton
         text="Log In"
         type="primary"
@@ -73,18 +75,14 @@ const Login = () => {
   )
 
   return (
-    <div className="login-container">
-      <div className="login-menu">
-        <div className="login-menu-content">
-          <h1>MM</h1>
-          <div className="login-message-container">
-            <p>{message}</p>
-          </div>
-          {emailField}
-          {passwordField}
-          {submitButton}
-        </div>
+    <div className="p1">
+      <h1>MM</h1>
+      <div className="mb0-5 font-s">
+        <span>{message}</span>
       </div>
+      {emailField}
+      {passwordField}
+      {submitButton}
     </div>
   )
 }

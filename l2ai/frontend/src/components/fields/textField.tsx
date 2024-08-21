@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import "./textField.css";
+
+import "../../styles.css";
 
 interface ITextFieldProps {
   id?: string;
@@ -25,6 +26,7 @@ const TextField: React.FC<ITextFieldProps> = ({
   onKeyup,
 }) => {
   const [text, setText] = useState<string>("");
+  const [showFeedback, setShowFeedback] = useState<boolean>(true);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
@@ -35,37 +37,35 @@ const TextField: React.FC<ITextFieldProps> = ({
   };
 
   return (
-    <div className="text-field-container">
+    <div>
+      <div
+        className={
+          (disabled ? "border-mid bg-light" : "border-b-mid")
+        }
+      >
+        {type === "textarea" ? (
+          <textarea
+            defaultValue={prefill}
+            onChange={handleChange}
+            disabled={disabled}
+          ></textarea>
+        ) : (
+          <input
+            type={type}
+            placeholder={placeholder}
+            defaultValue={prefill}
+            value={value}
+            onChange={handleChange}
+            disabled={disabled}
+          />
+        )}
+      </div>
+      {feedback && showFeedback && <span className="font-s font-red">{feedback}</span>}
       {label && (
-        <label className="text-field-label" htmlFor={id}>
+        <label className="font-s" htmlFor={id}>
           {label}
         </label>
       )}
-      <div
-        className={
-          "text-field-content border-light" + (disabled ? " bg-light" : "")
-        }
-      >
-        <div className="text-field-input">
-          {type === "textarea" ? (
-            <textarea
-              defaultValue={prefill}
-              onChange={handleChange}
-              disabled={disabled}
-            ></textarea>
-          ) : (
-            <input
-              type={type}
-              placeholder={placeholder}
-              defaultValue={prefill}
-              value={value}
-              onChange={handleChange}
-              disabled={disabled}
-            />
-          )}
-        </div>
-      </div>
-      {feedback && <span className="text-field-feedback">{feedback}</span>}
     </div>
   );
 };

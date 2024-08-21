@@ -3,6 +3,8 @@ import Login from "./components/login";
 import AuthContext from "./context/authContext";
 import useAuth from "./hooks/useAuth";
 
+import "./App.css";
+
 
 const App = () => {
   const {
@@ -28,7 +30,9 @@ const App = () => {
       setRefreshToken
     }}
     >
-      {isAuthenticated ? <Dashboard /> : <Login />}
+      <div className="wrapper">
+        {isAuthenticated ? <Dashboard /> : <Login />}
+      </div>
     </AuthContext.Provider>
   );
 };

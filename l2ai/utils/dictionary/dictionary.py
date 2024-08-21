@@ -2,6 +2,7 @@ from itertools import groupby
 
 from l2ai.collections import DictionaryEntry, DictionaryEntryWithSenses, dictionary_entries, senses
 from l2ai.extensions import mecab
+from l2ai.utils.misc import b
 from l2ai.utils.morphs.parse import get_morph_surface
 from l2ai.utils.morphs.types import exclude_dictionary, is_morph_type
 
@@ -149,22 +150,40 @@ def query_dictionary(query: str) -> list[list[DictionaryEntryWithSenses]]:
     """
 
     qstr = get_query_str(query, punctuation=True)
-    entries: DictionaryEntry = list(dictionary_entries.find(
+    entries: list[DictionaryEntry] = list(dictionary_entries.find(
         {"$text": {"$search": qstr}}).sort({"writtenForm": 1}
     ))
 
     # TODO: this is bad fix this
-    entries_filtered = filter(
+    entries_filtered = list(filter(
         lambda entry: any(
             (x in qstr and x not in exclude_words) for x in entry["queryStrs"]
         ),
         entries
-    )
+    ))
 
-    result = []
+    result: list[DictionaryEntryWithSenses] = []
     for entry in entries_filtered:
         entry["senses"] = list(senses.find({"dictionaryEntryId": entry["_id"]}))
         result.append(entry)
 
-    groups = groupby(result, lambda x: x["writtenForm"])
-    return [list(v) for _, v in groups]
+    groups = groupby(result, lambda x: x["queryStrs"][0])
+    groups = [list(v) for _, v in groups]
+
+    # handle cases where the query returns multiple written forms per query key
+    result = []
+    for group in groups:
+        written_forms = []
+
+        # get all written forms in this group
+        for entry in group:
+            if entry["writtenForm"] not in written_forms:
+                written_forms.append(entry["writtenForm"])
+
+        # remove written forms that are not in the original query string
+        if len(written_forms) > 1:
+            group = [entry for entry in group if entry["writtenForm"] in qstr]
+
+        result.append(group)
+
+    return result

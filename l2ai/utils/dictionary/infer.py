@@ -8,6 +8,7 @@ from transformers import AutoTokenizer, AutoModelForMultipleChoice
 
 from l2ai.collections import senses
 from l2ai.utils.dictionary.dictionary import query_dictionary, get_query_str
+from l2ai.utils.logging import logger
 
 # initialize the model and tokenizer
 model_name = "JesseStover/L2AI-dictionary-klue-bert-base"
@@ -87,13 +88,9 @@ def get_inference(query: str) -> InferenceResult:
 
         # construct a list of candidate responses using each of the word's
         # senses
-        definitions = reduce(
-            lambda l, r: [
-                f"({pos}) {sense["definition"]}" for sense in r["senses"]
-            ],
-            group,
-            []
-        )
+        definitions = []
+        for entry in group:
+            definitions.extend([sense["definition"] for sense in entry["senses"]])
 
         # if the word has only one sense
         if len(definitions) == 1:

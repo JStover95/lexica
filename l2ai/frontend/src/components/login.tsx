@@ -5,7 +5,7 @@ import AsyncButton from "./buttons/asyncButton";
 import TextField from "./fields/textField";
 import AuthContext from "../context/authContext";
 
-import "../styles.css";
+import "../styleSheets/styles.css";
 
 
 const Login = () => {

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import "../../styles.css";
+import "../../styleSheets/styles.css";
 
 interface ITextFieldProps {
   id?: string;

@@ -3,7 +3,7 @@ import Login from "./components/login";
 import AuthContext from "./context/authContext";
 import useAuth from "./hooks/useAuth";
 
-import "./App.css";
+import "./styleSheets/App.css";
 
 
 const App = () => {

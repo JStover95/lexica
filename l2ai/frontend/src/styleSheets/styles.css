@@ -115,6 +115,34 @@
   padding-left: 1rem;
 }
 
+.p2 {
+  padding: 2rem;
+}
+
+.pv2 {
+  padding: 2rem 0;
+}
+
+.ph2 {
+  padding: 0 2rem;
+}
+
+.pt2 {
+  padding-top: 2rem;
+}
+
+.pr2 {
+  padding-right: 2rem;
+}
+
+.pb2 {
+  padding-bottom: 2rem;
+}
+
+.pl2 {
+  padding-left: 2rem;
+}
+
 .font-s {
   font-size: 0.8rem;
 }
@@ -196,6 +224,16 @@
   display: flex;
 }
 
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.grow {
+  display: flex;
+  flex-grow: 1;
+}
+
 .align-center {
   display: flex;
   align-items: center;
@@ -204,6 +242,15 @@
 .justify-center {
   display: flex;
   justify-content: center;
+}
+
+.space-around {
+  display: flex;
+  justify-content: space-around;
+}
+
+.wfull {
+  width: 100%;
 }
 
 /* override default styles */

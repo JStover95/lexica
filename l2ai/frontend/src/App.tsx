@@ -31,7 +31,9 @@ const App = () => {
     }}
     >
       <div className="wrapper">
-        {isAuthenticated ? <Dashboard /> : <Login />}
+        <div className="container">
+          {!isAuthenticated ? <Dashboard /> : <Login />}
+        </div>
       </div>
     </AuthContext.Provider>
   );

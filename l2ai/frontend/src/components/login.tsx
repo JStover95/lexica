@@ -1,5 +1,5 @@
 import { Buffer } from "buffer";
-import { useContext, useState } from "react";
+import React, { useContext, useState } from "react";
 import { makeRequest } from "../utils";
 import AsyncButton from "./buttons/asyncButton";
 import TextField from "./fields/textField";
@@ -8,7 +8,7 @@ import AuthContext from "../context/authContext";
 import "../styleSheets/styles.css";
 
 
-const Login = () => {
+const Login: React.FC = () => {
   const { accessToken, setIsAuthenticated } = useContext(AuthContext);
   const [message, setMessage] = useState("");
   const [email, setEmail] = useState("");

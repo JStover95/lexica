@@ -1,6 +1,7 @@
 :root {
   --color-primary: #145214;
   --color-primary-light: #196619;
+  --color-text-block-hover: #ddd;
 }
 
 .m0-5 {
@@ -293,6 +294,20 @@
   height: 800px;
 }
 
+/* specific classes */
+.text-block {
+  margin-right: 0.4em;
+}
+
+.text-block:not(.text-block-active):hover {
+  cursor: pointer;
+  border-bottom: 3px solid var(--color-text-block-hover);
+}
+
+.text-block-active {
+  border-bottom: 3px solid var(--color-primary);
+}
+
 /* override default styles */
 input,
 textarea {
@@ -305,4 +320,9 @@ textarea {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
   'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
   sans-serif;
+}
+
+p {
+  margin-top: 0;
+  line-height: 1.5em;
 }

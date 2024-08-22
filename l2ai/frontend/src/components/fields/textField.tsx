@@ -4,6 +4,7 @@ import "../../styleSheets/styles.css";
 
 interface ITextFieldProps {
   id?: string;
+  className?: string;
   type?: string;
   placeholder?: string;
   prefill?: string;
@@ -16,6 +17,7 @@ interface ITextFieldProps {
 
 const TextField: React.FC<ITextFieldProps> = ({
   id,
+  className,
   type = "text",
   placeholder = "",
   prefill,
@@ -40,7 +42,7 @@ const TextField: React.FC<ITextFieldProps> = ({
     <React.Fragment>
       {type === "textarea" ? (
         <textarea
-          className="hfull wfull"
+          className={"h100p w100p pr1 " + (className ? className : "")}
           placeholder={placeholder}
           defaultValue={prefill}
           value={value}
@@ -49,7 +51,7 @@ const TextField: React.FC<ITextFieldProps> = ({
         ></textarea>
       ) : (
         <input
-          className="hfull wfull"
+          className={"h100p w100p " + (className ? className : "")}
           type={type}
           placeholder={placeholder}
           defaultValue={prefill}

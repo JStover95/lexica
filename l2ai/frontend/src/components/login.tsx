@@ -70,6 +70,7 @@ const Login: React.FC = () => {
         children={<span>Log In</span>}
         type="primary"
         onClick={handleLogin}
+        size={"large"}
       ></AsyncButton>
     </div>
   )

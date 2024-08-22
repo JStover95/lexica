@@ -4,9 +4,10 @@ interface IAsyncButtonProps {
   onClick: () => Promise<any>;
   children: React.ReactNode;
   type: string;
+  size: string;
 }
 
-const AsyncButton: React.FC<IAsyncButtonProps> = ({ onClick, children, type }) => {
+const AsyncButton: React.FC<IAsyncButtonProps> = ({ onClick, children, type, size }) => {
   const [loading, setLoading] = useState<boolean>(false);
 
   const handleClick = async () => {
@@ -29,7 +30,7 @@ const AsyncButton: React.FC<IAsyncButtonProps> = ({ onClick, children, type }) =
 
   return (
     <button
-      className={`btn btn-large btn-${type}`}
+      className={`btn btn-${size} btn-${type}`}
       onClick={handleClick}
       disabled={loading}
     >

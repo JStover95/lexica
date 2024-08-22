@@ -215,6 +215,12 @@
   border-radius: 1.5rem;
 }
 
+.btn-xlarge {
+  height: 4rem;
+  width: 12rem;
+  border-radius: 2rem;
+}
+
 .btn-primary {
   background-color: var(--color-primary);
   color: white;
@@ -263,12 +269,28 @@
   justify-content: space-around;
 }
 
-.wfull {
+.w100p {
   width: 100%;
 }
 
-.hfull {
+.w50p {
+  width: 50%;
+}
+
+.h100p {
   height: 100%;
+}
+
+.h50p {
+  height: 50%;
+}
+
+.h600 {
+  height: 600px;
+}
+
+.h800 {
+  height: 800px;
 }
 
 /* override default styles */
@@ -276,5 +298,11 @@ input,
 textarea {
   border: none;
   outline: none;
+}
+
+textarea {
   resize: none;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  sans-serif;
 }

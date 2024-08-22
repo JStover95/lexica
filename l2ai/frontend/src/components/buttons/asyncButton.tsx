@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 
-interface AsyncButtonProps {
+interface IAsyncButtonProps {
   onClick: () => Promise<any>;
-  text: string;
+  children: React.ReactNode;
   type: string;
 }
 
-const AsyncButton: React.FC<AsyncButtonProps> = ({ onClick, text, type }) => {
+const AsyncButton: React.FC<IAsyncButtonProps> = ({ onClick, children, type }) => {
   const [loading, setLoading] = useState<boolean>(false);
 
   const handleClick = async () => {
@@ -29,11 +29,11 @@ const AsyncButton: React.FC<AsyncButtonProps> = ({ onClick, text, type }) => {
 
   return (
     <button
-      className={`button button-large button-${type}`}
+      className={`btn btn-large btn-${type}`}
       onClick={handleClick}
       disabled={loading}
     >
-      {loading ? loader : text}
+      {loading ? loader : children}
     </button>
   );
 };

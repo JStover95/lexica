@@ -158,6 +158,35 @@
   background-color: #888;
 }
 
+.btn {
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  user-select: none;
+  transition: all 0.1s;
+}
+
+.btn:hover {
+  cursor: pointer;
+}
+
+.btn-large {
+  height: 3rem;
+  width: 6rem;
+  border-radius: 1.5rem;
+}
+
+.btn-primary {
+  background-color: #145214;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #196619;
+}
+
 .flex {
   display: flex;
 }

@@ -41,7 +41,7 @@ const Login: React.FC = () => {
   }
 
   const emailField = (
-    <div className="mb1">
+    <div className="mb1 input input-m">
       <TextField
         id="login-email"
         placeholder="Email"
@@ -53,7 +53,7 @@ const Login: React.FC = () => {
   )
 
   const passwordField = (
-    <div className="mb1">
+    <div className="mb1 input input-m">
       <TextField
         id="login-password"
         placeholder="Password"

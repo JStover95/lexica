@@ -1,6 +1,7 @@
 import React from "react";
 
 import "../styleSheets/styles.css";
+import TextField from "./fields/textField";
 
 
 const Dashboard: React.FC = () => {
@@ -11,7 +12,10 @@ const Dashboard: React.FC = () => {
       </div>
       <div className="flex wfull">
         <div className="grow p2">
-          <span>Text area</span>
+          <TextField
+            type={"textarea"}
+            placeholder={"Paste your content here..."}
+          />
         </div>
         <div className="grow p2">
           <span>Feedback area</span>

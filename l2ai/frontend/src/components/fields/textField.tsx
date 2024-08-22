@@ -37,36 +37,34 @@ const TextField: React.FC<ITextFieldProps> = ({
   };
 
   return (
-    <div>
-      <div
-        className={
-          (disabled ? "border-mid bg-light" : "border-b-mid")
-        }
-      >
-        {type === "textarea" ? (
-          <textarea
-            defaultValue={prefill}
-            onChange={handleChange}
-            disabled={disabled}
-          ></textarea>
-        ) : (
-          <input
-            type={type}
-            placeholder={placeholder}
-            defaultValue={prefill}
-            value={value}
-            onChange={handleChange}
-            disabled={disabled}
-          />
-        )}
-      </div>
+    <React.Fragment>
+      {type === "textarea" ? (
+        <textarea
+          className="hfull wfull"
+          placeholder={placeholder}
+          defaultValue={prefill}
+          value={value}
+          onChange={handleChange}
+          disabled={disabled}
+        ></textarea>
+      ) : (
+        <input
+          className="hfull wfull"
+          type={type}
+          placeholder={placeholder}
+          defaultValue={prefill}
+          value={value}
+          onChange={handleChange}
+          disabled={disabled}
+        />
+      )}
       {feedback && showFeedback && <span className="font-s font-red">{feedback}</span>}
       {label && (
         <label className="font-s" htmlFor={id}>
           {label}
         </label>
       )}
-    </div>
+    </React.Fragment>
   );
 };
 

@@ -159,6 +159,10 @@
   color: red;
 }
 
+.font-grey {
+  color: grey;
+}
+
 .border-light {
   border: 1px solid #ccc;
 }
@@ -220,6 +224,16 @@
   background-color: var(--color-primary-light);
 }
 
+.input {
+  display: flex;
+  border-bottom: 1px solid black;
+}
+
+.input-m {
+  padding: 0.5rem 0;
+  width: 12rem;
+}
+
 .flex {
   display: flex;
 }
@@ -253,9 +267,14 @@
   width: 100%;
 }
 
+.hfull {
+  height: 100%;
+}
+
 /* override default styles */
 input,
 textarea {
   border: none;
   outline: none;
+  resize: none;
 }

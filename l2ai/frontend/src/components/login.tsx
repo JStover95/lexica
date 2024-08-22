@@ -65,7 +65,7 @@ const Login = () => {
   )
 
   const submitButton = (
-    <div className="mb1">
+    <div className="mb1 justify-center">
       <AsyncButton
         children={<span>Log In</span>}
         type="primary"

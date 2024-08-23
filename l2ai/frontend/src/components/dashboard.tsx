@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { createRef, RefObject, useEffect, useState } from "react";
 
 import "../styleSheets/styles.css";
 import TextField from "./fields/textField";
@@ -10,30 +10,106 @@ import { dummyText } from "../dummyData";
 const Dashboard: React.FC = () => {
   const [inputText, setInputText] = useState<string>(dummyText);
   const [showInput, setShowInput] = useState<Boolean>(true);
-  const [outputBlocks, setOutputBlocks] = useState<React.ReactNode | null>(null);
-  const [activeBlocks, setActiveBlocks] = useState<number[]>([]);
+  const [blocks, setBlocks] = useState<React.ReactNode[] | null>(null);
+  const [blockRefs, setBlockRefs] = useState<(RefObject<HTMLSpanElement> | null)[] | null>(null);
+  const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
 
-  const handleBlockClick = (i: number, block: HTMLSpanElement) => {
-    if (!activeBlocks.includes(i)) {
-      activeBlocks.push(i);
-      setActiveBlocks(activeBlocks);
-      block.classList.add("text-block-active");
-    };
+  const handleBlockClick = (index: number, block: HTMLSpanElement) => {
+    setSelectedIndices((prevSelectedIndices) => {
+
+      // Check if the word is already selected
+      if (!prevSelectedIndices.includes(index)) {
+
+        // Create a new array with the updated selected indices
+        const updatedSelectedIndices = [...prevSelectedIndices, index];
+        block.classList.add("text-block-0");  // Set the word as active
+  
+        // Check for adjacent words
+        if (prevSelectedIndices.includes(index - 2)) {
+
+          // If the previous word is selected, select the space in between
+          updatedSelectedIndices.push(index - 1);
+          setBlockRefs((prevBlockRefs) => {
+            if (prevBlockRefs !== null) {
+              const spaceRef = prevBlockRefs[index - 1];
+              if (spaceRef !== null) {
+                const spanElement = spaceRef.current;
+                if (spanElement) {
+                  spanElement.classList.add("text-block-0");
+                }
+              }
+            }
+            return prevBlockRefs;
+          });
+        }
+        
+        if (prevSelectedIndices.includes(index + 2)) {
+
+          // If the next word is selected, select the space in between
+          updatedSelectedIndices.push(index + 1);
+          setBlockRefs((prevBlockRefs) => {
+            if (prevBlockRefs !== null) {
+              const spaceRef = prevBlockRefs[index + 1];
+              if (spaceRef !== null) {
+                const spanElement = spaceRef.current;
+                if (spanElement) {
+                  spanElement.classList.add("text-block-0");
+                }
+              }
+            }
+            return prevBlockRefs;
+          });
+        }
+  
+        return updatedSelectedIndices;
+      }
+  
+      // If the word was already selected, return the previous state unchanged
+      return prevSelectedIndices;
+    });
   };
 
   const handleInput = async () => {
     if (inputText === "") return;
-    const paragraphSplit = inputText.split(/\n+/);  // TODO: make safe
-    const blocks = paragraphSplit.map((paragraph, i) => {
-      const words = paragraph.split(" ").map((word, j) => {
-        return <span className="text-block font-l" onClick={(e) => handleBlockClick(j, e.target as HTMLSpanElement)} key={j}>{word}</span>;
+    const paragraphSplit = inputText.split(/\n+/);  // Splits text by paragraphs
+    const refs: (RefObject<HTMLSpanElement> | null)[] = [];
+
+    const blocks = paragraphSplit.filter((p) => p.trim() !== "").flatMap((p, i) => {
+      const words = p.split(" ").flatMap((word, j) => {
+        const refWord = createRef<HTMLSpanElement>();
+        const refSpace = createRef<HTMLSpanElement>();
+        refs.push(...[refWord, refSpace]);
+
+        return [
+          // Word span
+          <span
+            className={"text-block font-l"}
+            onClick={(e) => handleBlockClick(j * 2, e.target as HTMLSpanElement)}
+            key={`word-${i}-${j}`}
+            ref={refWord}
+          >
+            {word}
+          </span>,
+
+          // Space span
+          j < p.split(" ").length - 1 && (
+            <span
+              className={"text-block font-l"}
+              key={`space-${i}-${j}`}
+              ref={refSpace}
+            >
+              &nbsp;
+            </span>
+          )
+        ]
       });
 
-      // skip empty paragraphs
-      if (words.length === 1 && words[0].props.children === "") return;
-      return <p key={i}>{words}</p>
+      refs.push(null);  // don't include a ref for the <br /> element
+      return [...words, <br key={i} />]
     });
-    setOutputBlocks(blocks);
+
+    setBlocks(blocks);
+    setBlockRefs(refs);
     setShowInput(false);
   };
 
@@ -51,7 +127,7 @@ const Dashboard: React.FC = () => {
               placeholder={"Paste your content here..."}
               onKeyup={setInputText}
               value={dummyText}
-            /> : outputBlocks}
+            /> : blocks}
           </div>
           <div className="justify-center">
             <AsyncButton

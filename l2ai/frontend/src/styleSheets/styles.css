@@ -2,6 +2,10 @@
   --color-primary: #145214;
   --color-primary-light: #196619;
   --color-text-block-hover: #ddd;
+  --color-text-block-0: #ccc;
+  --color-text-block-1: red;
+  --color-text-block-2: yellow;
+  --color-text-block-3: green;
 }
 
 .m0-5 {
@@ -295,16 +299,24 @@
 }
 
 /* specific classes */
-.text-block {
-  margin-right: 0.4em;
-}
-
-.text-block:not(.text-block-active):hover {
+.text-block:not(.text-block-0, .text-block-1, .text-block-2, .text-block-3):hover {
   cursor: pointer;
   border-bottom: 3px solid var(--color-text-block-hover);
 }
 
-.text-block-active {
+.text-block-0 {
+  border-bottom: 3px solid var(--color-primary);
+}
+
+.text-block-1 {
+  border-bottom: 3px solid var(--color-primary);
+}
+
+.text-block-2 {
+  border-bottom: 3px solid var(--color-primary);
+}
+
+.text-block-3 {
   border-bottom: 3px solid var(--color-primary);
 }
 

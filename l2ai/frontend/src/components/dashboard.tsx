@@ -31,11 +31,21 @@ const Dashboard: React.FC = () => {
           updatedSelectedIndices.push(index - 1);
           setBlockRefs((prevBlockRefs) => {
             if (prevBlockRefs !== null) {
+
+              // skip if the adjacent word is the end of a sentence
+              const spanRef = prevBlockRefs[index - 2];
+              if (spanRef !== null) {
+                const spanElement = spanRef.current;
+                if (spanElement !== null && spanElement.innerHTML.endsWith(".")) {
+                  return prevBlockRefs;
+                }
+              }
+
               const spaceRef = prevBlockRefs[index - 1];
               if (spaceRef !== null) {
-                const spanElement = spaceRef.current;
-                if (spanElement) {
-                  spanElement.classList.add("text-block-0");
+                const spaceElement = spaceRef.current;
+                if (spaceElement) {
+                  spaceElement.classList.add("text-block-0");
                 }
               }
             }
@@ -49,11 +59,21 @@ const Dashboard: React.FC = () => {
           updatedSelectedIndices.push(index + 1);
           setBlockRefs((prevBlockRefs) => {
             if (prevBlockRefs !== null) {
+
+              // skip if the current word is the end of a sentence
+              const spanRef = prevBlockRefs[index];
+              if (spanRef !== null) {
+                const spanElement = spanRef.current;
+                if (spanElement !== null && spanElement.innerHTML.endsWith(".")) {
+                  return prevBlockRefs;
+                }
+              }
+
               const spaceRef = prevBlockRefs[index + 1];
               if (spaceRef !== null) {
-                const spanElement = spaceRef.current;
-                if (spanElement) {
-                  spanElement.classList.add("text-block-0");
+                const spaceElement = spaceRef.current;
+                if (spaceElement) {
+                  spaceElement.classList.add("text-block-0");
                 }
               }
             }

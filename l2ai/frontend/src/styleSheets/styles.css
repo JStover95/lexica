@@ -168,6 +168,10 @@
   color: grey;
 }
 
+.font-height-l {
+  line-height: 1.5;
+}
+
 .border-light {
   border: 1px solid #ccc;
 }
@@ -336,5 +340,4 @@ textarea {
 
 p {
   margin-top: 0;
-  line-height: 1.5em;
 }

@@ -104,8 +104,8 @@ const Dashboard: React.FC = () => {
         ]
       });
 
-      refs.push(null);  // don't include a ref for the <br /> element
-      return [...words, <br key={i} />]
+      refs.push(...[null, null]);  // don't include refs for the <br /> elements
+      return [...words, <br key={`b1-${i}`} />, <br key={`b2-${i}`} />]
     });
 
     setBlocks(blocks);
@@ -120,22 +120,27 @@ const Dashboard: React.FC = () => {
       </div>
       <div className="flex w100p">
         <div className="grow column p2 w50p h800">
-          <div className="grow column mb1">
-            {showInput ? <TextField
-              className={"font-l"}
-              type={"textarea"}
-              placeholder={"Paste your content here..."}
-              onKeyup={setInputText}
-              value={dummyText}
-            /> : blocks}
-          </div>
+          {showInput ? 
+            <div className="grow column mb1">
+              <TextField
+                className={"font-l"}
+                type={"textarea"}
+                placeholder={"Paste your content here..."}
+                onKeyup={setInputText}
+                value={dummyText}
+              />
+            </div> :
+            <div className="font-height-l">
+              {blocks}
+            </div>
+          }
           <div className="justify-center">
-            <AsyncButton
+            {showInput && <AsyncButton
               onClick={handleInput}
               children={<span className="font-l">Start learning</span>}
               type="primary"
               size="xlarge"
-            />
+            />}
           </div>
         </div>
         <div className="grow p2 w50p h800">

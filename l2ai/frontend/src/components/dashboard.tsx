@@ -93,45 +93,56 @@ const Dashboard: React.FC = () => {
     if (inputText === "") return;
     const paragraphSplit = inputText.split(/\n+/);  // Splits text by paragraphs
     const refs: (RefObject<HTMLSpanElement> | null)[] = [];
-
-    const blocks = paragraphSplit.filter((p) => p.trim() !== "").flatMap((p, i) => {
-      const words = p.split(" ").flatMap((word, j) => {
-        const refWord = createRef<HTMLSpanElement>();
-        const refSpace = createRef<HTMLSpanElement>();
-        refs.push(...[refWord, refSpace]);
-
-        return [
-          // Word span
-          <span
-            className={"text-block font-l"}
-            onClick={(e) => handleBlockClick(j * 2, e.target as HTMLSpanElement)}
-            key={`word-${i}-${j}`}
-            ref={refWord}
-          >
-            {word}
-          </span>,
-
-          // Space span
-          j < p.split(" ").length - 1 && (
+    let counter = -1;
+  
+    const blocks = paragraphSplit
+      .filter((p) => p.trim() !== "")
+      .flatMap((p, i) => {
+        const words = p.split(" ").flatMap((word, j) => {
+          const refWord = createRef<HTMLSpanElement>();
+          const refSpace = createRef<HTMLSpanElement>();
+  
+          // Capture the current value of counter
+          const currentCounter = counter + 1;
+          refs.push(...[refWord, refSpace]);
+          counter = currentCounter;  // Update the counter after capturing it
+  
+          return [
+            // Word span
             <span
               className={"text-block font-l"}
-              key={`space-${i}-${j}`}
-              ref={refSpace}
+              onClick={(e) =>
+                handleBlockClick(currentCounter * 2, e.target as HTMLSpanElement)
+              }
+              key={`word-${i}-${j}`}
+              ref={refWord}
             >
-              &nbsp;
-            </span>
-          )
-        ]
+              {word}
+            </span>,
+  
+            // Space span
+            j < p.split(" ").length - 1 && (
+              <span
+                className={"text-block font-l"}
+                key={`space-${i}-${j}`}
+                ref={refSpace}
+              >
+                &nbsp;
+              </span>
+            ),
+          ];
+        });
+  
+        counter += 1; // Increment counter for the next iteration
+        refs.push(...[null, null]);  // Don't include refs for the <br /> elements
+        return [...words, <br key={`b1-${i}`} />, <br key={`b2-${i}`} />];
       });
-
-      refs.push(...[null, null]);  // don't include refs for the <br /> elements
-      return [...words, <br key={`b1-${i}`} />, <br key={`b2-${i}`} />]
-    });
-
+  
     setBlocks(blocks);
     setBlockRefs(refs);
     setShowInput(false);
   };
+  
 
   return (
     <div className="column grow align-center">

@@ -324,6 +324,10 @@
   border-bottom: 3px solid var(--color-primary);
 }
 
+.scroll {
+  overflow: scroll;
+}
+
 /* override default styles */
 input,
 textarea {

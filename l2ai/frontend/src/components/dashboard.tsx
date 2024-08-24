@@ -161,7 +161,7 @@ const Dashboard: React.FC = () => {
                 value={dummyText}
               />
             </div> :
-            <div className="font-height-l">
+            <div className="font-height-l scroll pr1">
               {blocks}
             </div>
           }

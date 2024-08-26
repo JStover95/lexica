@@ -22,3 +22,9 @@ export interface ILogger {
   warn: ILogFn;
   error: ILogFn;
 }
+
+export interface IExplanation {
+  Expression: string;
+  Position: number;
+  Description?: string;
+}

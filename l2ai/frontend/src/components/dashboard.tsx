@@ -23,10 +23,8 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     if (blockRefs) {
       blockRefs.forEach((ref, i) => {
-        if (ref) {
-          if (ref.current) {
-            ref.current.onclick = (e) => handleBlockClick(i, e.target as HTMLSpanElement)
-          }
+        if (ref && ref.current && ref.current.innerHTML != "&nbsp;") {
+          ref.current.onclick = (e) => handleBlockClick(i, e.target as HTMLSpanElement);
         }
       });
     }

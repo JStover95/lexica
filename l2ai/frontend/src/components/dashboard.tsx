@@ -53,16 +53,14 @@ const Dashboard: React.FC = () => {
             const spanRef = blockRefs[index - 2];
             if (spanRef !== null) {
               const spanElement = spanRef.current;
-              if (spanElement !== null && spanElement.innerHTML.endsWith(".")) {
-                return prevSelectedIndices;
-              }
-            }
-
-            const spaceRef = blockRefs[index - 1];
-            if (spaceRef !== null) {
-              const spaceElement = spaceRef.current;
-              if (spaceElement) {
-                spaceElement.classList.add("text-block-0");
+              if (!(spanElement !== null && spanElement.innerHTML.endsWith("."))) {
+                const spaceRef = blockRefs[index - 1];
+                if (spaceRef !== null) {
+                  const spaceElement = spaceRef.current;
+                  if (spaceElement) {
+                    spaceElement.classList.add("text-block-0");
+                  }
+                }
               }
             }
           }
@@ -78,16 +76,14 @@ const Dashboard: React.FC = () => {
             const spanRef = blockRefs[index];
             if (spanRef !== null) {
               const spanElement = spanRef.current;
-              if (spanElement !== null && spanElement.innerHTML.endsWith(".")) {
-                return prevSelectedIndices;
-              }
-            }
-
-            const spaceRef = blockRefs[index + 1];
-            if (spaceRef !== null) {
-              const spaceElement = spaceRef.current;
-              if (spaceElement) {
-                spaceElement.classList.add("text-block-0");
+              if (!(spanElement !== null && spanElement.innerHTML.endsWith("."))) {
+                const spaceRef = blockRefs[index + 1];
+                if (spaceRef !== null) {
+                  const spaceElement = spaceRef.current;
+                  if (spaceElement) {
+                    spaceElement.classList.add("text-block-0");
+                  }
+                }
               }
             }
           }

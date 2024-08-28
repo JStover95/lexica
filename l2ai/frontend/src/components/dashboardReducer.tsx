@@ -1,5 +1,5 @@
 import { createRef, RefObject } from "react";
-import { IDashboardState } from "../interfaces";
+import { IDashboardState, IPhrase } from "../interfaces";
 
 
 type Action =
@@ -46,40 +46,49 @@ const reducer = (state: IDashboardState, action: Action) => {
           blockRefs.push(null, null);  // Don't include refs for the <br /> elements
           return [...words, <br key={`b1-${i}`} />, <br key={`b2-${i}`} />];
         });
+
       return { ...state, blocks, blockRefs, showInput: false };
     }
     case "CLICK_BLOCK": {
       const { index } = action;
 
-      if (!state.selectedIndices.includes(index)) {
-        const updatedSelectedIndices = [...state.selectedIndices, index];
-        const block = state.blockRefs?.[index]?.current;
-        block?.classList.add("text-block-0");
+      if (!state.selectedIndices.includes(index) && state.blockRefs?.[index]?.current) {
+        const blockRef = state.blockRefs[index];
+        const block = state.blockRefs[index]?.current;
 
-        // Check for adjacent words
-        if (state.selectedIndices.includes(index - 2)) {
-          updatedSelectedIndices.push(index - 1);
-          if (state.blockRefs) {
-            const spanRef = state.blockRefs[index - 2];
-            if (spanRef?.current && !spanRef.current.innerHTML.endsWith(".")) {
+        if (block && blockRef) {
+          const updatedSelectedIndices = [...state.selectedIndices, index];
+          const updatedPhrases = [...state.phrases];
+          block.classList.add("text-block-0");
+
+          const newPhrase: IPhrase = { startIndex: index, stopIndex: index, refs: [blockRef], explanation: "" };
+
+          // Check for adjacent words
+          if (state.selectedIndices.includes(index - 2)) {
+            const leftPhraseIx = updatedPhrases.findIndex(phrase => phrase.stopIndex == index - 2);
+            if (!(block.innerHTML.endsWith(".") || updatedPhrases[leftPhraseIx].explanation !== "")) {
+              newPhrase.startIndex = updatedPhrases[leftPhraseIx].startIndex;
+              newPhrase.refs = [...updatedPhrases[leftPhraseIx].refs, ...newPhrase.refs];
+              updatedPhrases.splice(leftPhraseIx, 1);
               const spaceElement = state.blockRefs[index - 1]?.current;
               spaceElement?.classList.add("text-block-0");
             }
           }
-        }
 
-        if (state.selectedIndices.includes(index + 2)) {
-          updatedSelectedIndices.push(index + 1);
-          if (state.blockRefs) {
-            const spanRef = state.blockRefs[index];
-            if (spanRef?.current && !spanRef.current.innerHTML.endsWith(".")) {
+          if (state.selectedIndices.includes(index + 2)) {
+            const rightPhraseIx = updatedPhrases.findIndex(phrase => phrase.startIndex == index + 2);
+            if (!(block.innerHTML.endsWith(".") || updatedPhrases[rightPhraseIx].explanation !== "")) {
+              newPhrase.stopIndex = updatedPhrases[rightPhraseIx].startIndex;
+              newPhrase.refs = [...newPhrase.refs, ...updatedPhrases[rightPhraseIx].refs];
+              updatedPhrases.splice(rightPhraseIx, 1);
               const spaceElement = state.blockRefs[index + 1]?.current;
               spaceElement?.classList.add("text-block-0");
             }
           }
-        }
 
-        return { ...state, selectedIndices: updatedSelectedIndices };
+          updatedPhrases.push(newPhrase);
+          return { ...state, selectedIndices: updatedSelectedIndices, phrases: updatedPhrases };
+        }
       }
       return state;
     }

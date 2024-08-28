@@ -52,6 +52,7 @@ const reducer = (state: IDashboardState, action: Action) => {
     case "CLICK_BLOCK": {
       const { index } = action;
 
+      // If the user clicks a non-active block
       if (!state.selectedIndices.includes(index) && state.blockRefs?.[index]?.current) {
         const blockRef = state.blockRefs[index];
         const block = state.blockRefs[index]?.current;
@@ -59,26 +60,41 @@ const reducer = (state: IDashboardState, action: Action) => {
         if (block && blockRef) {
           const updatedSelectedIndices = [...state.selectedIndices, index];
           const updatedPhrases = [...state.phrases];
+
+          // Mark the block as active with an underline
           block.classList.add("text-block-0");
 
+          // Always create a new phrase on each click
           const newPhrase: IPhrase = { startIndex: index, stopIndex: index, refs: [blockRef], explanation: "" };
 
-          // Check for adjacent words
+          // Check for an adjacent block to the left
           if (state.selectedIndices.includes(index - 2)) {
+
+            // Get the phrase that contains the adjacent block
             const leftPhraseIx = updatedPhrases.findIndex(phrase => phrase.stopIndex == index - 2);
-            if (!(block.innerHTML.endsWith(".") || updatedPhrases[leftPhraseIx].explanation !== "")) {
+
+            // If the adjacent block is not the end of a sentence
+            if (!block.innerHTML.endsWith(".")) {
+
+              // Merge the adjacent phrase with the new phrase
+              // TODO: handle when the adjacent phrase has an explanation
               newPhrase.startIndex = updatedPhrases[leftPhraseIx].startIndex;
               newPhrase.refs = [...updatedPhrases[leftPhraseIx].refs, ...newPhrase.refs];
+
+              // Delete the adjacent phrase
               updatedPhrases.splice(leftPhraseIx, 1);
+
+              // Underline the span containing "&nbsp;" between the two blocks
               const spaceElement = state.blockRefs[index - 1]?.current;
               spaceElement?.classList.add("text-block-0");
             }
           }
 
+          // Check for an adjacent block to the right as before
           if (state.selectedIndices.includes(index + 2)) {
             const rightPhraseIx = updatedPhrases.findIndex(phrase => phrase.startIndex == index + 2);
             if (!(block.innerHTML.endsWith(".") || updatedPhrases[rightPhraseIx].explanation !== "")) {
-              newPhrase.stopIndex = updatedPhrases[rightPhraseIx].startIndex;
+              newPhrase.stopIndex = updatedPhrases[rightPhraseIx].stopIndex;
               newPhrase.refs = [...newPhrase.refs, ...updatedPhrases[rightPhraseIx].refs];
               updatedPhrases.splice(rightPhraseIx, 1);
               const spaceElement = state.blockRefs[index + 1]?.current;
@@ -87,6 +103,54 @@ const reducer = (state: IDashboardState, action: Action) => {
           }
 
           updatedPhrases.push(newPhrase);
+          return { ...state, selectedIndices: updatedSelectedIndices, phrases: updatedPhrases };
+        }
+      }
+
+      // If the user click an active block
+      else if (state.blockRefs?.[index]?.current) {
+        const blockRef = state.blockRefs[index];
+        const block = state.blockRefs[index]?.current;
+
+        if (block && blockRef) {
+          const updatedSelectedIndices = [...state.selectedIndices];
+          const updatedPhrases = [...state.phrases];
+
+          // Remove the index from selectedIndices
+          const foundIx = state.selectedIndices.findIndex(ix => ix == index);
+          updatedSelectedIndices.splice(foundIx, 1);
+
+          // Mark the block as inactive by removing the underline
+          block.classList.remove("text-block-0");
+
+          // Check for adjacent words and remove any underlined whitespace
+          if (state.selectedIndices.includes(index - 2)) {
+            const spaceElement = state.blockRefs[index - 1]?.current;
+            spaceElement?.classList.remove("text-block-0");
+          }
+
+          if (state.selectedIndices.includes(index + 2)) {
+            const spaceElement = state.blockRefs[index + 1]?.current;
+            spaceElement?.classList.remove("text-block-0");
+          }
+
+          // Find the phrase that contains current block
+          const phraseIx = updatedPhrases.findIndex(phrase => phrase.startIndex <= index && index <= phrase.stopIndex);
+          const phrase = updatedPhrases[phraseIx];
+
+          // Split the phrase into one or two new phrases that don't contain the block
+          const newPhrases: IPhrase[] = [];
+          if (phrase.startIndex < index) {
+            newPhrases.push({ startIndex: phrase.startIndex, stopIndex: index - 2, refs: phrase.refs.slice(0, (index - phrase.startIndex) / 2), explanation: "" });
+          }
+          if (index < phrase.stopIndex) {
+            newPhrases.push({ startIndex: index + 2, stopIndex: phrase.stopIndex, refs: phrase.refs.slice((index + 2 - phrase.startIndex) / 2), explanation: "" });
+          }
+
+          // Remove and replace the previous phrase
+          updatedPhrases.splice(phraseIx, 1);
+          updatedPhrases.push(...newPhrases);
+
           return { ...state, selectedIndices: updatedSelectedIndices, phrases: updatedPhrases };
         }
       }

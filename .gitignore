@@ -29,3 +29,6 @@ dict.json
 content.json
 
 .DS_Store
+
+/node_modules/
+yarn.lock

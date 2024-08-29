@@ -41,6 +41,53 @@ const Dashboard: React.FC = () => {
         dispatch({ type: "GET_DICTIONARY_ENTRIES", index: i, entries: phrase.refs.map(() => dummyDefinition) });
       }
     });
+
+    phrases.filter(phrase => !phrase.dictionaryEntries).forEach(async (phrase, i) => {
+      const query = phrase.refs.reduce((prev, current) => {
+        if (current.current) {
+          return `${prev} ${current.current.innerHTML}`;
+        }
+        return prev;
+      }, "");
+
+      const graphqlQuery = {
+        query: `
+          query SearchDictionary($q: String!) {
+            searchDictionary(q: $q) {
+              writtenForm
+              partOfSpeech
+              senses {
+                definition
+                equivalents {
+                  equivalentLanguage
+                  equivalent
+                  definition
+                }
+              }
+            }
+          }
+        `,
+        variables: {
+          q: query,
+        },
+      };
+
+      try {
+        const response = await fetch(process.env.REACT_APP_API_ENDPOINT + "/graphql", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(graphqlQuery),
+        });
+
+        const result = await response.json();
+        console.log(result.data.searchDictionary);
+        // Handle the result as needed
+      } catch (error) {
+        console.error("Error fetching dictionary entry:", error);
+      }
+    });
   }, [phrases, dispatch])
 
   const handleClickStart = async () => {

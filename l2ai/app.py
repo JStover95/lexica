@@ -7,7 +7,7 @@ from flask import Flask, Response
 from l2ai.commands import init_database, drop_database, init_user
 from l2ai.extensions import cors, jwt_manager, socketio
 from l2ai.utils.logging import logger
-from l2ai.views import base
+from l2ai.views import api, base
 
 
 def create_app(testing: bool = False) -> Flask:
@@ -34,6 +34,7 @@ def create_app(testing: bool = False) -> Flask:
 
 def register_blueprints(app: Flask):
     app.register_blueprint(base.blueprint)
+    app.register_blueprint(api.blueprint)
 
 
 def register_commands(app: Flask):

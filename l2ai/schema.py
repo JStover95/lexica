@@ -1,4 +1,5 @@
 from datetime import datetime, UTC
+from functools import reduce
 from bson.objectid import ObjectId
 from graphene import (
     Boolean,
@@ -13,7 +14,8 @@ from graphene import (
     Schema,
     String
 )
-from l2ai.collections import contents, dictionary_entries, senses, users
+from l2ai.collections import contents, dictionary_entries
+from l2ai.utils.dictionary.dictionary import query_dictionary
 
 
 class User(ObjectType):
@@ -58,9 +60,9 @@ class Sense(ObjectType):
     def from_mongo(document):
         return Sense(
             id=str(document["_id"]),
-            sense_no=document["sense_no"],
+            sense_no=document["senseNo"],
             definition=document["definition"],
-            part_of_speech=document["part_of_speech"],
+            part_of_speech=document["partOfSpeech"],
             examples=document["examples"],
             type=document["type"],
             equivalents=[
@@ -84,13 +86,32 @@ class DictionaryEntry(ObjectType):
     def from_mongo(document):
         return DictionaryEntry(
             id=str(document["_id"]),
-            source_id=document["source_id"],
+            source_id=document["sourceId"],
             sourceLanguage=document["sourceLanguage"],
-            written_form=document["written_form"],
+            written_form=document["writtenForm"],
             variations=document["variations"],
-            part_of_speech=document["part_of_speech"],
+            part_of_speech=document["partOfSpeech"],
             grade=document["grade"],
-            query_strs=document["query_strs"]
+            query_strs=document["queryStrs"]
+        )
+
+
+class DictionaryEntryWithSenses(DictionaryEntry):
+    senses = List(Sense)
+
+    @staticmethod
+    def from_mongo(document):
+        print(document)
+        return DictionaryEntryWithSenses(
+            id=str(document["_id"]),
+            source_id=document["sourceId"],
+            sourceLanguage=document["sourceLanguage"],
+            written_form=document["writtenForm"],
+            variations=document["variations"],
+            part_of_speech=document["partOfSpeech"],
+            grade=document["grade"],
+            query_strs=document["queryStrs"],
+            senses=[Sense.from_mongo(sense) for sense in document["senses"]]
         )
 
 
@@ -210,6 +231,7 @@ class Query(ObjectType):
     senses = List(Sense)
     dictionary_entries = List(DictionaryEntry)
     contents = List(Content)
+    search_dictionary = Field(List(DictionaryEntryWithSenses), q=String())
 
     def resolve_users(self, info):
         users = users.find()
@@ -226,6 +248,13 @@ class Query(ObjectType):
     def resolve_contents(self, info):
         contents = contents.find()
         return [Content.from_mongo(c) for c in contents]
+
+    def resolve_search_dictionary(self, info, q):
+        entries = []
+        for group in query_dictionary(q):
+            for entry in group:
+                entries.append(entry)
+        return [DictionaryEntryWithSenses.from_mongo(e) for e in entries]
 
 
 class ContentSurfacesInput(InputObjectType):

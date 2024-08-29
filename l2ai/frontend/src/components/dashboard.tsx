@@ -1,6 +1,6 @@
 import React, { useEffect, useReducer } from "react";
 
-import { IDashboardState } from "../interfaces";
+import { IDashboardState, IDictionaryEntry } from "../interfaces";
 import "../styleSheets/styles.css";
 import TextField from "./fields/textField";
 import AsyncButton from "./buttons/asyncButton";
@@ -38,7 +38,7 @@ const Dashboard: React.FC = () => {
     phrases.forEach((phrase, i) => {
       if (!phrase.dictionaryEntries) {
         // TODO: make request
-        dispatch({ type: "GET_DICTIONARY_ENTRIES", index: i, entries: phrase.refs.map(() => dummyDefinition) });
+        // dispatch({ type: "GET_DICTIONARY_ENTRIES", index: i, entries: phrase.refs.map(() => dummyDefinition) });
       }
     });
 
@@ -52,8 +52,8 @@ const Dashboard: React.FC = () => {
 
       const graphqlQuery = {
         query: `
-          query SearchDictionary($q: String!) {
-            searchDictionary(q: $q) {
+          query SearchDictionary($q: String!, $lang: String!) {
+            searchDictionary(q: $q, lang: $lang) {
               writtenForm
               partOfSpeech
               senses {
@@ -69,6 +69,7 @@ const Dashboard: React.FC = () => {
         `,
         variables: {
           q: query,
+          lang: "영어",  // TODO: allow user to select
         },
       };
 
@@ -82,8 +83,8 @@ const Dashboard: React.FC = () => {
         });
 
         const result = await response.json();
-        console.log(result.data.searchDictionary);
-        // Handle the result as needed
+        const entries: IDictionaryEntry[] = result.data.searchDictionary;
+        dispatch({ type: "GET_DICTIONARY_ENTRIES", index: i, entries: entries });
       } catch (error) {
         console.error("Error fetching dictionary entry:", error);
       }

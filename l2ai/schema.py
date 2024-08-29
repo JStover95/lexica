@@ -101,7 +101,6 @@ class DictionaryEntryWithSenses(DictionaryEntry):
 
     @staticmethod
     def from_mongo(document):
-        print(document)
         return DictionaryEntryWithSenses(
             id=str(document["_id"]),
             source_id=document["sourceId"],
@@ -231,7 +230,7 @@ class Query(ObjectType):
     senses = List(Sense)
     dictionary_entries = List(DictionaryEntry)
     contents = List(Content)
-    search_dictionary = Field(List(DictionaryEntryWithSenses), q=String())
+    search_dictionary = Field(List(DictionaryEntryWithSenses), q=String(), lang=String())
 
     def resolve_users(self, info):
         users = users.find()
@@ -249,12 +248,19 @@ class Query(ObjectType):
         contents = contents.find()
         return [Content.from_mongo(c) for c in contents]
 
-    def resolve_search_dictionary(self, info, q):
-        entries = []
+    def resolve_search_dictionary(self, info, q, lang):
+        result = []
         for group in query_dictionary(q):
             for entry in group:
-                entries.append(entry)
-        return [DictionaryEntryWithSenses.from_mongo(e) for e in entries]
+                for sense in entry["senses"]:
+                    sense["equivalents"] = [
+                        e for e in sense["equivalents"]
+                        if e["equivalentLanguage"] == lang
+                    ]
+
+                result.append(DictionaryEntryWithSenses.from_mongo(entry))
+
+        return result
 
 
 class ContentSurfacesInput(InputObjectType):

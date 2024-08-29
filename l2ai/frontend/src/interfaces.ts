@@ -35,6 +35,7 @@ export interface IPhrase {
   startIndex: number;
   stopIndex: number;
   refs: RefObject<HTMLSpanElement>[];
+  dictionaryEntries: IDictionaryEntry[] | null;
   explanation: "";
 }
 

@@ -6,7 +6,7 @@ import TextField from "./fields/textField";
 import AsyncButton from "./buttons/asyncButton";
 import reducer from "./dashboardReducer";
 
-import { dummyText } from "../dummyData";
+import { dummyDefinition, dummyText } from "../dummyData";
 
 const initialState: IDashboardState = {
   inputText: dummyText,
@@ -20,7 +20,7 @@ const initialState: IDashboardState = {
 
 const Dashboard: React.FC = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { showInput, blocks, blockRefs } = state;
+  const { showInput, blocks, blockRefs, phrases } = state;
 
   // Effect to update block refs
   useEffect(() => {
@@ -34,19 +34,57 @@ const Dashboard: React.FC = () => {
     }
   }, [blockRefs, dispatch]);
 
+  useEffect(() => {
+    phrases.forEach((phrase, i) => {
+      if (!phrase.dictionaryEntries) {
+        // TODO: make request
+        dispatch({ type: "GET_DICTIONARY_ENTRIES", index: i, entries: phrase.refs.map(() => dummyDefinition) });
+      }
+    });
+  }, [phrases, dispatch])
+
   const handleClickStart = async () => {
     dispatch({ type: "CLICK_START" });
   };
 
-  const phraseCards = state.phrases.map((phrase, i) => {
+  const phraseCards = phrases.map((phrase, i) => {
     return (
-      <div className="font-l p1 mb2 border-mid border-radius">
-        {phrase.refs.reduce((prev, current) => {
-          if (current.current) {
-            return `${prev} ${current.current.innerHTML}`;
-          }
-          return prev
-        }, "")}
+      <div className="mb1" key={i}>
+        <div className="font-l p1 border-mid border-radius">
+          {phrase.refs.reduce((prev, current) => {
+            if (current.current) {
+              return `${prev} ${current.current.innerHTML}`;
+            }
+            return prev
+          }, "")}
+        </div>
+        {phrase.dictionaryEntries && (
+          <div className="mt1 ph1">
+            {phrase.dictionaryEntries.map((entry, j) => (
+              <div key={`${i}-${j}`}>
+                <span className="font-l mr1"><b>{entry.writtenForm}</b></span>
+                <span>{entry.partOfSpeech}</span>
+                <ol>
+                  {entry.senses.map((sense, k) => {
+                    const eq = sense.equivalents.find(
+                      eq => eq.equivalentLanguage == "영어"
+                    );
+
+                    return (
+                      <li key={`${i}-${j}-${k}`} className="mb0-5">
+                        <div className="column">
+                          {eq && <span>{eq.equivalent}</span>}
+                          <span>{sense.definition}</span>
+                          {eq && <span>{eq.definition}</span>}
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ol>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   });

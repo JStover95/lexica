@@ -1,11 +1,13 @@
 import { createRef, RefObject } from "react";
-import { IDashboardState, IPhrase } from "../interfaces";
+import { IDashboardState, IDictionaryEntry, IPhrase } from "../interfaces";
+import { dummyDefinition } from "../dummyData";
 
 
 type Action =
   | { type: "EDIT_INPUT"; text: string }
   | { type: "CLICK_START" }
-  | { type: "CLICK_BLOCK"; index: number };
+  | { type: "CLICK_BLOCK"; index: number }
+  | { type: "GET_DICTIONARY_ENTRIES"; index: number; entries: IDictionaryEntry[] };
 
 
 const reducer = (state: IDashboardState, action: Action) => {
@@ -53,7 +55,10 @@ const reducer = (state: IDashboardState, action: Action) => {
       const { index } = action;
 
       // If the user clicks a non-active block
-      if (!state.selectedIndices.includes(index) && state.blockRefs?.[index]?.current) {
+      if (
+        !state.selectedIndices.includes(index)
+        && state.blockRefs?.[index]?.current
+      ) {
         const blockRef = state.blockRefs[index];
         const block = state.blockRefs[index]?.current;
 
@@ -65,13 +70,21 @@ const reducer = (state: IDashboardState, action: Action) => {
           block.classList.add("text-block-0");
 
           // Always create a new phrase on each click
-          const newPhrase: IPhrase = { startIndex: index, stopIndex: index, refs: [blockRef], explanation: "" };
+          const newPhrase: IPhrase = {
+            startIndex: index,
+            stopIndex: index,
+            refs: [blockRef],
+            dictionaryEntries: null,
+            explanation: ""
+          };
 
           // Check for an adjacent block to the left
           if (state.selectedIndices.includes(index - 2)) {
 
             // Get the phrase that contains the adjacent block
-            const leftPhraseIx = updatedPhrases.findIndex(phrase => phrase.stopIndex == index - 2);
+            const leftPhraseIx = updatedPhrases.findIndex(
+              phrase => phrase.stopIndex == index - 2
+            );
 
             // If the adjacent block is not the end of a sentence
             if (!block.innerHTML.endsWith(".")) {
@@ -79,7 +92,10 @@ const reducer = (state: IDashboardState, action: Action) => {
               // Merge the adjacent phrase with the new phrase
               // TODO: handle when the adjacent phrase has an explanation
               newPhrase.startIndex = updatedPhrases[leftPhraseIx].startIndex;
-              newPhrase.refs = [...updatedPhrases[leftPhraseIx].refs, ...newPhrase.refs];
+              newPhrase.refs = [
+                ...updatedPhrases[leftPhraseIx].refs,
+                ...newPhrase.refs
+              ];
 
               // Delete the adjacent phrase
               updatedPhrases.splice(leftPhraseIx, 1);
@@ -92,10 +108,18 @@ const reducer = (state: IDashboardState, action: Action) => {
 
           // Check for an adjacent block to the right as before
           if (state.selectedIndices.includes(index + 2)) {
-            const rightPhraseIx = updatedPhrases.findIndex(phrase => phrase.startIndex == index + 2);
-            if (!(block.innerHTML.endsWith(".") || updatedPhrases[rightPhraseIx].explanation !== "")) {
+            const rightPhraseIx = updatedPhrases.findIndex(
+              phrase => phrase.startIndex == index + 2
+            );
+            if (
+              !(block.innerHTML.endsWith(".")
+              || updatedPhrases[rightPhraseIx].explanation !== ""))
+            {
               newPhrase.stopIndex = updatedPhrases[rightPhraseIx].stopIndex;
-              newPhrase.refs = [...newPhrase.refs, ...updatedPhrases[rightPhraseIx].refs];
+              newPhrase.refs = [
+                ...newPhrase.refs,
+                ...updatedPhrases[rightPhraseIx].refs
+              ];
               updatedPhrases.splice(rightPhraseIx, 1);
               const spaceElement = state.blockRefs[index + 1]?.current;
               spaceElement?.classList.add("text-block-0");
@@ -103,12 +127,16 @@ const reducer = (state: IDashboardState, action: Action) => {
           }
 
           updatedPhrases.push(newPhrase);
-          return { ...state, selectedIndices: updatedSelectedIndices, phrases: updatedPhrases };
+          return {
+            ...state,
+            selectedIndices: updatedSelectedIndices,
+            phrases: updatedPhrases
+          };
         }
       }
 
       // If the user click an active block
-      else if (state.blockRefs?.[index]?.current) {
+      else if (state.blockRefs?.[index]?.current) {  // TODO: require that phrase must be selected first
         const blockRef = state.blockRefs[index];
         const block = state.blockRefs[index]?.current;
 
@@ -135,26 +163,48 @@ const reducer = (state: IDashboardState, action: Action) => {
           }
 
           // Find the phrase that contains current block
-          const phraseIx = updatedPhrases.findIndex(phrase => phrase.startIndex <= index && index <= phrase.stopIndex);
+          const phraseIx = updatedPhrases.findIndex(
+            phrase => phrase.startIndex <= index && index <= phrase.stopIndex
+          );
           const phrase = updatedPhrases[phraseIx];
 
           // Split the phrase into one or two new phrases that don't contain the block
           const newPhrases: IPhrase[] = [];
           if (phrase.startIndex < index) {
-            newPhrases.push({ startIndex: phrase.startIndex, stopIndex: index - 2, refs: phrase.refs.slice(0, (index - phrase.startIndex) / 2), explanation: "" });
+            newPhrases.push({
+              startIndex: phrase.startIndex, 
+              stopIndex: index - 2,
+              refs: phrase.refs.slice(0, (index - phrase.startIndex) / 2),
+              dictionaryEntries: null,
+              explanation: "" });
           }
           if (index < phrase.stopIndex) {
-            newPhrases.push({ startIndex: index + 2, stopIndex: phrase.stopIndex, refs: phrase.refs.slice((index + 2 - phrase.startIndex) / 2), explanation: "" });
+            newPhrases.push({
+              startIndex: index + 2,
+              stopIndex: phrase.stopIndex,
+              refs: phrase.refs.slice((index + 2 - phrase.startIndex) / 2),
+              dictionaryEntries: null,
+              explanation: "" });
           }
 
           // Remove and replace the previous phrase
           updatedPhrases.splice(phraseIx, 1);
           updatedPhrases.push(...newPhrases);
 
-          return { ...state, selectedIndices: updatedSelectedIndices, phrases: updatedPhrases };
+          return {
+            ...state,
+            selectedIndices: updatedSelectedIndices,
+            phrases: updatedPhrases
+          };
         }
       }
       return state;
+    }
+    case "GET_DICTIONARY_ENTRIES": {
+      const { index, entries } = action;
+      const updatedPhrases = [...state.phrases];
+      updatedPhrases[index].dictionaryEntries = entries;
+      return { ...state, phrases: updatedPhrases };
     }
     default:
       return state;

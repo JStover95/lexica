@@ -33,10 +33,10 @@ class DictionaryEntry(TypedDict):
     sourceId: str
     sourceLanguage: str
     writtenForm: str
-    variations: str
+    variations: list[str]  # TODO: check that correct in graphql endpoint
     partOfSpeech: str
     grade: str
-    queryStrs: str
+    queryStrs: list[str]  # TODO: check that correct in graphql endpoint
 
 
 class DictionaryEntryWithSenses(DictionaryEntry):

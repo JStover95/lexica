@@ -14,7 +14,7 @@ const reducer = (state: IDashboardState, action: Action) => {
       if (state.inputText === "") return state;
       const paragraphSplit = state.inputText.split(/\n+/);  // Splits text by paragraphs
       const blockRefs: (RefObject<HTMLSpanElement> | null)[] = [];
-  
+
       const blocks = paragraphSplit
         .filter((p) => p.trim() !== "")
         .flatMap((p, i) => {
@@ -22,7 +22,7 @@ const reducer = (state: IDashboardState, action: Action) => {
             const refWord = createRef<HTMLSpanElement>();
             const refSpace = createRef<HTMLSpanElement>();
             blockRefs.push(refWord, refSpace);
-  
+
             return [
               <span
                 className={"text-block font-l"}
@@ -42,7 +42,7 @@ const reducer = (state: IDashboardState, action: Action) => {
               ),
             ];
           });
-  
+
           blockRefs.push(null, null);  // Don't include refs for the <br /> elements
           return [...words, <br key={`b1-${i}`} />, <br key={`b2-${i}`} />];
         });

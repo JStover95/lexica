@@ -46,3 +46,29 @@ export interface IDashboardState {
   selectedIndices: number[];
   phrases: IPhrase[];
 }
+
+export interface IEquivalent {
+  equivalentLanguage: string;
+  equivalent: string;
+  definition: string;
+}
+
+export interface ISense {
+  senseNo: string;
+  definition: string;
+  partOfSpeech: string;
+  examples: string[];
+  type: string;
+  equivalents: IEquivalent[];
+}
+
+export interface IDictionaryEntry {
+  sourceId: string;
+  sourceLanguage: string;
+  writtenForm: string;
+  variations: string[];
+  partOfSpeech: string;
+  grade: string;
+  queryStrs: string[];
+  senses: ISense[];
+}

@@ -38,6 +38,19 @@ const Dashboard: React.FC = () => {
     dispatch({ type: "CLICK_START" });
   };
 
+  const phraseCards = state.phrases.map((phrase, i) => {
+    return (
+      <div className="font-l p1 mb2 border-mid border-radius">
+        {phrase.refs.reduce((prev, current) => {
+          if (current.current) {
+            return `${prev} ${current.current.innerHTML}`;
+          }
+          return prev
+        }, "")}
+      </div>
+    );
+  });
+
   return (
     <div className="column grow align-center">
       <div>
@@ -68,8 +81,8 @@ const Dashboard: React.FC = () => {
             />}
           </div>
         </div>
-        <div className="grow p2 w50p h800">
-          <span>Feedback area</span>
+        <div className="grow column p2 w50p h800">
+          {phraseCards}
         </div>
       </div>
     </div>

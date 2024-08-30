@@ -121,7 +121,7 @@ def get_query_str(
     return " ".join(result)
 
 
-def query_dictionary(query: str) -> list[list[DictionaryEntryWithSenses]]:
+def query_dictionary(query: str, context: str = "") -> list[list[DictionaryEntryWithSenses]]:
     """Query the dictionary for all words, idioms, or proverbs in a string.
     Dictionary entries are only retured if all of at least one of the entry's
     variations is found in the query string. This is done by checking that the
@@ -149,7 +149,7 @@ def query_dictionary(query: str) -> list[list[DictionaryEntryWithSenses]]:
         list[list[DictionaryEntryWithSenses]]
     """
 
-    qstr = get_query_str(query, punctuation=True)
+    qstr = get_query_str(query, context=context, punctuation=True)
     entries: list[DictionaryEntry] = list(dictionary_entries.find(
         {"$text": {"$search": qstr}}).sort({"writtenForm": 1}
     ))

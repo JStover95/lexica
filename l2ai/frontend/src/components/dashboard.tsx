@@ -40,18 +40,29 @@ const Dashboard: React.FC = () => {
         return;
       };
 
-      console.log("here");
       const query = phrase.refs.reduce((prev, current) => {
         if (current.current) {
           return `${prev} ${current.current.innerHTML}`;
         }
         return prev;
-      }, "");
+      }, "").trim();
+
+      let context = "";
+      if (blockRefs) {
+        if  (blockRefs[phrase.startIndex - 2] !== null) {
+          const text = blockRefs[phrase.startIndex - 2]?.current?.innerHTML;
+          if (text) context = text;
+        }
+        context = `${context} ${query}`.trim();
+        if  (blockRefs[phrase.stopIndex + 2] !== null) {
+          context = `${context} ${blockRefs[phrase.stopIndex + 2]?.current?.innerHTML}`.trim();
+        }
+      }
 
       const graphqlQuery = {
         query: `
-          query SearchDictionary($q: String!, $lang: String!) {
-            searchDictionary(q: $q, lang: $lang) {
+          query SearchDictionary($q: String!, $lang: String!, $context: String!) {
+            searchDictionary(q: $q, lang: $lang, context: $context) {
               writtenForm
               partOfSpeech
               senses {
@@ -68,6 +79,7 @@ const Dashboard: React.FC = () => {
         variables: {
           q: query,
           lang: "영어",  // TODO: allow user to select
+          context: context,
         },
       };
 

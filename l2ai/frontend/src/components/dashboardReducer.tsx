@@ -126,6 +126,7 @@ const reducer = (state: IDashboardState, action: Action) => {
             }
           }
 
+          console.log(newPhrase);
           updatedPhrases.push(newPhrase);
           return {
             ...state,
@@ -172,7 +173,7 @@ const reducer = (state: IDashboardState, action: Action) => {
           const newPhrases: IPhrase[] = [];
           if (phrase.startIndex < index) {
             newPhrases.push({
-              startIndex: phrase.startIndex, 
+              startIndex: phrase.startIndex,
               stopIndex: index - 2,
               refs: phrase.refs.slice(0, (index - phrase.startIndex) / 2),
               dictionaryEntries: null,

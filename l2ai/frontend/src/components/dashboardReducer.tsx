@@ -1,14 +1,16 @@
 import { createRef, RefObject } from "react";
 import { IDashboardState, IDictionaryEntry, IPhrase } from "../interfaces";
 import { dummyDefinition } from "../dummyData";
-
+import { scrollToMiddle } from "../utils";
 
 type Action =
   | { type: "EDIT_INPUT"; text: string }
   | { type: "CLICK_START" }
   | { type: "CLICK_BLOCK"; index: number }
   | { type: "CLICK_PHRASE_CARD"; index: number }
-  | { type: "GET_DICTIONARY_ENTRIES"; index: number; entries: IDictionaryEntry[] };
+  | { type: "CLICK_PHRASE"; index: number }
+  | { type: "GET_DICTIONARY_ENTRIES"; index: number; entries: IDictionaryEntry[] }
+  | { type: "REMOVE_BLOCK"; index: number };
 
 
 const reducer = (state: IDashboardState, action: Action) => {
@@ -143,9 +145,36 @@ const reducer = (state: IDashboardState, action: Action) => {
           };
         }
       }
+      return state;
+    }
+    case "CLICK_PHRASE_CARD": {
+      const { index } = action;
+      const updatedPhrases = [...state.phrases];
 
-      // If the user click an active block
-      else if (state.blockRefs?.[index]?.current) {  // TODO: require that phrase must be selected first
+      // Get the container's dimensions and scroll position
+      const container = updatedPhrases[index].refs[0].current?.parentElement;
+      const element = updatedPhrases[index].refs[0].current;
+      if (container && element) scrollToMiddle(container, element);
+
+      updatedPhrases.forEach((phrase, i) => phrase.active = index == i);
+      return { ...state, phrases: updatedPhrases };
+    }
+    case "CLICK_PHRASE": {
+      const { index } = action;
+      const updatedPhrases = [...state.phrases];
+      updatedPhrases.forEach((phrase, i) => phrase.active = index == i);
+      return { ...state, phrases: updatedPhrases };
+    }
+    case "GET_DICTIONARY_ENTRIES": {
+      const { index, entries } = action;
+      const updatedPhrases = [...state.phrases];
+      updatedPhrases[index].dictionaryEntries = entries;
+      return { ...state, phrases: updatedPhrases };
+    }
+    case "REMOVE_BLOCK": {
+      const { index } = action;
+
+      if (state.blockRefs?.[index]?.current) {  // TODO: require that phrase must be selected first
         const blockRef = state.blockRefs[index];
         const block = state.blockRefs[index]?.current;
 
@@ -210,37 +239,6 @@ const reducer = (state: IDashboardState, action: Action) => {
         }
       }
       return state;
-    }
-    case "CLICK_PHRASE_CARD": {
-      const { index } = action;
-      const updatedPhrases = [...state.phrases];
-
-      // Get the container's dimensions and scroll position
-      const container = updatedPhrases[index].refs[0].current?.parentElement;
-      const element = updatedPhrases[index].refs[0].current;
-
-      if (container && element) {
-        const containerRect = container.getBoundingClientRect();
-        const elementRect = element.getBoundingClientRect();
-        
-        // Calculate the offset to center the element within the container
-        const offsetTop = elementRect.top - containerRect.top - containerRect.height / 2 + elementRect.height / 2;
-        
-        // Scroll the container to the calculated offset
-        container.scrollBy({
-            top: offsetTop,
-            behavior: "smooth",
-        });
-      };
-
-      updatedPhrases.forEach((phrase, i) => phrase.active = index == i);
-      return { ...state, phrases: updatedPhrases };
-    }
-    case "GET_DICTIONARY_ENTRIES": {
-      const { index, entries } = action;
-      const updatedPhrases = [...state.phrases];
-      updatedPhrases[index].dictionaryEntries = entries;
-      return { ...state, phrases: updatedPhrases };
     }
     default:
       return state;

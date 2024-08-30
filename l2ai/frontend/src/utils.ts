@@ -1,6 +1,38 @@
 const crossorigin = Boolean(process.env.CROSSORIGIN);
 
 
+export const scrollToMiddle = (container: HTMLElement, element: HTMLElement) => {
+  // Get the container's dimensions and scroll position
+  const containerRect = container.getBoundingClientRect();
+  const elementRect = element.getBoundingClientRect();
+  
+  // Calculate the offset to center the element within the container
+  const offsetTop = elementRect.top - containerRect.top - containerRect.height / 2 + elementRect.height / 2;
+  
+  // Scroll the container to the calculated offset
+  container.scrollBy({
+      top: offsetTop,
+      behavior: 'smooth' // Optional: Adds smooth scrolling animation
+  });
+}
+
+
+export const scrollToTop = (container: HTMLElement, element: HTMLElement) => {
+  // Get the container's dimensions and scroll position
+  const containerRect = container.getBoundingClientRect();
+  const elementRect = element.getBoundingClientRect();
+  
+  // Calculate the offset to center the element within the container
+  const offsetTop = elementRect.top - containerRect.top;
+  
+  // Scroll the container to the calculated offset
+  container.scrollBy({
+      top: offsetTop,
+      behavior: 'smooth' // Optional: Adds smooth scrolling animation
+  });
+}
+
+
 // make a request with options
 // TODO: implement CSRF protection
 export const makeRequest = async (opts: {

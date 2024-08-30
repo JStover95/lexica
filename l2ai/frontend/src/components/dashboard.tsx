@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer } from "react";
+import React, { createRef, RefObject, useEffect, useReducer } from "react";
 
 import { IDashboardState, IDictionaryEntry } from "../interfaces";
 import "../styleSheets/styles.css";
@@ -7,6 +7,7 @@ import AsyncButton from "./buttons/asyncButton";
 import reducer from "./dashboardReducer";
 
 import { dummyDefinition, dummyText } from "../dummyData";
+import { scrollToMiddle, scrollToTop } from "../utils";
 
 const initialState: IDashboardState = {
   inputText: dummyText,
@@ -27,7 +28,7 @@ const Dashboard: React.FC = () => {
     if (blockRefs) {
       blockRefs.forEach((ref, i) => {
         if (ref && ref.current && ref.current.innerHTML !== "&nbsp;") {
-          ref.current.onclick = (e) =>
+          ref.current.onclick = () =>
             dispatch({ type: "CLICK_BLOCK", index: i });
         }
       });
@@ -36,6 +37,12 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     phrases.forEach(async (phrase, i) => {
+      phrase.refs.forEach(ref => {
+        if (ref.current) {
+          ref.current.onclick = () => handleClickActiveBlock(i);
+        };
+      });
+
       if (phrase.dictionaryEntries) {
         return;
       };
@@ -109,9 +116,19 @@ const Dashboard: React.FC = () => {
     dispatch({ type: "CLICK_PHRASE_CARD", index });
   };
 
+  const handleClickActiveBlock = (index: number) => {
+    const element = phraseCardRefs[index].current;
+    const container = element?.parentElement;
+    if (element && container) scrollToTop(container, element);
+    dispatch({ type: "CLICK_PHRASE", index });
+  };
+
+  const phraseCardRefs: RefObject<HTMLDivElement>[] = [];
   const phraseCards = phrases.map((phrase, i) => {
+    const ref = createRef<HTMLDivElement>();
+    phraseCardRefs.push(ref);
     return (
-      <div className="mb1" key={i}>
+      <div className="mb1" key={i} ref={ref}>
         <div
           className="font-l p1 border-mid border-radius hover-pointer hover-bg-light"
           onClick={() => handleClickPhraseCard(i)}
@@ -185,7 +202,9 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
         <div className="grow column p2 w50p h800">
-          {phraseCards}
+          <div className="scroll pr1">
+            {phraseCards}
+          </div>
         </div>
       </div>
     </div>

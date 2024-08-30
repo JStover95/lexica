@@ -214,6 +214,25 @@ const reducer = (state: IDashboardState, action: Action) => {
     case "CLICK_PHRASE_CARD": {
       const { index } = action;
       const updatedPhrases = [...state.phrases];
+
+      // Get the container's dimensions and scroll position
+      const container = updatedPhrases[index].refs[0].current?.parentElement;
+      const element = updatedPhrases[index].refs[0].current;
+
+      if (container && element) {
+        const containerRect = container.getBoundingClientRect();
+        const elementRect = element.getBoundingClientRect();
+        
+        // Calculate the offset to center the element within the container
+        const offsetTop = elementRect.top - containerRect.top - containerRect.height / 2 + elementRect.height / 2;
+        
+        // Scroll the container to the calculated offset
+        container.scrollBy({
+            top: offsetTop,
+            behavior: "smooth",
+        });
+      };
+
       updatedPhrases.forEach((phrase, i) => phrase.active = index == i);
       return { ...state, phrases: updatedPhrases };
     }

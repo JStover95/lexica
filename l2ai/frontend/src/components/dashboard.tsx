@@ -35,14 +35,12 @@ const Dashboard: React.FC = () => {
   }, [blockRefs, dispatch]);
 
   useEffect(() => {
-    phrases.forEach((phrase, i) => {
-      if (!phrase.dictionaryEntries) {
-        // TODO: make request
-        // dispatch({ type: "GET_DICTIONARY_ENTRIES", index: i, entries: phrase.refs.map(() => dummyDefinition) });
-      }
-    });
+    phrases.forEach(async (phrase, i) => {
+      if (phrase.dictionaryEntries) {
+        return;
+      };
 
-    phrases.filter(phrase => !phrase.dictionaryEntries).forEach(async (phrase, i) => {
+      console.log("here");
       const query = phrase.refs.reduce((prev, current) => {
         if (current.current) {
           return `${prev} ${current.current.innerHTML}`;

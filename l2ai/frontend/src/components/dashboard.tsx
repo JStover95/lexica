@@ -105,10 +105,17 @@ const Dashboard: React.FC = () => {
     dispatch({ type: "CLICK_START" });
   };
 
+  const handleClickPhraseCard = (index: number) => {
+    dispatch({ type: "CLICK_PHRASE_CARD", index });
+  };
+
   const phraseCards = phrases.map((phrase, i) => {
     return (
       <div className="mb1" key={i}>
-        <div className="font-l p1 border-mid border-radius">
+        <div
+          className="font-l p1 border-mid border-radius hover-pointer hover-bg-light"
+          onClick={() => handleClickPhraseCard(i)}
+        >
           {phrase.refs.reduce((prev, current) => {
             if (current.current) {
               return `${prev} ${current.current.innerHTML}`;
@@ -116,7 +123,7 @@ const Dashboard: React.FC = () => {
             return prev
           }, "")}
         </div>
-        {phrase.dictionaryEntries && (
+        {phrase.active && phrase.dictionaryEntries && (
           <div className="mt1 ph1">
             {phrase.dictionaryEntries.map((entry, j) => (
               <div key={`${i}-${j}`}>

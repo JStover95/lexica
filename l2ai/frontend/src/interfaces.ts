@@ -32,6 +32,7 @@ export interface IExplanation {
 }
 
 export interface IPhrase {
+  active: boolean;
   startIndex: number;
   stopIndex: number;
   refs: RefObject<HTMLSpanElement>[];

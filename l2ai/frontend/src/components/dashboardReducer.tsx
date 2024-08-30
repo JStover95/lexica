@@ -7,6 +7,7 @@ type Action =
   | { type: "EDIT_INPUT"; text: string }
   | { type: "CLICK_START" }
   | { type: "CLICK_BLOCK"; index: number }
+  | { type: "CLICK_PHRASE_CARD"; index: number }
   | { type: "GET_DICTIONARY_ENTRIES"; index: number; entries: IDictionaryEntry[] };
 
 
@@ -65,12 +66,14 @@ const reducer = (state: IDashboardState, action: Action) => {
         if (block && blockRef) {
           const updatedSelectedIndices = [...state.selectedIndices, index];
           const updatedPhrases = [...state.phrases];
+          updatedPhrases.forEach(phrase => phrase.active = false);
 
           // Mark the block as active with an underline
           block.classList.add("text-block-0");
 
           // Always create a new phrase on each click
           const newPhrase: IPhrase = {
+            active: true,
             startIndex: index,
             stopIndex: index,
             refs: [blockRef],
@@ -126,8 +129,13 @@ const reducer = (state: IDashboardState, action: Action) => {
             }
           }
 
-          console.log(newPhrase);
           updatedPhrases.push(newPhrase);
+          updatedPhrases.sort((a, b) => {
+            if (a.startIndex > b.startIndex) return 1;
+            else if (a.startIndex < b.startIndex) return -1;
+            return 0;
+          });
+
           return {
             ...state,
             selectedIndices: updatedSelectedIndices,
@@ -173,6 +181,7 @@ const reducer = (state: IDashboardState, action: Action) => {
           const newPhrases: IPhrase[] = [];
           if (phrase.startIndex < index) {
             newPhrases.push({
+              active: true,
               startIndex: phrase.startIndex,
               stopIndex: index - 2,
               refs: phrase.refs.slice(0, (index - phrase.startIndex) / 2),
@@ -181,6 +190,7 @@ const reducer = (state: IDashboardState, action: Action) => {
           }
           if (index < phrase.stopIndex) {
             newPhrases.push({
+              active: false,
               startIndex: index + 2,
               stopIndex: phrase.stopIndex,
               refs: phrase.refs.slice((index + 2 - phrase.startIndex) / 2),
@@ -200,6 +210,12 @@ const reducer = (state: IDashboardState, action: Action) => {
         }
       }
       return state;
+    }
+    case "CLICK_PHRASE_CARD": {
+      const { index } = action;
+      const updatedPhrases = [...state.phrases];
+      updatedPhrases.forEach((phrase, i) => phrase.active = index == i);
+      return { ...state, phrases: updatedPhrases };
     }
     case "GET_DICTIONARY_ENTRIES": {
       const { index, entries } = action;

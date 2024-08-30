@@ -6,9 +6,10 @@ import torch
 from tqdm import tqdm
 from transformers import AutoTokenizer, AutoModelForMultipleChoice
 
-from l2ai.collections import senses
+from l2ai.collections import senses, dictionary_entries
 from l2ai.utils.dictionary.dictionary import query_dictionary, get_query_str
 from l2ai.utils.logging import logger
+from l2ai.utils.misc import b
 
 # initialize the model and tokenizer
 model_name = "JesseStover/L2AI-dictionary-klue-bert-base"
@@ -42,8 +43,8 @@ def ends_in_vowel(str: str) -> bool:
     return ord(jamos[-1]) >= 0x1161 and ord(jamos[-1]) <= 0x1175
 
 
-def get_inference(query: str) -> InferenceResult:
-    """
+def get_inference(query: str, context: str | None = None) -> InferenceResult:  # TODO: update typing
+    """  TODO: update docstring
     Gets each word of a given query then infers the best definitions (senses)
     for each word. For example, the word "강아지" can mean "puppy" or "baby,
     sweetheart." Calling get_inference("강아지는 뽀송뽀송하다.") will:
@@ -70,21 +71,21 @@ def get_inference(query: str) -> InferenceResult:
     """
 
     # get all words, idioms, or proverbs in the query
-    groups = query_dictionary(query)
-    result = {}
+    groups = query_dictionary(query, context)
+    result = []
 
-    for group in tqdm(groups):
+    for group in groups:
 
         # all words in a group have the same written form, so use the first
         written_form = group[0]["writtenForm"]
-        pos = group[0]["partOfSpeech"]
+        pos = group[0]["partOfSpeech"]  # TODO: use part of speech to improve results
 
         # if the word is a common excluded word
         if written_form in exclude_words:
             continue
 
         # construct the prompt using the variation that was used in the query
-        prompt = "\"%s\"에 있는 \"%s\"의 정의는 " % (query, written_form)
+        prompt = "\"%s\"에 있는 \"%s\"의 정의는 " % (context, written_form)
 
         # construct a list of candidate responses using each of the word's
         # senses
@@ -106,8 +107,7 @@ def get_inference(query: str) -> InferenceResult:
                 if definition.endswith("."):
                     definition = definition[:-1]
 
-                # remove all characters that are not Hangul, alphanumeric, or
-                # numbers
+                # remove all characters that are not Hangul, alphanumeric, or numbers
                 definition_stripped = re.sub(r"[^\u3131-\uD79DA-Za-z\d]", "", definition)
 
                 # conjugate the end of the sentence
@@ -149,10 +149,22 @@ def get_inference(query: str) -> InferenceResult:
             start = end
 
             # make a list of each sense and their scores
-            ranks.extend(list(zip(entry["ranks"], [sense["definition"] for sense in entry["senses"]])))
+            ranks.extend(list(zip([sense["_id"] for sense in entry["senses"]], entry["ranks"])))
 
         # sort this word's senses according to its rank
-        ranks.sort(key=lambda x: x[0], reverse=True)
-        result[written_form] = ranks
+        ranks.sort(key=lambda x: x[1], reverse=True)
+        rank_map = dict(ranks)
+
+        # get dictionary entry that has sense with highest score
+        for entry in group:
+            for sense in entry["senses"]:
+                if sense["_id"] == ranks[0][0]:
+                    break
+
+        # add the rank to each sense
+        for sense in entry["senses"]:
+            sense["rank"] = rank_map[sense["_id"]]
+
+        result.append(entry)
 
     return result

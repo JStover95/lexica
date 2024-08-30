@@ -62,6 +62,7 @@ export interface ISense {
   examples: string[];
   type: string;
   equivalents: IEquivalent[];
+  rank?: number;
 }
 
 export interface IDictionaryEntry {

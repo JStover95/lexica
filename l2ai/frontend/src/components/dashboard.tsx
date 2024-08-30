@@ -64,56 +64,44 @@ const Dashboard: React.FC = () => {
       }, "").trim();
 
       let context = "";
+      let index = phrase.startIndex;
       if (blockRefs) {
-        if  (blockRefs[phrase.startIndex - 2] !== null) {
-          const text = blockRefs[phrase.startIndex - 2]?.current?.innerHTML;
-          if (text) context = text;
+        if (
+          index > 0
+          && blockRefs[index]?.current?.innerHTML.endsWith(".")
+          && !blockRefs[index - 1]?.current?.innerHTML.endsWith(".")
+        ) {
+          index--;
         }
-        context = `${context} ${query}`.trim();
-        if  (blockRefs[phrase.stopIndex + 2] !== null) {
-          context = `${context} ${blockRefs[phrase.stopIndex + 2]?.current?.innerHTML}`.trim();
+        while (index > -1
+          && blockRefs[index] !== null
+          && !blockRefs[index]?.current?.innerHTML.endsWith(".")
+        ) {
+          index--;
         }
-      }
-
-      const graphqlQuery = {
-        query: `
-          query SearchDictionary($q: String!, $lang: String!, $context: String!) {
-            searchDictionary(q: $q, lang: $lang, context: $context) {
-              writtenForm
-              partOfSpeech
-              senses {
-                definition
-                equivalents {
-                  equivalentLanguage
-                  equivalent
-                  definition
-                }
-              }
-            }
+        index++;
+        while (index < blockRefs.length && blockRefs[index] !== null) {
+          if (blockRefs[index]?.current?.innerHTML != "&nbsp;") {
+            context = `${context} ${blockRefs[index]?.current?.innerHTML}`;
           }
-        `,
-        variables: {
-          q: query,
-          lang: "영어",  // TODO: allow user to select
-          context: context,
-        },
-      };
-
-      try {
-        const response = await fetch(process.env.REACT_APP_API_ENDPOINT + "/graphql", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(graphqlQuery),
-        });
-
-        const result = await response.json();
-        const entries: IDictionaryEntry[] = result.data.searchDictionary;
-        dispatch({ type: "GET_DICTIONARY_ENTRIES", index: i, entries: entries });
-      } catch (error) {
-        console.error("Error fetching dictionary entry:", error);
+          if (blockRefs[index]?.current?.innerHTML.endsWith(".")) {
+            break;
+          }
+          index++;
+        }
       }
+
+      const inference = await fetch(process.env.REACT_APP_API_ENDPOINT + "/infer", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({"Query": query, "Context": context.trim()})
+      });
+
+      const result = await inference.json();
+      const entries: IDictionaryEntry[] = result.Result;
+      dispatch({ type: "GET_DICTIONARY_ENTRIES", index: i, entries: entries });
     });
   }, [phrases, dispatch])
 
@@ -151,29 +139,43 @@ const Dashboard: React.FC = () => {
         </div>
         {phrase.active && phrase.dictionaryEntries && (
           <div className="mt1 ph1">
-            {phrase.dictionaryEntries.map((entry, j) => (
-              <div key={`${i}-${j}`}>
-                <span className="font-l mr1"><b>{entry.writtenForm}</b></span>
-                <span>{entry.partOfSpeech}</span>
-                <ol>
-                  {entry.senses.map((sense, k) => {
-                    const eq = sense.equivalents.find(
-                      eq => eq.equivalentLanguage == "영어"
-                    );
+            {phrase.dictionaryEntries.map((entry, j) => {
 
-                    return (
-                      <li key={`${i}-${j}-${k}`} className="mb0-5">
-                        <div className="column">
-                          {eq && <span>{eq.equivalent}</span>}
-                          <span>{sense.definition}</span>
-                          {eq && <span>{eq.definition}</span>}
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ol>
-              </div>
-            ))}
+              // get index of sense with highest rank
+              let maxRank = 0;
+              let maxIndex = 0;
+              for (let index = 0; index < entry.senses.length; index++) {
+                const rank = entry.senses[index].rank;
+                if (rank && rank > maxRank) {
+                  maxRank = rank;
+                  maxIndex = index;
+                }
+              };
+
+              return (
+                <div key={`${i}-${j}`}>
+                  <span className="font-l mr1"><b>{entry.writtenForm}</b></span>
+                  <span>{entry.partOfSpeech}</span>
+                  <ol>
+                    {entry.senses.map((sense, k) => {
+                      const eq = sense.equivalents.find(
+                        eq => eq.equivalentLanguage == "영어"
+                      );
+
+                      return (
+                        <li key={`${i}-${j}-${k}`} className={maxIndex !== k ? "hidden" : "mb0-5" }>
+                          <div className="column">
+                            {eq && <span>{eq.equivalent}</span>}
+                            <span>{sense.definition}</span>
+                            {eq && <span>{eq.definition}</span>}
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

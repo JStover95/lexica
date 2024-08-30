@@ -1,6 +1,5 @@
 from functools import wraps
-import traceback
-from typing import Mapping, TypedDict
+from typing import Mapping, TypedDict, NotRequired
 from flask import make_response, request
 from jsonschema import validate, ValidationError
 from mypy_boto3_cognito_idp.literals import ChallengeNameType
@@ -23,6 +22,27 @@ def validate_schema(schema):
         return wrapper
 
     return wrapped_func
+
+
+class API:
+    InferRequestType = TypedDict(
+        "InferRequestType",
+        {
+            "Query": str,
+            "Context": NotRequired[str],
+        }
+    )
+
+    infer_schema = {
+        "type": "object",
+        "properties": {
+            "Query": {"type": "string"},
+            "Context": {"type": "string"},
+        },
+        "required": [
+            "Query",
+        ],
+    }
 
 
 class Base:

@@ -28,19 +28,19 @@ class User(ObjectType):
         return User(
             id=str(document["_id"]),
             username=document["username"],
-            last_login=document["last_login"]
+            last_login=document["lastLogin"]
         )
 
 
 class Equivalent(ObjectType):
-    equivalentLanguage = String()
+    equivalent_language = String()
     equivalent = String()
     definition = String()
 
     @staticmethod
     def from_mongo(document):
         return Equivalent(
-            equivalentLanguage=document["equivalentLanguage"],
+            equivalent_language=document["equivalentLanguage"],
             equivalent=document["equivalent"],
             definition=document["definition"]
         )
@@ -54,7 +54,7 @@ class Sense(ObjectType):
     examples = List(String)
     type = String()
     equivalents = List(Equivalent)
-    dictionaryEntryId = String()
+    dictionary_entry_id = String()
 
     @staticmethod
     def from_mongo(document):
@@ -68,14 +68,14 @@ class Sense(ObjectType):
             equivalents=[
                 Equivalent.from_mongo(eq) for eq in document["equivalents"]
             ],
-            dictionaryEntryId=str(document["dictionaryEntryId"])
+            dictionary_entry_id=str(document["dictionaryEntryId"])
         )
 
 
 class DictionaryEntry(ObjectType):
     id = String()
     source_id = String()
-    sourceLanguage = String()
+    source_language = String()
     written_form = String()
     variations = String()
     part_of_speech = String()
@@ -87,7 +87,7 @@ class DictionaryEntry(ObjectType):
         return DictionaryEntry(
             id=str(document["_id"]),
             source_id=document["sourceId"],
-            sourceLanguage=document["sourceLanguage"],
+            source_language=document["sourceLanguage"],
             written_form=document["writtenForm"],
             variations=document["variations"],
             part_of_speech=document["partOfSpeech"],
@@ -104,7 +104,7 @@ class DictionaryEntryWithSenses(DictionaryEntry):
         return DictionaryEntryWithSenses(
             id=str(document["_id"]),
             source_id=document["sourceId"],
-            sourceLanguage=document["sourceLanguage"],
+            source_language=document["sourceLanguage"],
             written_form=document["writtenForm"],
             variations=document["variations"],
             part_of_speech=document["partOfSpeech"],
@@ -116,13 +116,13 @@ class DictionaryEntryWithSenses(DictionaryEntry):
 
 class SenseRank(ObjectType):
     rank = Float()
-    senseId = String()
+    sense_id = String()
 
     @staticmethod
     def from_mongo(document):
         return SenseRank(
             rank=document["rank"],
-            senseId=str(document["senseId"])
+            sense_id=str(document["senseId"])
         )
 
 
@@ -195,7 +195,7 @@ class Content(ObjectType):
     ix = List(Ix)
     explanations = List(Explanation)
     highlights = List(Highlight)
-    userId = String()
+    user_id = String()
 
     @staticmethod
     def from_mongo(document):
@@ -221,7 +221,7 @@ class Content(ObjectType):
             highlights=[
                 Highlight.from_mongo(hl) for hl in document["highlights"]
             ],
-            userId=str(document["userId"])
+            user_id=str(document["userId"])
         )
 
 

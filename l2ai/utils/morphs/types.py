@@ -139,5 +139,4 @@ def get_morph_type(morph: Morpheme) -> str:
         if function(pos):
             return key
 
-    print(morph)
     raise ValueError("Morph pos not found: %s" % str(pos))

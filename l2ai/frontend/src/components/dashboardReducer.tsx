@@ -92,7 +92,7 @@ const reducer = (state: IDashboardState, action: Action) => {
             );
 
             // If the adjacent block is not the end of a sentence
-            if (!block.innerHTML.endsWith(".")) {
+            if (!state.blockRefs[index - 2]?.current?.innerHTML.endsWith(".")) {
 
               // Underline the span containing "&nbsp;" between the two blocks
               const spaceRef = state.blockRefs[index - 1];
@@ -118,10 +118,7 @@ const reducer = (state: IDashboardState, action: Action) => {
             const rightPhraseIx = updatedPhrases.findIndex(
               phrase => phrase.startIndex == index + 2
             );
-            if (
-              !(block.innerHTML.endsWith(".")
-              || updatedPhrases[rightPhraseIx].explanation !== ""))
-            {
+            if (!state.blockRefs[index + 2]?.current?.innerHTML.endsWith(".")) {
               const spaceRef = state.blockRefs[index + 1];
               const spaceElement = spaceRef?.current;
               spaceElement?.classList.add("text-block-0");

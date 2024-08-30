@@ -121,7 +121,7 @@ def get_query_str(
     return " ".join(result)
 
 
-def query_dictionary(query: str, context: str = "") -> list[list[DictionaryEntryWithSenses]]:
+def query_dictionary(query: str, context: str | None = None) -> list[list[DictionaryEntryWithSenses]]:
     """Query the dictionary for all words, idioms, or proverbs in a string.
     Dictionary entries are only retured if all of at least one of the entry's
     variations is found in the query string. This is done by checking that the

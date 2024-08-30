@@ -333,6 +333,11 @@
   overflow: scroll;
 }
 
+.hidden {
+  visibility: hidden;
+  height: 0px;
+}
+
 .hover-bg-light:hover {
   background-color: var(--color-primary-bg-light);
   transition: background-color .2s;

@@ -12,7 +12,7 @@ export const scrollToMiddle = (container: HTMLElement, element: HTMLElement) => 
   // Scroll the container to the calculated offset
   container.scrollBy({
       top: offsetTop,
-      behavior: 'smooth' // Optional: Adds smooth scrolling animation
+      behavior: "smooth"
   });
 }
 
@@ -28,7 +28,7 @@ export const scrollToTop = (container: HTMLElement, element: HTMLElement) => {
   // Scroll the container to the calculated offset
   container.scrollBy({
       top: offsetTop,
-      behavior: 'smooth' // Optional: Adds smooth scrolling animation
+      behavior: "smooth"
   });
 }
 

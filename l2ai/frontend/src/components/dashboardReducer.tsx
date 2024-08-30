@@ -94,20 +94,22 @@ const reducer = (state: IDashboardState, action: Action) => {
             // If the adjacent block is not the end of a sentence
             if (!block.innerHTML.endsWith(".")) {
 
+              // Underline the span containing "&nbsp;" between the two blocks
+              const spaceRef = state.blockRefs[index - 1];
+              const spaceElement = spaceRef?.current;
+              spaceElement?.classList.add("text-block-0");
+
               // Merge the adjacent phrase with the new phrase
               // TODO: handle when the adjacent phrase has an explanation
               newPhrase.startIndex = updatedPhrases[leftPhraseIx].startIndex;
               newPhrase.refs = [
                 ...updatedPhrases[leftPhraseIx].refs,
+                ...(spaceRef ? [spaceRef] : []),
                 ...newPhrase.refs
               ];
 
               // Delete the adjacent phrase
               updatedPhrases.splice(leftPhraseIx, 1);
-
-              // Underline the span containing "&nbsp;" between the two blocks
-              const spaceElement = state.blockRefs[index - 1]?.current;
-              spaceElement?.classList.add("text-block-0");
             }
           }
 
@@ -120,14 +122,16 @@ const reducer = (state: IDashboardState, action: Action) => {
               !(block.innerHTML.endsWith(".")
               || updatedPhrases[rightPhraseIx].explanation !== ""))
             {
+              const spaceRef = state.blockRefs[index + 1];
+              const spaceElement = spaceRef?.current;
+              spaceElement?.classList.add("text-block-0");
               newPhrase.stopIndex = updatedPhrases[rightPhraseIx].stopIndex;
               newPhrase.refs = [
                 ...newPhrase.refs,
+                ...(spaceRef ? [spaceRef] : []),
                 ...updatedPhrases[rightPhraseIx].refs
               ];
               updatedPhrases.splice(rightPhraseIx, 1);
-              const spaceElement = state.blockRefs[index + 1]?.current;
-              spaceElement?.classList.add("text-block-0");
             }
           }
 
@@ -171,75 +175,75 @@ const reducer = (state: IDashboardState, action: Action) => {
       updatedPhrases[index].dictionaryEntries = entries;
       return { ...state, phrases: updatedPhrases };
     }
-    case "REMOVE_BLOCK": {
-      const { index } = action;
+    // case "REMOVE_BLOCK": {
+    //   const { index } = action;
 
-      if (state.blockRefs?.[index]?.current) {  // TODO: require that phrase must be selected first
-        const blockRef = state.blockRefs[index];
-        const block = state.blockRefs[index]?.current;
+    //   if (state.blockRefs?.[index]?.current) {  // TODO: require that phrase must be selected first
+    //     const blockRef = state.blockRefs[index];
+    //     const block = state.blockRefs[index]?.current;
 
-        if (block && blockRef) {
-          const updatedSelectedIndices = [...state.selectedIndices];
-          const updatedPhrases = [...state.phrases];
+    //     if (block && blockRef) {
+    //       const updatedSelectedIndices = [...state.selectedIndices];
+    //       const updatedPhrases = [...state.phrases];
 
-          // Remove the index from selectedIndices
-          const foundIx = state.selectedIndices.findIndex(ix => ix == index);
-          updatedSelectedIndices.splice(foundIx, 1);
+    //       // Remove the index from selectedIndices
+    //       const foundIx = state.selectedIndices.findIndex(ix => ix == index);
+    //       updatedSelectedIndices.splice(foundIx, 1);
 
-          // Mark the block as inactive by removing the underline
-          block.classList.remove("text-block-0");
+    //       // Mark the block as inactive by removing the underline
+    //       block.classList.remove("text-block-0");
 
-          // Check for adjacent words and remove any underlined whitespace
-          if (state.selectedIndices.includes(index - 2)) {
-            const spaceElement = state.blockRefs[index - 1]?.current;
-            spaceElement?.classList.remove("text-block-0");
-          }
+    //       // Check for adjacent words and remove any underlined whitespace
+    //       if (state.selectedIndices.includes(index - 2)) {
+    //         const spaceElement = state.blockRefs[index - 1]?.current;
+    //         spaceElement?.classList.remove("text-block-0");
+    //       }
 
-          if (state.selectedIndices.includes(index + 2)) {
-            const spaceElement = state.blockRefs[index + 1]?.current;
-            spaceElement?.classList.remove("text-block-0");
-          }
+    //       if (state.selectedIndices.includes(index + 2)) {
+    //         const spaceElement = state.blockRefs[index + 1]?.current;
+    //         spaceElement?.classList.remove("text-block-0");
+    //       }
 
-          // Find the phrase that contains current block
-          const phraseIx = updatedPhrases.findIndex(
-            phrase => phrase.startIndex <= index && index <= phrase.stopIndex
-          );
-          const phrase = updatedPhrases[phraseIx];
+    //       // Find the phrase that contains current block
+    //       const phraseIx = updatedPhrases.findIndex(
+    //         phrase => phrase.startIndex <= index && index <= phrase.stopIndex
+    //       );
+    //       const phrase = updatedPhrases[phraseIx];
 
-          // Split the phrase into one or two new phrases that don't contain the block
-          const newPhrases: IPhrase[] = [];
-          if (phrase.startIndex < index) {
-            newPhrases.push({
-              active: true,
-              startIndex: phrase.startIndex,
-              stopIndex: index - 2,
-              refs: phrase.refs.slice(0, (index - phrase.startIndex) / 2),
-              dictionaryEntries: null,
-              explanation: "" });
-          }
-          if (index < phrase.stopIndex) {
-            newPhrases.push({
-              active: false,
-              startIndex: index + 2,
-              stopIndex: phrase.stopIndex,
-              refs: phrase.refs.slice((index + 2 - phrase.startIndex) / 2),
-              dictionaryEntries: null,
-              explanation: "" });
-          }
+    //       // Split the phrase into one or two new phrases that don't contain the block
+    //       const newPhrases: IPhrase[] = [];
+    //       if (phrase.startIndex < index) {
+    //         newPhrases.push({
+    //           active: true,
+    //           startIndex: phrase.startIndex,
+    //           stopIndex: index - 2,
+    //           refs: phrase.refs.slice(0, (index - phrase.startIndex) / 2),
+    //           dictionaryEntries: null,
+    //           explanation: "" });
+    //       }
+    //       if (index < phrase.stopIndex) {
+    //         newPhrases.push({
+    //           active: false,
+    //           startIndex: index + 2,
+    //           stopIndex: phrase.stopIndex,
+    //           refs: phrase.refs.slice((index + 2 - phrase.startIndex) / 2),
+    //           dictionaryEntries: null,
+    //           explanation: "" });
+    //       }
 
-          // Remove and replace the previous phrase
-          updatedPhrases.splice(phraseIx, 1);
-          updatedPhrases.push(...newPhrases);
+    //       // Remove and replace the previous phrase
+    //       updatedPhrases.splice(phraseIx, 1);
+    //       updatedPhrases.push(...newPhrases);
 
-          return {
-            ...state,
-            selectedIndices: updatedSelectedIndices,
-            phrases: updatedPhrases
-          };
-        }
-      }
-      return state;
-    }
+    //       return {
+    //         ...state,
+    //         selectedIndices: updatedSelectedIndices,
+    //         phrases: updatedPhrases
+    //       };
+    //     }
+    //   }
+    //   return state;
+    // }
     default:
       return state;
   }

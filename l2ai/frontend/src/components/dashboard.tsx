@@ -6,8 +6,8 @@ import TextField from "./fields/textField";
 import AsyncButton from "./buttons/asyncButton";
 import reducer from "./dashboardReducer";
 
-import { dummyDefinition, dummyText } from "../dummyData";
-import { scrollToMiddle, scrollToTop } from "../utils";
+import { dummyText } from "../dummyData";
+import { scrollToTop } from "../utils";
 
 const initialState: IDashboardState = {
   inputText: dummyText,
@@ -37,8 +37,17 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     phrases.forEach(async (phrase, i) => {
+      if (phrase.active) {
+        const element = phraseCardRefs[i].current;
+        const container = element?.parentElement;
+        if (element && container) scrollToTop(container, element);
+        phrase.refs.forEach(ref => ref.current?.classList.add("bg-light"));
+      } else {
+        phrase.refs.forEach(ref => ref.current?.classList.remove("bg-light"));
+      };
+
       phrase.refs.forEach(ref => {
-        if (ref.current) {
+        if (ref.current && ref.current.innerHTML != "&nbsp;") {
           ref.current.onclick = () => handleClickActiveBlock(i);
         };
       });
@@ -48,7 +57,7 @@ const Dashboard: React.FC = () => {
       };
 
       const query = phrase.refs.reduce((prev, current) => {
-        if (current.current) {
+        if (current.current && current.current.innerHTML != "&nbsp;") {
           return `${prev} ${current.current.innerHTML}`;
         }
         return prev;
@@ -134,7 +143,7 @@ const Dashboard: React.FC = () => {
           onClick={() => handleClickPhraseCard(i)}
         >
           {phrase.refs.reduce((prev, current) => {
-            if (current.current) {
+            if (current.current && current.current.innerHTML != "&nbsp;") {
               return `${prev} ${current.current.innerHTML}`;
             }
             return prev

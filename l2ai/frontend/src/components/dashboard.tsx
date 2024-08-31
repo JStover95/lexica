@@ -177,14 +177,14 @@ const Dashboard: React.FC = () => {
                               {eq && <span>{eq.equivalent}</span>}
                               <span>{sense.definition}</span>
                               {eq && <span>{eq.definition}</span>}
-                              {!entry.showAll && <span
+                              {!entry.showAll && entry.senses.length > 1 && <span
                                 className="border-radius btn btn-primary font-s mt0-5 w-fit-content"
                                 onClick={() => handleClickDefinitionButton(i, j)}
                               >
                                 See more definitions
                               </span>}
                             </div>
-                            {maxIndex === k
+                            {entry.senses.length > 1 && (maxIndex === k
                               ? (
                                 <div className="flex-grow align-center justify-end grow hover-pointer">
                                   <i className="material-icons icon-primary-mid icon-l p1"
@@ -202,7 +202,7 @@ const Dashboard: React.FC = () => {
                                     star
                                   </i>
                                 </div>
-                            )}
+                            ))}
                           </div>
                         </li>
                       );

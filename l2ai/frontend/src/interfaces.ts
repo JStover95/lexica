@@ -43,6 +43,7 @@ export interface IPhrase {
 export interface IDashboardState {
   inputText: string;
   showInput: boolean;
+  edit: boolean;
   blocks: React.ReactNode[] | null;
   blockRefs: (RefObject<HTMLSpanElement> | null)[] | null;
   selectedIndices: number[];

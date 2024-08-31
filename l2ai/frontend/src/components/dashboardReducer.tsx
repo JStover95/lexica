@@ -11,6 +11,7 @@ type Action =
   | { type: "CLICK_PHRASE"; index: number }
   | { type: "CLICK_SEE_MORE_DEFINITIONS"; phraseIx: number; entryIx: number }
   | { type: "CLICK_STAR_BUTTON"; phraseIx: number; entryIx: number; senseIx: number; }
+  | { type: "CLICK_EDIT_HIGHLIGHTS" }
   | { type: "GET_DICTIONARY_ENTRIES"; index: number; entries: IDictionaryEntry[] }
   | { type: "REMOVE_BLOCK"; index: number };
 
@@ -191,6 +192,9 @@ const reducer = (state: IDashboardState, action: Action) => {
       }
       return { ...state, phrases: updatedPhrases };
     }
+    case "CLICK_EDIT_HIGHLIGHTS": {
+      return { ...state, edit: !state.edit };
+    }
     case "GET_DICTIONARY_ENTRIES": {
       const { index, entries } = action;
       const updatedPhrases = [...state.phrases];
@@ -200,7 +204,7 @@ const reducer = (state: IDashboardState, action: Action) => {
     // case "REMOVE_BLOCK": {
     //   const { index } = action;
 
-    //   if (state.blockRefs?.[index]?.current) {  // TODO: require that phrase must be selected first
+    //   if (state.blockRefs?.[index]?.current) {
     //     const blockRef = state.blockRefs[index];
     //     const block = state.blockRefs[index]?.current;
 
@@ -239,19 +243,21 @@ const reducer = (state: IDashboardState, action: Action) => {
     //           active: true,
     //           startIndex: phrase.startIndex,
     //           stopIndex: index - 2,
-    //           refs: phrase.refs.slice(0, (index - phrase.startIndex) / 2),
+    //           refs: phrase.refs.slice(0, index - phrase.startIndex - 1),
     //           dictionaryEntries: null,
-    //           explanation: "" });
+    //           explanation: ""
+    //         });
     //       }
-    //       if (index < phrase.stopIndex) {
-    //         newPhrases.push({
-    //           active: false,
-    //           startIndex: index + 2,
-    //           stopIndex: phrase.stopIndex,
-    //           refs: phrase.refs.slice((index + 2 - phrase.startIndex) / 2),
-    //           dictionaryEntries: null,
-    //           explanation: "" });
-    //       }
+    //       // if (index < phrase.stopIndex) {
+    //       //   newPhrases.push({
+    //       //     active: false,
+    //       //     startIndex: index + 2,
+    //       //     stopIndex: phrase.stopIndex,
+    //       //     refs: phrase.refs.slice(index + 3 - phrase.startIndex),
+    //       //     dictionaryEntries: null,
+    //       //     explanation: ""
+    //       //   });
+    //       // }
 
     //       // Remove and replace the previous phrase
     //       updatedPhrases.splice(phraseIx, 1);

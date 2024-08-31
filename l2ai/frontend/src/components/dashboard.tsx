@@ -12,6 +12,7 @@ import { scrollToMiddle, scrollToTop } from "../utils";
 const initialState: IDashboardState = {
   inputText: dummyText,
   showInput: true,
+  edit: false,
   blocks: null,
   blockRefs: null,
   selectedIndices: [],
@@ -21,11 +22,19 @@ const initialState: IDashboardState = {
 
 const Dashboard: React.FC = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { showInput, blocks, blockRefs, phrases } = state;
+  const { showInput, edit, blocks, blockRefs, phrases } = state;
 
   // Effect to update block refs
   useEffect(() => {
-    if (blockRefs) {
+    if (edit && blockRefs) {
+      blockRefs.forEach((ref, i) => {
+        if (ref && ref.current) {
+          ref.current.onclick = () => {
+            dispatch({ type: "REMOVE_BLOCK", index: i });
+          };
+        }
+      });
+    } else if (blockRefs) {
       blockRefs.forEach((ref, i) => {
         if (ref && ref.current && ref.current.innerHTML !== "&nbsp;") {
           ref.current.onclick = () =>
@@ -33,7 +42,7 @@ const Dashboard: React.FC = () => {
         }
       });
     }
-  }, [blockRefs, dispatch]);
+  }, [edit, blockRefs, dispatch]);
 
   useEffect(() => {
     phrases.forEach(async (phrase, i) => {
@@ -234,9 +243,37 @@ const Dashboard: React.FC = () => {
                 value={dummyText}
               />
             </div> :
-            <div className="font-height-l scroll pr1">
-              {blocks}
-            </div>
+            <React.Fragment>
+              <div className="flex mb1">
+                {!edit
+                  ? (
+                    <React.Fragment>
+                      <div className="border-radius btn btn-primary mr0-5">
+                        <i className="material-icons mr0-5">edit_note</i>
+                        <span>Edit text</span>
+                      </div>
+                      <div className="border-radius btn btn-primary mr0-5"
+                        onClick={() => dispatch({ type: "CLICK_EDIT_HIGHLIGHTS" })}
+                      >
+                        <i className="material-icons mr0-5">bookmark_remove</i>
+                        <span>Edit highlights</span>
+                      </div>
+                    </React.Fragment>
+                  )
+                  : (
+                    <div className="border-radius btn btn-primary mr0-5"
+                      onClick={() => dispatch({ type: "CLICK_EDIT_HIGHLIGHTS" })}
+                    >
+                      <i className="material-icons mr0-5">done_all</i>
+                      <span>Save changes</span>
+                    </div>
+                  )
+                }
+              </div>
+              <div className="font-height-l scroll pr1">
+                {blocks}
+              </div>
+            </React.Fragment>
           }
           <div className="justify-center">
             {showInput && <AsyncButton

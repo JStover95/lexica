@@ -9,6 +9,8 @@ type Action =
   | { type: "CLICK_BLOCK"; index: number }
   | { type: "CLICK_PHRASE_CARD"; index: number }
   | { type: "CLICK_PHRASE"; index: number }
+  | { type: "CLICK_SEE_MORE_DEFINITIONS"; phraseIx: number; entryIx: number }
+  | { type: "CLICK_STAR_BUTTON"; phraseIx: number; entryIx: number; senseIx: number; }
   | { type: "GET_DICTIONARY_ENTRIES"; index: number; entries: IDictionaryEntry[] }
   | { type: "REMOVE_BLOCK"; index: number };
 
@@ -164,6 +166,29 @@ const reducer = (state: IDashboardState, action: Action) => {
       const { index } = action;
       const updatedPhrases = [...state.phrases];
       updatedPhrases.forEach((phrase, i) => phrase.active = index == i);
+      return { ...state, phrases: updatedPhrases };
+    }
+    case "CLICK_SEE_MORE_DEFINITIONS": {
+      const { phraseIx, entryIx } = action;
+      const updatedPhrases = [...state.phrases];
+      const phrase = updatedPhrases[phraseIx];
+      if (phrase.dictionaryEntries) {
+        const entry = phrase.dictionaryEntries[entryIx].showAll = true;
+      }
+      return { ...state, phrases: updatedPhrases };
+    }
+    case "CLICK_STAR_BUTTON": {
+      const { phraseIx, entryIx, senseIx } = action;
+      const updatedPhrases = [...state.phrases];
+      const phrase = updatedPhrases[phraseIx];
+      if (phrase.dictionaryEntries) {
+        const entry = phrase.dictionaryEntries[entryIx];
+        entry.showAll = false;
+        entry.senses.forEach(sense => {
+          if (sense.rank === 1.0) sense.rank = 0.0;
+        });
+        entry.senses[senseIx].rank = 1.0;
+      }
       return { ...state, phrases: updatedPhrases };
     }
     case "GET_DICTIONARY_ENTRIES": {

@@ -56,22 +56,23 @@ export interface IEquivalent {
 }
 
 export interface ISense {
-  senseNo: string;
+  senseNo?: string;
   definition: string;
-  partOfSpeech: string;
-  examples: string[];
-  type: string;
-  equivalents: IEquivalent[];
+  partOfSpeech?: string;
+  examples?: string[];
+  type?: string;
+  equivalents?: IEquivalent[];
   rank?: number;
 }
 
 export interface IDictionaryEntry {
-  sourceId: string;
-  sourceLanguage: string;
+  sourceId?: string;
+  sourceLanguage?: string;
   writtenForm: string;
-  variations: string[];
+  variations?: string[];
   partOfSpeech: string;
-  grade: string;
-  queryStrs: string[];
+  grade?: string;
+  queryStrs?: string[];
   senses: ISense[];
+  showAll?: boolean;
 }

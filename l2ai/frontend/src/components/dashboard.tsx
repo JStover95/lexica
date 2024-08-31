@@ -7,7 +7,7 @@ import AsyncButton from "./buttons/asyncButton";
 import reducer from "./dashboardReducer";
 
 import { dummyText } from "../dummyData";
-import { scrollToTop } from "../utils";
+import { scrollToMiddle, scrollToTop } from "../utils";
 
 const initialState: IDashboardState = {
   inputText: dummyText,
@@ -116,8 +116,16 @@ const Dashboard: React.FC = () => {
   const handleClickActiveBlock = (index: number) => {
     const element = phraseCardRefs[index].current;
     const container = element?.parentElement;
-    if (element && container) scrollToTop(container, element);
+    if (element && container) scrollToMiddle(container, element);
     dispatch({ type: "CLICK_PHRASE", index });
+  };
+
+  const handleClickDefinitionButton = (phraseIx: number, entryIx: number) => {
+    dispatch({ type: "CLICK_SEE_MORE_DEFINITIONS", phraseIx, entryIx });
+  };
+
+  const handleClickStarButton = (phraseIx: number, entryIx: number, senseIx: number) => {
+    dispatch({ type: "CLICK_STAR_BUTTON", phraseIx, entryIx, senseIx })
   };
 
   const phraseCardRefs: RefObject<HTMLDivElement>[] = [];
@@ -158,16 +166,43 @@ const Dashboard: React.FC = () => {
                   <span>{entry.partOfSpeech}</span>
                   <ol>
                     {entry.senses.map((sense, k) => {
-                      const eq = sense.equivalents.find(
+                      const eq = sense.equivalents?.find(
                         eq => eq.equivalentLanguage == "영어"
                       );
 
                       return (
-                        <li key={`${i}-${j}-${k}`} className={maxIndex !== k ? "hidden" : "mb0-5" }>
-                          <div className="column">
-                            {eq && <span>{eq.equivalent}</span>}
-                            <span>{sense.definition}</span>
-                            {eq && <span>{eq.definition}</span>}
+                        <li key={`${i}-${j}-${k}`} className={(entry.showAll || maxIndex === k) ? "mb0-5" : "hidden" }>
+                          <div className="grow">
+                            <div className="column">
+                              {eq && <span>{eq.equivalent}</span>}
+                              <span>{sense.definition}</span>
+                              {eq && <span>{eq.definition}</span>}
+                              {!entry.showAll && <span
+                                className="border-radius btn btn-primary font-s mt0-5 w-fit-content"
+                                onClick={() => handleClickDefinitionButton(i, j)}
+                              >
+                                See more definitions
+                              </span>}
+                            </div>
+                            {maxIndex === k
+                              ? (
+                                <div className="flex-grow align-center justify-end grow hover-pointer">
+                                  <i className="material-icons icon-primary-mid icon-l p1"
+                                    onClick={() => entry.showAll && handleClickStarButton(i, j, k)}
+                                  >
+                                    star
+                                  </i>
+                                </div>
+                              )
+                              : (
+                                <div className="flex-grow align-center justify-end grow icon-hover">
+                                  <i className="material-icons icon-l hover-pointer p1"
+                                    onClick={() => entry.showAll && handleClickStarButton(i, j, k)}
+                                  >
+                                    star
+                                  </i>
+                                </div>
+                            )}
                           </div>
                         </li>
                       );

@@ -177,12 +177,6 @@ const Dashboard: React.FC = () => {
                               {eq && <span>{eq.equivalent}</span>}
                               <span>{sense.definition}</span>
                               {eq && <span>{eq.definition}</span>}
-                              {!entry.showAll && entry.senses.length > 1 && <span
-                                className="border-radius btn btn-primary font-s mt0-5 w-fit-content"
-                                onClick={() => handleClickDefinitionButton(i, j)}
-                              >
-                                See more definitions
-                              </span>}
                             </div>
                             {entry.senses.length > 1 && (maxIndex === k
                               ? (
@@ -190,7 +184,7 @@ const Dashboard: React.FC = () => {
                                   <i className="material-icons icon-primary-mid icon-l p1"
                                     onClick={() => entry.showAll && handleClickStarButton(i, j, k)}
                                   >
-                                    star
+                                    radio_button_checked
                                   </i>
                                 </div>
                               )
@@ -199,11 +193,17 @@ const Dashboard: React.FC = () => {
                                   <i className="material-icons icon-l hover-pointer p1"
                                     onClick={() => entry.showAll && handleClickStarButton(i, j, k)}
                                   >
-                                    star
+                                    radio_button_unchecked
                                   </i>
                                 </div>
                             ))}
                           </div>
+                          {!entry.showAll && entry.senses.length > 1 && <span
+                            className="font-s hover-pointer"
+                            onClick={() => handleClickDefinitionButton(i, j)}
+                          >
+                            <u>Choose a different definition...</u>
+                          </span>}
                         </li>
                       );
                     })}

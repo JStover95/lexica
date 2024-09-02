@@ -286,6 +286,11 @@
   justify-content: flex-end;
 }
 
+.justify-space-between {
+  display: flex;
+  justify-content: space-between;
+}
+
 .space-around {
   display: flex;
   justify-content: space-around;
@@ -357,6 +362,10 @@
 
 .hover-pointer:hover {
   cursor: pointer;
+}
+
+.hover-icon-red:hover {
+  color: red;
 }
 
 .icon-primary-mid {

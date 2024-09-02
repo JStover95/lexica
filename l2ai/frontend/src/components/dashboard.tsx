@@ -135,15 +135,26 @@ const Dashboard: React.FC = () => {
     return (
       <div className="mb1" key={i} ref={ref}>
         <div
-          className="font-l p1 border-mid border-radius hover-pointer hover-bg-light"
+          className="font-l p1 border-mid border-radius hover-pointer hover-bg-light align-center justify-space-between"
           onClick={() => handleClickPhraseCard(i)}
         >
-          {phrase.refs.reduce((prev, current) => {
-            if (current.current && current.current.innerHTML != "&nbsp;") {
-              return `${prev} ${current.current.innerHTML}`;
-            }
-            return prev
-          }, "")}
+          <span>
+            {phrase.refs.reduce((prev, current) => {
+              if (current.current && current.current.innerHTML != "&nbsp;") {
+                return `${prev} ${current.current.innerHTML}`;
+              }
+              return prev
+            }, "")}
+          </span>
+          <span className="ph1 hover-icon-red"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              dispatch({ type: "DELETE_PHRASE", index: i });
+            }}
+          >
+            <i className="material-icons">delete</i>
+          </span>
         </div>
         {phrase.active && phrase.dictionaryEntries && (
           <div className="mt1 ph1">

@@ -12,7 +12,7 @@ type Action =
   | { type: "CLICK_SEE_MORE_DEFINITIONS"; phraseIx: number; entryIx: number }
   | { type: "CLICK_STAR_BUTTON"; phraseIx: number; entryIx: number; senseIx: number; }
   | { type: "GET_DICTIONARY_ENTRIES"; index: number; entries: IDictionaryEntry[] }
-  | { type: "REMOVE_BLOCK"; index: number };
+  | { type: "DELETE_PHRASE"; index: number };
 
 
 const reducer = (state: IDashboardState, action: Action) => {
@@ -177,7 +177,7 @@ const reducer = (state: IDashboardState, action: Action) => {
       }
       return { ...state, phrases: updatedPhrases };
     }
-    case "CLICK_STAR_BUTTON": {
+    case "CLICK_STAR_BUTTON": {  // TODO: fix type of action
       const { phraseIx, entryIx, senseIx } = action;
       const updatedPhrases = [...state.phrases];
       const phrase = updatedPhrases[phraseIx];
@@ -194,78 +194,33 @@ const reducer = (state: IDashboardState, action: Action) => {
     case "GET_DICTIONARY_ENTRIES": {
       const { index, entries } = action;
       const updatedPhrases = [...state.phrases];
-      updatedPhrases[index].dictionaryEntries = entries;
+      const phrase = updatedPhrases[index];
+      if (phrase) {
+        updatedPhrases[index].dictionaryEntries = entries;
+        return { ...state, phrases: updatedPhrases };
+      };
+      return state;
+    }
+    case "DELETE_PHRASE": {
+      const { index } = action;
+      const updatedPhrases = [...state.phrases];
+      const startIndex = updatedPhrases[index].startIndex;
+      const stopIndex = updatedPhrases[index].stopIndex;
+      updatedPhrases.splice(index, 1);
+
+      if (state.blockRefs) {
+        const updatedBlockRefs = [...state.blockRefs];
+        for (let i = startIndex; i <= stopIndex; i++) {
+          const ref = updatedBlockRefs[i];
+          if (ref && ref.current) {
+            ref.current.classList.remove("text-block-0");
+            ref.current.classList.remove("bg-light");
+          }
+        };
+        return { ...state, phrases: updatedPhrases, blockRefs: updatedBlockRefs };
+      };
       return { ...state, phrases: updatedPhrases };
     }
-    // case "REMOVE_BLOCK": {
-    //   const { index } = action;
-
-    //   if (state.blockRefs?.[index]?.current) {  // TODO: require that phrase must be selected first
-    //     const blockRef = state.blockRefs[index];
-    //     const block = state.blockRefs[index]?.current;
-
-    //     if (block && blockRef) {
-    //       const updatedSelectedIndices = [...state.selectedIndices];
-    //       const updatedPhrases = [...state.phrases];
-
-    //       // Remove the index from selectedIndices
-    //       const foundIx = state.selectedIndices.findIndex(ix => ix == index);
-    //       updatedSelectedIndices.splice(foundIx, 1);
-
-    //       // Mark the block as inactive by removing the underline
-    //       block.classList.remove("text-block-0");
-
-    //       // Check for adjacent words and remove any underlined whitespace
-    //       if (state.selectedIndices.includes(index - 2)) {
-    //         const spaceElement = state.blockRefs[index - 1]?.current;
-    //         spaceElement?.classList.remove("text-block-0");
-    //       }
-
-    //       if (state.selectedIndices.includes(index + 2)) {
-    //         const spaceElement = state.blockRefs[index + 1]?.current;
-    //         spaceElement?.classList.remove("text-block-0");
-    //       }
-
-    //       // Find the phrase that contains current block
-    //       const phraseIx = updatedPhrases.findIndex(
-    //         phrase => phrase.startIndex <= index && index <= phrase.stopIndex
-    //       );
-    //       const phrase = updatedPhrases[phraseIx];
-
-    //       // Split the phrase into one or two new phrases that don't contain the block
-    //       const newPhrases: IPhrase[] = [];
-    //       if (phrase.startIndex < index) {
-    //         newPhrases.push({
-    //           active: true,
-    //           startIndex: phrase.startIndex,
-    //           stopIndex: index - 2,
-    //           refs: phrase.refs.slice(0, (index - phrase.startIndex) / 2),
-    //           dictionaryEntries: null,
-    //           explanation: "" });
-    //       }
-    //       if (index < phrase.stopIndex) {
-    //         newPhrases.push({
-    //           active: false,
-    //           startIndex: index + 2,
-    //           stopIndex: phrase.stopIndex,
-    //           refs: phrase.refs.slice((index + 2 - phrase.startIndex) / 2),
-    //           dictionaryEntries: null,
-    //           explanation: "" });
-    //       }
-
-    //       // Remove and replace the previous phrase
-    //       updatedPhrases.splice(phraseIx, 1);
-    //       updatedPhrases.push(...newPhrases);
-
-    //       return {
-    //         ...state,
-    //         selectedIndices: updatedSelectedIndices,
-    //         phrases: updatedPhrases
-    //       };
-    //     }
-    //   }
-    //   return state;
-    // }
     default:
       return state;
   }

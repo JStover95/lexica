@@ -17,6 +17,10 @@ type Action =
 
 const reducer = (state: IDashboardState, action: Action) => {
   switch (action.type) {
+    case "EDIT_INPUT": {
+      const { text } = action;
+      return { ...state, inputText: text };
+    }
     case "CLICK_START": {
       if (state.inputText === "") return state;
       const paragraphSplit = state.inputText.split(/\n+/);  // Splits text by paragraphs
@@ -208,6 +212,10 @@ const reducer = (state: IDashboardState, action: Action) => {
       const stopIndex = updatedPhrases[index].stopIndex;
       updatedPhrases.splice(index, 1);
 
+      const updatedSelectedIndices = state.selectedIndices.filter(
+        i => i < startIndex || stopIndex < i
+      );
+
       if (state.blockRefs) {
         const updatedBlockRefs = [...state.blockRefs];
         for (let i = startIndex; i <= stopIndex; i++) {
@@ -217,9 +225,18 @@ const reducer = (state: IDashboardState, action: Action) => {
             ref.current.classList.remove("bg-light");
           }
         };
-        return { ...state, phrases: updatedPhrases, blockRefs: updatedBlockRefs };
+        return {
+          ...state,
+          phrases: updatedPhrases,
+          selectedIndices: updatedSelectedIndices,
+          blockRefs: updatedBlockRefs
+        };
       };
-      return { ...state, phrases: updatedPhrases };
+      return {
+        ...state,
+        phrases: updatedPhrases,
+        selectedIndices: updatedSelectedIndices
+      };
     }
     default:
       return state;

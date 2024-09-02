@@ -243,7 +243,7 @@ const Dashboard: React.FC = () => {
                 type={"textarea"}
                 placeholder={"Paste your content here..."}
                 onKeyup={(text) => dispatch({ type: "EDIT_INPUT", text })}
-                value={dummyText}
+                prefill={dummyText}
               />
             </div> :
             <div className="font-height-l scroll pr1">

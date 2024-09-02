@@ -25,7 +25,6 @@ y.py
 **/frontend/yarn-debug.log*
 **/frontend/yarn-error.log*
 
-dict.json
 content.json
 
 .DS_Store

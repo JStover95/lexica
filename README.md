@@ -23,7 +23,7 @@ The following environment variables for configuring the backend can be added to 
 | AWS_DEFAULT_REGION | (Optional) The region where your Cognito instance is deployed. |
 | COGNITO_CLIENT_ID | (Optional) The ID of your Cognito user pool's app client. |
 | COGNITO_CLIENT_SECRET | (Optional) The secret of your Cognito user pool's app client. |
-| COGNITO_USERNAME | (Optional) The username of the user saved in your Cognito user pool. This is used when running the `flask init-user` command.  |
+| COGNITO_USERNAME | (Optiona) The username of the user saved in your Cognito user pool. This is used when running the `flask init-user` command. |
 | COGNITO_USERPOOL_ID | (Optional) The ID of your Cognito user pool. |
 
 The following environment variables for configuring the frontend can be added to your `.env` file in the `lexica/frontend` directory:
@@ -47,6 +47,12 @@ Create your `.env` file with the correct environment variables and ensure Docker
 ```bash
 source ./deploy-dev.sh
 flask run
+```
+
+Initialize your database using the `reset-database` shell script:
+
+```bash
+./reset-database.sh
 ```
 
 In a separate terminal, insteall the frontend dependencies and start the frontend server:

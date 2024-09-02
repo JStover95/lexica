@@ -1,9 +1,9 @@
 from flask import Blueprint, make_response, request, jsonify
 
-from l2ai.json_schemas import API, validate_schema
-from l2ai.schema import schema
-from l2ai.utils.dictionary.infer import get_inference
-from l2ai.utils.logging import logger
+from app.json_schemas import API, validate_schema
+from app.schema import schema
+from app.utils.dictionary.infer import get_inference
+from app.utils.logging import logger
 
 blueprint = Blueprint("api", __name__)
 

@@ -1,6 +1,6 @@
 import logging
-from l2ai.extensions import socketio
-from l2ai.utils.logging import logger
+from app.extensions import socketio
+from app.utils.logging import logger
 
 
 @socketio.event

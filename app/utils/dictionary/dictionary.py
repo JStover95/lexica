@@ -1,10 +1,10 @@
 from itertools import groupby
 
-from l2ai.collections import DictionaryEntry, DictionaryEntryWithSenses, dictionary_entries, senses
-from l2ai.extensions import mecab
-from l2ai.utils.misc import b
-from l2ai.utils.morphs.parse import get_morph_surface
-from l2ai.utils.morphs.types import exclude_dictionary, is_morph_type
+from app.collections import DictionaryEntry, DictionaryEntryWithSenses, dictionary_entries, senses
+from app.extensions import mecab
+from app.utils.misc import b
+from app.utils.morphs.parse import get_morph_surface
+from app.utils.morphs.types import exclude_dictionary, is_morph_type
 
 
 type QueryResult = dict[str, list[DictionaryEntryWithSenses]]

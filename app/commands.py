@@ -6,9 +6,9 @@ import click
 from flask.cli import with_appcontext
 from tqdm import tqdm
 
-from l2ai.collections import contents, dictionary_entries, senses, User, users
-from l2ai.extensions import mecab, mongo
-from l2ai.utils.morphs.parse import get_smap_from_morphs
+from app.collections import contents, dictionary_entries, senses, User, users
+from app.extensions import mecab, mongo
+from app.utils.morphs.parse import get_smap_from_morphs
 
 
 @click.command()

@@ -5,10 +5,9 @@ from flask import Flask, make_response
 from flask.testing import FlaskClient
 from werkzeug.test import TestResponse
 from werkzeug import Response
-# from l2ai.collections import users
-from l2ai.utils.cognito import Cognito
-from l2ai.utils.logging import logger
-from l2ai.utils.mongo import Mongo
+from app.utils.cognito import Cognito
+from app.utils.logging import logger
+from app.utils.mongo import Mongo
 
 
 class Fake:

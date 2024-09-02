@@ -6,10 +6,10 @@ import torch
 from tqdm import tqdm
 from transformers import AutoTokenizer, AutoModelForMultipleChoice
 
-from l2ai.collections import senses, dictionary_entries
-from l2ai.utils.dictionary.dictionary import query_dictionary, get_query_str
-from l2ai.utils.logging import logger
-from l2ai.utils.misc import b
+from app.collections import senses, dictionary_entries
+from app.utils.dictionary.dictionary import query_dictionary, get_query_str
+from app.utils.logging import logger
+from app.utils.misc import b
 
 # initialize the model and tokenizer
 model_name = "JesseStover/L2AI-dictionary-klue-bert-base"

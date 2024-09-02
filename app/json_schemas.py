@@ -3,7 +3,7 @@ from typing import Mapping, TypedDict, NotRequired
 from flask import make_response, request
 from jsonschema import validate, ValidationError
 from mypy_boto3_cognito_idp.literals import ChallengeNameType
-from l2ai.utils.handlers import handle_server_error
+from app.utils.handlers import handle_server_error
 
 
 def validate_schema(schema):

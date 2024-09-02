@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import NotRequired, TypedDict
 from bson.objectid import ObjectId
 from pymongo.collection import Collection
-from l2ai.extensions import mongo
+from app.extensions import mongo
 
 
 class User(TypedDict):

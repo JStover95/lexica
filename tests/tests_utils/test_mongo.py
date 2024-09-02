@@ -1,5 +1,5 @@
-from l2ai.utils.logging import logger
-from l2ai.utils.mongo import Mongo
+from app.utils.logging import logger
+from app.utils.mongo import Mongo
 from tests.utils import Fake
 
 class TestMongo:

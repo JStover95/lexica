@@ -1,7 +1,7 @@
 from base64 import b64encode
 from time import sleep
 from flask.testing import FlaskClient
-from l2ai.utils.cognito import Cognito
+from app.utils.cognito import Cognito
 from tests.utils import Fake, get_cookie_from_response, logger, login
 
 

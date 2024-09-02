@@ -4,8 +4,8 @@ from flask import Flask
 from flask.testing import FlaskClient
 from moto import mock_aws
 import pytest
-from l2ai.utils.cognito import Cognito
-from l2ai.utils.mongo import Mongo
+from app.utils.cognito import Cognito
+from app.utils.mongo import Mongo
 from tests.utils import (
     initialize_app_test_environment,
     initialize_cognito_test_environment,
@@ -20,7 +20,7 @@ os.environ["COGNITO_CLIENT_SECRET"] = "testing"
 @pytest.fixture
 def cognito() -> Generator[Cognito, None, None]:
     with mock_aws():
-        from l2ai.extensions import cognito
+        from app.extensions import cognito
         initialize_cognito_test_environment(cognito)
 
         yield cognito
@@ -28,14 +28,14 @@ def cognito() -> Generator[Cognito, None, None]:
 
 @pytest.fixture
 def mongo(cognito: Cognito) -> Generator[Mongo, None, None]:
-    from l2ai.extensions import mongo
+    from app.extensions import mongo
     initialize_mongo_test_environment(mongo)
     yield mongo
 
 
 @pytest.fixture
 def app(cognito: Cognito, mongo: Mongo) -> Generator[Flask, None, None]:
-    from l2ai.app import create_app
+    from app.app import create_app
 
     app = create_app(testing=True)
     initialize_app_test_environment(app, cognito)

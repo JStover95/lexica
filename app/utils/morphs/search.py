@@ -1,7 +1,7 @@
-from l2ai.extensions import mecab
-from l2ai.collections import Content, contents
-from l2ai.utils.morphs.parse import get_smap_from_morphs
-from l2ai.utils.types import SurfaceMap
+from app.extensions import mecab
+from app.collections import Content, contents
+from app.utils.morphs.parse import get_smap_from_morphs
+from app.utils.types import SurfaceMap
 
 type Ix = list[list[int]]
 type ResultMap = tuple[list[str], Ix]

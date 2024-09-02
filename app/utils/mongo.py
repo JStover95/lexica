@@ -1,7 +1,7 @@
 import os
 import pymongo
 from pymongo.database import Database
-from l2ai.utils.logging import logger
+from app.utils.logging import logger
 
 
 class Mongo():
@@ -10,7 +10,7 @@ class Mongo():
 
     This class will initialize using the following environment variables. If
     they are not initialized, default values will be used.
-     - MONGO_NAME (default: "l2ai")
+     - MONGO_NAME (default: "lexica")
      - MONGO_HOST (default: "localhost")
      - MONGO_PORT (default: 27107)
      - MONGO_USERNAME (default: None)
@@ -29,8 +29,8 @@ class Mongo():
     def __init__(self):
         name = os.getenv("MONGO_NAME")
         if name is None:
-            logger.info("Environment variable MONGO_NAME is not set. Defaulting to default \"l2ai\"")
-            self.name = "l2ai"
+            logger.info("Environment variable MONGO_NAME is not set. Defaulting to default \"lexica\"")
+            self.name = "lexica"
         else:
             self.name = name
 

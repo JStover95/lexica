@@ -3,13 +3,13 @@ from typing import Tuple
 
 from mecab import Morpheme
 
-from l2ai.extensions import mecab
-from l2ai.utils.morphs.types import (
+from app.extensions import mecab
+from app.utils.morphs.types import (
     exclude_general,
     dependent_types,
     is_morph_type
 )
-from l2ai.utils.types import SurfaceMap
+from app.utils.types import SurfaceMap
 
 
 def get_morph_surface(morph: Morpheme) -> str:

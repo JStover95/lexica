@@ -4,8 +4,8 @@ import hmac
 from flask import Flask, make_response
 from flask.testing import FlaskClient
 import pytest
-from l2ai.utils.cognito import Cognito  # , set_access_cookies
-from l2ai.utils.logging import logger
+from app.utils.cognito import Cognito  # , set_access_cookies
+from app.utils.logging import logger
 from tests.utils import Fake, get_cookie_from_response, login
 
 

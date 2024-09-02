@@ -5,8 +5,8 @@ from flask_jwt_extended import JWTManager
 from flask_socketio import SocketIO
 from mecab import MeCab
 
-from l2ai.utils.cognito import Cognito
-from l2ai.utils.mongo import Mongo
+from app.utils.cognito import Cognito
+from app.utils.mongo import Mongo
 
 cognito = Cognito()
 

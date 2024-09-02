@@ -1,11 +1,11 @@
 from base64 import b64decode
 from flask import Blueprint, make_response, request
-from l2ai.extensions import cognito
-from l2ai.collections import User, users
-from l2ai.json_schemas import Base, validate_schema
-from l2ai.utils.cognito import get_access_token_from_request
-from l2ai.utils.handlers import handle_server_error
-from l2ai.utils.logging import logger
+from app.extensions import cognito
+from app.collections import User, users
+from app.json_schemas import Base, validate_schema
+from app.utils.cognito import get_access_token_from_request
+from app.utils.handlers import handle_server_error
+from app.utils.logging import logger
 
 blueprint = Blueprint("base", __name__)
 

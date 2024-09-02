@@ -1,6 +1,6 @@
 from flask.testing import FlaskClient
-from l2ai.utils.handlers import handle_server_error
-from l2ai.utils.logging import logger
+from app.utils.handlers import handle_server_error
+from app.utils.logging import logger
 
 
 def test_handle_client_error():

@@ -16,7 +16,7 @@ The following environment variables for configuring the backend can be added to 
 | FLASK_CONFIG | (Optional) The configuration to run the backend Flask app with. | Default
 | FLASK_DEBUG | (Optional) Whether to run the Flask app in debug mode. | True
 | MONGO_HOST | Where your MongoDB instance is being hosted. | localhost
-| MONGO_NAME | The name of your MongoDB Docker container. | l2ai-mongo
+| MONGO_NAME | The name of your MongoDB Docker container. | lexica-mongo
 | MONGO_PASSWORD | The password for your MongoDB database. |
 | MONGO_USERNAME | The username for your MongoDB database. |
 | MONGO_PORT | The port your MongoDB instance is exposed on. | 27017
@@ -26,7 +26,7 @@ The following environment variables for configuring the backend can be added to 
 | COGNITO_USERNAME | (Optional) The username of the user saved in your Cognito user pool. This is used when running the `flask init-user` command.  |
 | COGNITO_USERPOOL_ID | (Optional) The ID of your Cognito user pool. |
 
-The following environment variables for configuring the frontend can be added to your `.env` file in the `l2ai/frontend` directory:
+The following environment variables for configuring the frontend can be added to your `.env` file in the `lexica/frontend` directory:
 | Variable Name | Description | Recommended Value |
 | ------------- | ----------- | ----------------- |
 | REACT_APP_API_ENDPOINT | The backend Flask app's endpoint. | http://localhost:5000
@@ -42,7 +42,7 @@ flask run
 In a separate terminal, insteall the frontend dependencies and start the frontend server:
 
 ```bash
-cd l2ai/frontend
+cd app/frontend
 yarn install
 yarn start
 ```

@@ -4,10 +4,10 @@ dotenv.load_dotenv()
 
 import os
 from flask import Flask, Response
-from l2ai.commands import init_database, drop_database, init_user
-from l2ai.extensions import cors, jwt_manager, socketio
-from l2ai.utils.logging import logger
-from l2ai.views import api, base
+from app.commands import init_database, drop_database, init_user
+from app.extensions import cors, jwt_manager, socketio
+from app.utils.logging import logger
+from app.views import api, base
 
 
 def create_app(testing: bool = False) -> Flask:
@@ -20,7 +20,7 @@ def create_app(testing: bool = False) -> Flask:
     app = Flask(__name__, static_url_path="", static_folder="frontend/build")
 
     # configure and initialize the app
-    app.config.from_object("l2ai.config.%s" % flask_config)
+    app.config.from_object("app.config.%s" % flask_config)
     register_blueprints(app)
     register_commands(app)
     register_extensions(app)

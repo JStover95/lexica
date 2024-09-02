@@ -14,8 +14,8 @@ from graphene import (
     Schema,
     String
 )
-from l2ai.collections import contents, dictionary_entries
-from l2ai.utils.dictionary.dictionary import query_dictionary
+from app.collections import contents, dictionary_entries
+from app.utils.dictionary.dictionary import query_dictionary
 
 
 class User(ObjectType):

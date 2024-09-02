@@ -1,6 +1,6 @@
 from flask import make_response, Response
 from botocore.exceptions import ClientError
-from l2ai.utils.logging import logger
+from app.utils.logging import logger
 
 
 def handle_client_error(e: ClientError) -> None:

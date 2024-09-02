@@ -146,14 +146,15 @@ const Dashboard: React.FC = () => {
               return prev
             }, "")}
           </span>
-          <span className="ph1 hover-icon-red"
+          <span
+            className="ph1 hover-icon-red justify-center"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
               dispatch({ type: "DELETE_PHRASE", index: i });
             }}
           >
-            <i className="material-icons">delete</i>
+            <i className="material-icons">close</i>
           </span>
         </div>
         {phrase.active && phrase.dictionaryEntries && (

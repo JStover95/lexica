@@ -3,6 +3,8 @@ Lexica is a language experience app based on recall, context, and learner identi
 
 In this MVP, users begin by manually entering text and clicking "Start Learning." Users can then click on words to select phrases that they are interested in learning more about. The app will automatically query a dictionary for the definitions of any words in the phrase and an algorithm will recommend the most appropriate definition in the case of words with multiple meanings.
 
+Dictionary data was procured under Creative Commons [CC BY-SA 2.0 KR DEED](https://creativecommons.org/licenses/by-sa/2.0/kr/) from the National Institute of Korean Language's [Basic Korean Dictionary](https://krdict.korean.go.kr/).
+
 ## Deploying Locally
 The deploy script `deploy-dev.sh` will automatically export any environment variables in your `.env` file and create a Docker container running MongoDB if one does not exist already. This prepares the backend for running locally.
 

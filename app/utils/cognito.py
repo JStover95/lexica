@@ -108,21 +108,24 @@ class Cognito():
 
         user_pool_id = os.getenv("COGNITO_USERPOOL_ID")
         if user_pool_id is None:
-            raise ValueError("Environment variable COGNITO_USERPOOL_ID must be set.")
+            pass
+            # raise ValueError("Environment variable COGNITO_USERPOOL_ID must be set.")
         else:
             self.user_pool_id = user_pool_id
 
         client_id = os.getenv("COGNITO_CLIENT_ID")
         if client_id is None:
-            raise ValueError("Environment variable COGNITO_CLIENT_ID must be set.")
+            pass
+            # raise ValueError("Environment variable COGNITO_CLIENT_ID must be set.")
         else:
             self.client_id = client_id
 
         self.client_secret = os.getenv("COGNITO_CLIENT_SECRET")
         if self.client_secret is None:
-            logger.warn("Environment variable COGNITO_CLIENT_SECRET is not set. A secret will not be used during user authentication")
+            pass
+            # logger.warn("Environment variable COGNITO_CLIENT_SECRET is not set. A secret will not be used during user authentication")
 
-        self.public_keys = self.get_public_keys()
+        # self.public_keys = self.get_public_keys()
 
     def _secret_hash(self, username: str) -> str:
         """

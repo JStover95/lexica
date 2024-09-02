@@ -14,7 +14,7 @@ def create_app(testing: bool = False) -> Flask:
     if testing:
         flask_config = "Testing"
     else:
-        flask_config = os.getenv("FLASK_CONFIG", "Development")
+        flask_config = os.getenv("FLASK_CONFIG", "Default")
 
     # set the static folder as the react frontend
     app = Flask(__name__, static_url_path="", static_folder="frontend/build")

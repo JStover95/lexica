@@ -36,23 +36,28 @@ Create a Python virtual environment and install project dependencies. Note that 
 
 ```bash
 python3.12 -m venv env
+source env/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
 Install PyTorch. See the officail documentation for for installing PyTorch locally for more information: https://pytorch.org/get-started/locally/. Note that even though the models used in this MVP are small enough to run locally on most machines, there may be an impact on performance.
 
-Create your `.env` file with the correct environment variables and ensure Docker is running then run the deploy script in a Unix-like terminal and start the backend Flask app:
+Create your `.env` file with the correct environment variables and ensure Docker is running then run the deploy script in a Unix-like terminal:
 
 ```bash
 source ./deploy-dev.sh
-flask run
 ```
 
 Initialize your database using the `reset-database` shell script:
 
 ```bash
 ./reset-database.sh
+```
+
+Finally, run the Flask backend:
+```bash
+flask run
 ```
 
 In a separate terminal, insteall the frontend dependencies and start the frontend server:

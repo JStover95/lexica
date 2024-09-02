@@ -77,13 +77,15 @@ const Login: React.FC = () => {
 
   return (
     <div className="p1">
-      <h1>MM</h1>
-      <div className="mb0-5 font-s">
-        <span>{message}</span>
+      <h1>Lexica: The Language Experience App</h1>
+      <div className="align-center column">
+        <div className="mb0-5 font-s">
+          <span>{message}</span>
+        </div>
+        {emailField}
+        {passwordField}
+        {submitButton}
       </div>
-      {emailField}
-      {passwordField}
-      {submitButton}
     </div>
   )
 }

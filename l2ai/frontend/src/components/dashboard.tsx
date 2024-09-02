@@ -232,7 +232,7 @@ const Dashboard: React.FC = () => {
   return (
     <div className="column grow align-center">
       <div>
-        <h1>MyMaum</h1>
+        <h1>Lexica: The Language Experience App</h1>
       </div>
       <div className="flex w100p">
         <div className="grow column p2 w50p h800">

@@ -1,7 +1,9 @@
 # Lexica
 Lexica is a language experience app based on recall, context, and learner identity where learners study context-rich content tailored to their interests and levels. This MVP is for English speakers learning Korean and support for other languages is planned for future releases.
 
-In this MVP, users begin by manually entering text and clicking "Start Learning." Users can then click on words to select phrases that they are interested in learning more about. The app will automatically query a dictionary for the definitions of any words in the phrase and an algorithm will recommend the most appropriate definition in the case of words with multiple meanings.
+In this MVP, users begin by manually entering text and clicking "Start learning." Users can then click on words to select phrases that they are interested in learning more about. The app will automatically query a dictionary for the definitions of any words in the phrase and an algorithm will recommend the most appropriate definition in the case of words with multiple meanings.
+
+For the sake of demonstration, this MVP is prefilled with the content of the Namu Wiki page of [Yun Dong-ju](https://namu.wiki/w/%EC%9C%A4%EB%8F%99%EC%A3%BC), a famous Korean poet and important figure in Korean history.
 
 Dictionary data was procured under Creative Commons [CC BY-SA 2.0 KR DEED](https://creativecommons.org/licenses/by-sa/2.0/kr/) from the National Institute of Korean Language's [Basic Korean Dictionary](https://krdict.korean.go.kr/).
 

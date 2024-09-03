@@ -388,10 +388,8 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* The feedback view */}
-        <div className="grow column p2 w50p h800">
-          <div className="scroll pr1">
-            {phraseCards}
-          </div>
+        <div className="grow column p2 w50p h800 scroll pr1">
+          {phraseCards}
         </div>
       </div>
     </div>

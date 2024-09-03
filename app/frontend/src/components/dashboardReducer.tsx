@@ -55,7 +55,7 @@ const reducer = (state: IDashboardState, action: Action) => {
           const words = p.split(" ").flatMap((word, j) => {
 
             // Whether the current word is at the end of the paragraph
-            const isEndOfParagraph = j < p.split(" ").length - 1;
+            const isEndOfParagraph = !(j < p.split(" ").length - 1);
 
             // Create a ref for the word block and the following white space block
             const refWord = createRef<HTMLSpanElement>();
@@ -93,7 +93,7 @@ const reducer = (state: IDashboardState, action: Action) => {
                   &nbsp;
                 </span>
               );
-            }
+            };
 
             return result;
           });
@@ -172,7 +172,9 @@ const reducer = (state: IDashboardState, action: Action) => {
             const rightPhraseIx = updatedPhrases.findIndex(
               phrase => phrase.startIndex == index + 2
             );
-            if (!state.blockRefs[index + 2]?.current?.innerHTML.endsWith(".")) {
+
+            // If the current block is not the end of a sentence
+            if (!state.blockRefs[index]?.current?.innerHTML.endsWith(".")) {
               const spaceRef = state.blockRefs[index + 1];
               const spaceElement = spaceRef?.current;
               spaceElement?.classList.add("text-block-0");

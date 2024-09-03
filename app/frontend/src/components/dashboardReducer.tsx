@@ -10,7 +10,7 @@ type Action =
   | { type: "CLICK_ACTIVE_BLOCK"; index: number }
   | { type: "CLICK_SEE_MORE_DEFINITIONS"; phraseIx: number; entryIx: number }
   | { type: "CLICK_SENSE_BUTTON"; phraseIx: number; entryIx: number; senseIx: number; }
-  | { type: "GET_DICTIONARY_ENTRIES"; index: number; entries: IDictionaryEntry[] }
+  | { type: "GET_DICTIONARY_ENTRIES"; previousText: string; index: number; entries: IDictionaryEntry[] }
   | { type: "DELETE_PHRASE"; index: number };
 
 
@@ -133,7 +133,8 @@ const reducer = (state: IDashboardState, action: Action) => {
             stopIndex: index,
             refs: [blockRef],
             dictionaryEntries: null,
-            explanation: ""
+            explanation: "",
+            previousText: "",
           };
 
           // Check for an adjacent block to the left
@@ -156,6 +157,7 @@ const reducer = (state: IDashboardState, action: Action) => {
               newPhrase.startIndex = updatedPhrases[leftPhraseIx].startIndex;
               newPhrase.dictionaryEntries = updatedPhrases[leftPhraseIx]
                 .dictionaryEntries;
+              newPhrase.previousText = updatedPhrases[leftPhraseIx].previousText;
               newPhrase.refs = [
                 ...updatedPhrases[leftPhraseIx].refs,
                 ...(spaceRef ? [spaceRef] : []),
@@ -181,6 +183,7 @@ const reducer = (state: IDashboardState, action: Action) => {
               newPhrase.stopIndex = updatedPhrases[rightPhraseIx].stopIndex;
               newPhrase.dictionaryEntries = updatedPhrases[rightPhraseIx]
                 .dictionaryEntries;
+              newPhrase.previousText = updatedPhrases[rightPhraseIx].previousText;
               newPhrase.refs = [
                 ...newPhrase.refs,
                 ...(spaceRef ? [spaceRef] : []),
@@ -264,15 +267,24 @@ const reducer = (state: IDashboardState, action: Action) => {
       return { ...state, phrases: updatedPhrases };
     }
     case "GET_DICTIONARY_ENTRIES": {
-      const { index, entries } = action;
+      const { previousText, index, entries } = action;
 
       // Get the phrase corresponding to the dictionary entris
       const updatedPhrases = [...state.phrases];
       const phrase = updatedPhrases[index];
 
       // Set the phrase's dictionary entries
-      if (phrase) {
-        updatedPhrases[index].dictionaryEntries = entries;
+      if (phrase && phrase.previousText !== previousText) {
+
+        // If the phrase already has dictionary entries
+        if (updatedPhrases[index].dictionaryEntries) {
+          updatedPhrases[index].dictionaryEntries?.push(...entries);
+        } else {
+          updatedPhrases[index].dictionaryEntries = entries;
+        }
+
+        // Keep track of the phrase's previous text
+        updatedPhrases[index].previousText = previousText;
         return { ...state, phrases: updatedPhrases };
       };
       return state;

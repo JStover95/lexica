@@ -79,18 +79,25 @@ const Dashboard: React.FC = () => {
         };
       });
 
-      // If the phrase already has dictionary entries, skip the rest of the function
-      if (phrase.dictionaryEntries) {
+      // Combine the phrase's refs into a single space-separated string of unique words
+      let phraseText = "";
+      phrase.refs.forEach(ref => {
+        if (
+          ref.current
+          && ref.current.innerHTML != "&nbsp;"
+          && !phraseText.includes(ref.current.innerHTML)
+        ) {
+          phraseText = `${phraseText} ${ref.current.innerHTML}`;
+        }
+      });
+
+      // If the phrase does not have any new words to query, skip querying the dictionary
+      if (phrase.previousText === phraseText) {
         return;
       };
 
-      // Combine the phrase's refs into a single space-separated string
-      const query = phrase.refs.reduce((prev, current) => {
-        if (current.current && current.current.innerHTML != "&nbsp;") {
-          return `${prev} ${current.current.innerHTML}`;
-        }
-        return prev;
-      }, "").trim();
+      // Query only the newly selected words
+      const query = phraseText.replace(phrase.previousText, "").trim();
 
       // Get the whole sentence that the phrase is part of to pass as context
       let context = "";
@@ -148,7 +155,12 @@ const Dashboard: React.FC = () => {
       const entries: IDictionaryEntry[] = result.Result;
 
       // Set the dictionary entries
-      dispatch({ type: "GET_DICTIONARY_ENTRIES", index: i, entries: entries });
+      dispatch({
+        type: "GET_DICTIONARY_ENTRIES",
+        previousText: phraseText,
+        index: i,
+        entries
+      });
     });
   }, [phrases, dispatch]);
 

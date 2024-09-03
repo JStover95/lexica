@@ -37,7 +37,8 @@ export interface IPhrase {
   stopIndex: number;
   refs: RefObject<HTMLSpanElement>[];
   dictionaryEntries: IDictionaryEntry[] | null;
-  explanation: "";
+  explanation: string;
+  previousText: string;
 }
 
 export interface IDashboardState {

@@ -1,22 +1,53 @@
 from functools import wraps
 from typing import Mapping, TypedDict, NotRequired
+
 from flask import make_response, request
 from jsonschema import validate, ValidationError
 from mypy_boto3_cognito_idp.literals import ChallengeNameType
+
 from app.utils.handlers import handle_server_error
 
 
 def validate_schema(schema):
+    """
+    A decorator function to enforce JSON payload validation for Flask endpoints
+    using the jsonschema library.
+
+    This decorator checks if the incoming request contains a JSON payload and
+    validates it against the provided schema. If the payload is missing or
+    invalid, it returns a 401 Unauthorized response with an appropriate error
+    message.
+
+    Args:
+        schema (dict): The JSON schema to validate the incoming request data
+                       against.
+
+    Returns:
+        function: The wrapped Flask route function, which is executed if the
+                  payload is valid. The validated JSON data is passed to the
+                  route function via the `validated_data` keyword argument.
+
+    Example usage:
+        @app.route('/example', methods=['POST'])
+        @validate_schema(example_schema)
+        def example_endpoint(validated_data):
+            # Use the validated_data here
+            pass
+    """
     def wrapped_func(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
+            # Check if the incoming request has a JSON payload
             if request.json is None:
                 return make_response({"Message": "Missing payload."}, 401)
             try:
+                # Validate the request JSON data against the provided schema
                 validate(request.json, schema)
             except ValidationError as e:
+                # Handle validation errors by returning a 401 Unauthorized response
                 return handle_server_error("Invalid paylod.", 401, e)
 
+            # If validation is successful, pass the validated data to the route function
             return f(*args, validated_data=request.json, **kwargs)
 
         return wrapper

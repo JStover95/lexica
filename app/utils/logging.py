@@ -1,7 +1,7 @@
 import logging
 import sys
 
-# initialize a single logger to use upon module initialization
+# Initialize a single logger to use upon module initialization
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 formatter = logging.Formatter('[%(asctime)s %(module)s.%(funcName)s %(lineno)d %(levelname)s] %(message)s')

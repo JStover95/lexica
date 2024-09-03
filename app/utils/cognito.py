@@ -23,54 +23,38 @@ from app.utils.logging import logger
 
 
 def get_access_token_from_request():
-    # get the Access Token from the access_token cookie.
+    """
+    Extract the Access Token from the Authorization header in the request.
+
+    This function retrieves the Access Token from the `Authorization` header of 
+    the incoming HTTP request. The header should be in the format:
+    "Bearer <AccessToken>". If the header is missing, incorrectly formatted, or 
+    any error occurs, a `ValueError` is raised.
+
+    Returns:
+        str: The Access Token extracted from the Authorization header.
+
+    Raises:
+        ValueError: If the Authorization header is missing, or the Bearer 
+            token is incorrectly formatted.
+    """
+    # Attempt to retrieve the Authorization header from the request
     try:
         auth_header = request.headers["Authorization"]
     except BadRequestKeyError:
-        logger.info("Bad requesst: Authorization header missing from request: %s" % request)
-        raise ValueError  # TODO: create custom error handler
+        logger.info("Bad request: Authorization header missing from request: %s" % request)
+        raise ValueError  # TODO: Replace with custom error handler
 
+    # Split the Authorization header by spaces to extract the Bearer token
     bearer_split = auth_header.split()
 
+    # Check if the header is correctly formatted (i.e., contains exactly two parts)
     if len(bearer_split) != 2:
         logger.info("Bad request: Header with bearer token incorrectly formatted: %s" % request)
         raise ValueError
 
+    # Return the Access Token part of the Bearer token
     return bearer_split[1]
-
-
-# def set_access_cookies(
-#         response: Response,
-#         auth_result: InitiateAuthResponseTypeDef,
-#     ) -> None:
-#     """
-#     Add the user's AccessToken and RefreshToken to a response using cookies.
-#     Cookies are always set to secure, HTTP only, and "Strict" same-site mode.
-
-#     Args:
-#         response (Response)
-#         auth_result (InitiateAuthResponseTypeDef): The authentication result
-#             returned from Cognito.login or Cognito.respond_to_challenge upon a
-#             successful login.
-
-#     Raises:
-#         RuntimeError: When the Access Token or Refresh Token are not found in
-#             auth_result. This may occur when Cognito.login returns with an
-#             authentication challenge.
-#     """
-#     opts = {"secure": True, "httponly": True, "samesite": "Strict"}
-
-#     try:
-#         access_token = auth_result["AuthenticationResult"]["AccessToken"]
-#         response.set_cookie("access_token", access_token, **opts)
-#     except KeyError:
-#         raise RuntimeError("Error retrieving Access Token from auth_result.")
-
-#     try:
-#         refresh_token = auth_result["AuthenticationResult"]["RefreshToken"]
-#         response.set_cookie("refresh_token", refresh_token, **opts)
-#     except KeyError:
-#         pass
 
 
 class Cognito():
@@ -219,36 +203,36 @@ class Cognito():
 
         kid = headers["kid"]
 
-        # search for the Key ID in the downloaded public keys
+        # Search for the Key ID in the downloaded public keys
         try:
             key_index = self.get_public_key_index(kid)
 
-        # if it's not found, redownload keys and retry
+        # If it's not found, redownload keys and retry
         except ValueError:
             logger.warn("Key ID not found in public keys. Re-downloading public keys and retrying.")
             self.keys = self.get_public_keys()
             key_index = self.get_public_key_index(kid)
 
-        # construct the public key
+        # Construct the public key
         public_key = jwk.construct(self.public_keys[key_index])
 
-        # get the last two sections of the token, message and signature
+        # Get the last two sections of the token, message and signature
         message, encoded_signature = str(token).rsplit(".", 1)
 
-        # decode the signature
+        # Decode the signature
         decoded_signature = base64url_decode(encoded_signature.encode("utf-8"))
 
-        # verify the signature
+        # Verify the signature
         if not public_key.verify(message.encode("utf8"), decoded_signature):
             raise ValueError("Signature verification failed.")
 
         claim = jwt.get_unverified_claims(token)
 
-        # verify the token expiration
+        # Verify the token expiration
         if time.time() > claim["exp"]:
             raise ValueError("Token is expired.")
 
-        # verify the clientId
+        # Verify the client ID
         if claim["client_id"] != self.client_id:
             raise ValueError("Token was not issued for this client.")
 
@@ -280,20 +264,20 @@ class Cognito():
             except Exception:
                 return make_response({"Message": "Unauthorized request"}, 403)
 
-            # make an API call to check whether the Access Token is valid
+            # Make an API call to check whether the Access Token is valid
             try:
                 self.client.get_user(AccessToken=access_token)
 
-            # if an error occurs during the API call
+            # If an error occurs during the API call
             except ClientError as e:
                 try:
                     code = e.response["Error"]["Code"]
 
-                    # if the Access Token is invalid
+                    # If the Access Token is invalid
                     if code == "NotAuthorizedException":
                         return make_response({"Message": "Unauthorized request."}, 403)
 
-                    # if any other reason, throw an exception to send a response
+                    # If any other reason, throw an exception to send a response
                     else:
                         raise Exception
 
@@ -301,15 +285,15 @@ class Cognito():
                     msg = "An unexpected AWS client error occured during credential verification."
                     return handle_server_error(msg, 500, e)
 
-            # inspect and validate the Access Token's claim
+            # Inspect and validate the Access Token's claim
             try:
                 self.get_claim_from_access_token(access_token)
 
-            # if the claim is not valid
-            except ValueError:  # TODO: make a separate exception for expired tokens
+            # If the claim is not valid
+            except ValueError:  # TODO: Make a separate exception for expired tokens
                 return make_response({"Unauthorized request."}, 403)
 
-            # if any other exception occured during validation
+            # If any other exception occured during validation
             except Exception as e:
                 msg = "An unexpected error occured during credential verification."
                 return handle_server_error(msg, 500, e)
@@ -356,7 +340,7 @@ class Cognito():
             try:
                 code = e.response["Error"]["Code"]
 
-                # when login was attempted with incorrect credentials
+                # When login was attempted with incorrect credentials
                 if code == "NotAuthorizedException":
                     return False
 
@@ -411,7 +395,7 @@ class Cognito():
             try:
                 code = e.response["Error"]["Code"]
 
-                # if the challenge failed
+                # If the challenge failed
                 if code == "NotAuthorizedException":
                     return False
 

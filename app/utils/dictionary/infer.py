@@ -1,25 +1,19 @@
-from functools import reduce
 import re
-from typing import Tuple
+
 import jamotools
 import torch
-from tqdm import tqdm
 from transformers import AutoTokenizer, AutoModelForMultipleChoice
 
-from app.collections import senses, dictionary_entries
-from app.utils.dictionary.dictionary import query_dictionary, get_query_str
-from app.utils.logging import logger
-from app.utils.misc import b
+from app.collections import DictionaryEntryWithSenses
+from app.utils.dictionary.dictionary import query_dictionary
 
-# initialize the model and tokenizer
+# Initialize the model and tokenizer
 model_name = "JesseStover/L2AI-dictionary-klue-bert-base"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForMultipleChoice.from_pretrained(model_name)
 model.to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 
-type InferenceResult = dict[str, list[Tuple[float, str]]]
-
-# single common words to exclude from inference
+# Single common words to exclude from inference
 exclude_words = ["것", "수", "있다", "안", "하다", "되다"]
 
 
@@ -43,79 +37,85 @@ def ends_in_vowel(str: str) -> bool:
     return ord(jamos[-1]) >= 0x1161 and ord(jamos[-1]) <= 0x1175
 
 
-def get_inference(query: str, context: str | None = None) -> InferenceResult:  # TODO: update typing
-    """  TODO: update docstring
-    Gets each word of a given query then infers the best definitions (senses)
-    for each word. For example, the word "강아지" can mean "puppy" or "baby,
-    sweetheart." Calling get_inference("강아지는 뽀송뽀송하다.") will:
+def get_inference(
+        query: str,
+        context: str | None = None
+    ) -> list[DictionaryEntryWithSenses]:
+    """
+    Analyzes the given query sentence and infers the most probable meanings
+    (senses) of each word based on the context.
 
-    1. Break down the query into its constituent words (강아지 and 뽀송뽀송).
-    2. Get the senses of each word.
-    3. Based on the context of the sentence, infer a score for each sense that
-       represents the probability that that is the proper definition.
-
-    In this case, 뽀송뽀송 when used to describe 강아지 means "fuzzily, downily,"
-    while 강아지 means "puppy." The inference should return high scores for
-    these definitions.
+    The function processes the query by segmenting it into individual words and 
+    phrases, retrieving possible definitions for each, and then inferring the 
+    most likely definition from the context of the sentence. For instance, given
+    "강아지는 뽀송뽀송하다." ("The puppy is fluffy.") it would infer that 
+    "강아지" means "puppy" and "뽀송뽀송" means "fluffy".
 
     Args:
-        query (str)
-
-    Raises:
-        ValueError: When a variation used in the query string is not found in
-            one of the query keys used to search the dictionary. This would
-            likely be an issue with the function itself and not the query.
+        query (str): The input sentence for which word definitions need to be
+            inferred.
+        context (str | None, optional): Additional context that might help to 
+            disambiguate the definitions. Default is None.
 
     Returns:
-        InferenceResult
+        list[DictionaryEntryWithSenses]: A list of dictionary entries, each
+            mapped to its inferred senses with their respective ranks based on 
+            the context. Each entry in the list contains the word, its part of 
+            speech, and a ranked list of possible meanings.
+
+    Raises:
+        ValueError: If a variation in the query string is not found among the 
+            dictionary keys searched, indicating a probable issue with the 
+            function's internal dictionary lookup.
     """
 
-    # get all words, idioms, or proverbs in the query
+    # Get all words, idioms, or proverbs in the query
     groups = query_dictionary(query, context)
     result = []
 
     for group in groups:
 
-        # all words in a group have the same written form, so use the first
+        # All words in a group have the same written form, so use the first
         written_form = group[0]["writtenForm"]
         pos = group[0]["partOfSpeech"]  # TODO: use part of speech to improve results
 
-        # if the word is a common excluded word
+        # If the word is a common excluded word
         if written_form in exclude_words:
             continue
 
-        # construct the prompt using the variation that was used in the query
+        # Construct the prompt using the variation that was used in the query
         prompt = "\"%s\"에 있는 \"%s\"의 정의는 " % (context, written_form)
 
-        # construct a list of candidate responses using each of the word's
-        # senses
+        # Construct a list of candidate responses using each of the word's senses
         definitions = []
         for entry in group:
             definitions.extend([sense["definition"] for sense in entry["senses"]])
 
-        # if the word has only one sense
+        # If the word has only one sense
         if len(definitions) == 1:
             infer_result = [1.0]
 
         else:
             candidates = []
 
-            # prepare the candidate responses
+            # Prepare the candidate responses
             for definition in definitions:
 
-                # remove ending punctuation
+                # Remove ending punctuation
                 if definition.endswith("."):
                     definition = definition[:-1]
 
-                # remove all characters that are not Hangul, alphanumeric, or numbers
-                definition_stripped = re.sub(r"[^\u3131-\uD79DA-Za-z\d]", "", definition)
+                # Remove all characters that are not Hangul, alphanumeric, or numbers
+                definition_stripped = re.sub(
+                    r"[^\u3131-\uD79DA-Za-z\d]", "", definition
+                )
 
-                # conjugate the end of the sentence
+                # Conjugate the end of the sentence
                 end = "예요." if ends_in_vowel(definition_stripped) else "이에요."
 
                 candidates.append("\"%s\"%s" % (definition, end))
 
-            # prepare the model's inputs
+            # Prepare the model's inputs
             inputs = tokenizer(
                 [[prompt, candidate] for candidate in candidates],
                 return_tensors="pt",
@@ -124,14 +124,14 @@ def get_inference(query: str, context: str | None = None) -> InferenceResult:  #
 
             labels = torch.tensor(0).unsqueeze(0)
 
-            # run inference
+            # Run the inference
             with torch.no_grad():
                 outputs = model(
                     **{k: v.unsqueeze(0) for k, v in inputs.items()},
                     labels=labels
                 )
 
-            # use Softmax to get the inference results
+            # Use Softmax to get the inference results
             infer_result = [float(x) for x in outputs.logits.softmax(1)[0]]
 
         start = 0
@@ -139,29 +139,31 @@ def get_inference(query: str, context: str | None = None) -> InferenceResult:  #
 
         for entry in group:
 
-            # get the end index of this word's results
+            # Get the end index of this word's results
             end = start + len(entry["senses"])
 
-            # map the results to each sense of this word
+            # Map the results to each sense of this word
             entry["ranks"] = infer_result[start:end]
 
-            # set the start index of the next word's results
+            # Set the start index of the next word's results
             start = end
 
-            # make a list of each sense and their scores
-            ranks.extend(list(zip([sense["_id"] for sense in entry["senses"]], entry["ranks"])))
+            # Make a list of each sense and their scores
+            ranks.extend(list(zip(
+                [sense["_id"] for sense in entry["senses"]], entry["ranks"]
+            )))
 
-        # sort this word's senses according to its rank
+        # Sort this word's senses according to its rank
         ranks.sort(key=lambda x: x[1], reverse=True)
         rank_map = dict(ranks)
 
-        # get dictionary entry that has sense with highest score
+        # Get dictionary entry that has sense with highest score
         for entry in group:
             for sense in entry["senses"]:
                 if sense["_id"] == ranks[0][0]:
                     break
 
-        # add the rank to each sense
+        # Add the rank to each sense
         for sense in entry["senses"]:
             sense["rank"] = rank_map[sense["_id"]]
 

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import NotRequired, TypedDict
+from typing import TypedDict
 from bson.objectid import ObjectId
 from pymongo.collection import Collection
 from app.extensions import mongo
@@ -33,10 +33,10 @@ class DictionaryEntry(TypedDict):
     sourceId: str
     sourceLanguage: str
     writtenForm: str
-    variations: list[str]  # TODO: check that correct in graphql endpoint
+    variations: list[str]  # TODO: Check whether correct in graphql endpoint
     partOfSpeech: str
     grade: str
-    queryStrs: list[str]  # TODO: check that correct in graphql endpoint
+    queryStrs: list[str]  # TODO: Check whether correct in graphql endpoint
 
 
 class DictionaryEntryWithSenses(DictionaryEntry):

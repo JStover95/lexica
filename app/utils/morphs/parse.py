@@ -1,5 +1,5 @@
 import re
-from typing import Tuple
+from typing import Tuple, TypedDict
 
 from mecab import Morpheme
 
@@ -9,7 +9,13 @@ from app.utils.morphs.types import (
     dependent_types,
     is_morph_type
 )
-from app.utils.types import SurfaceMap
+
+type Ix = list[list[int]]
+
+
+class SurfaceMap(TypedDict):
+    surfaces: list[str]
+    ix: list[Ix]
 
 
 def get_morph_surface(morph: Morpheme) -> str:

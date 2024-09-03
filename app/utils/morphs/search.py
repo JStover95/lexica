@@ -1,9 +1,7 @@
 from app.extensions import mecab
 from app.collections import Content, contents
-from app.utils.morphs.parse import get_smap_from_morphs
-from app.utils.types import SurfaceMap
+from app.utils.morphs.parse import get_smap_from_morphs, SurfaceMap, Ix
 
-type Ix = list[list[int]]
 type ResultMap = tuple[list[str], Ix]
 type SearchResults = list[tuple[Content, Ix]]
 

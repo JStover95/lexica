@@ -1,5 +1,5 @@
 from datetime import datetime, UTC
-from functools import reduce
+
 from bson.objectid import ObjectId
 from graphene import (
     Boolean,
@@ -14,8 +14,8 @@ from graphene import (
     Schema,
     String
 )
+
 from app.collections import contents, dictionary_entries
-from app.utils.dictionary.dictionary import query_dictionary
 
 
 class User(ObjectType):
@@ -230,7 +230,6 @@ class Query(ObjectType):
     senses = List(Sense)
     dictionary_entries = List(DictionaryEntry)
     contents = List(Content)
-    search_dictionary = Field(List(DictionaryEntryWithSenses), q=String(), lang=String(), context=String())
 
     def resolve_users(self, info):
         users = users.find()
@@ -247,20 +246,6 @@ class Query(ObjectType):
     def resolve_contents(self, info):
         contents = contents.find()
         return [Content.from_mongo(c) for c in contents]
-
-    def resolve_search_dictionary(self, info, q, lang, context):
-        result = []
-        for group in query_dictionary(q, context=context):
-            for entry in group:
-                for sense in entry["senses"]:
-                    sense["equivalents"] = [
-                        e for e in sense["equivalents"]
-                        if e["equivalentLanguage"] == lang
-                    ]
-
-                result.append(DictionaryEntryWithSenses.from_mongo(entry))
-
-        return result
 
 
 class ContentSurfacesInput(InputObjectType):

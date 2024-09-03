@@ -352,6 +352,13 @@ const Dashboard: React.FC = () => {
                 </div>
               );
             })}
+            {phrase.previousText !== "" && !phrase.dictionaryEntries.length &&
+
+              // If the dictionary was queried but no dictionary entries were returned
+              <div>
+                <span>No dictionary entries found</span>
+              </div>
+            }
           </div>
         }
       </div>

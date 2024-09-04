@@ -115,29 +115,56 @@ class DictionaryEntryWithSenses(DictionaryEntry):
 
 
 class SenseRank(ObjectType):
-    rank = Float()
     sense_id = String()
+    rank = Float()
 
     @staticmethod
     def from_mongo(document):
         return SenseRank(
+            sense_id=str(document["senseId"]),
             rank=document["rank"],
-            sense_id=str(document["senseId"])
         )
 
 
-class Highlight(ObjectType):
+class Phrase(ObjectType):
     position = Int()
     score = Int()
     sense_ranks = List(SenseRank)
+    explanation = String()
+    dictionary_entry_ids = List(String())
+    content_id = String()
 
     @staticmethod
     def from_mongo(document):
-        return Highlight(
+        return Phrase(
             position=document["position"],
             score=document["score"],
             sense_ranks=[
-                SenseRank.from_mongo(sr) for sr in document["sense_ranks"]
+                SenseRank.from_mongo(sr) for sr in document["senseRanks"]
+            ],
+            explanation=document["explanation"],
+            content_id=document["contentId"],
+            dictionary_entry_ids=document["dictionaryEntryIds"],
+        )
+
+
+class PhraseWithDictionaryEntries(Phrase):
+    dictionary_entries = List(DictionaryEntryWithSenses)
+
+    @staticmethod
+    def from_mongo(document):
+        return Phrase(
+            position=document["position"],
+            score=document["score"],
+            sense_ranks=[
+                SenseRank.from_mongo(sr) for sr in document["senseRanks"]
+            ],
+            explanation=document["explanation"],
+            content_id=document["contentId"],
+            dictionary_entry_ids=document["dictionaryEntryIds"],
+            dictionary_entries=[
+                DictionaryEntryWithSenses.from_mongo(e)
+                for e in document["DictionaryEntries"]
             ]
         )
 
@@ -193,8 +220,7 @@ class Content(ObjectType):
     text = String()
     surfaces = List(Surfaces)
     ix = List(Ix)
-    explanations = List(Explanation)
-    highlights = List(Highlight)
+    phrases = List(Phrase)
     user_id = String()
 
     @staticmethod
@@ -215,11 +241,8 @@ class Content(ObjectType):
                 for surface in document["surfaces"]
             ],
             ix=[Ix.from_mongo(ix) for ix in document["ix"]],
-            explanations=[
-                Explanation.from_mongo(exp) for exp in document["explanations"]
-            ],
-            highlights=[
-                Highlight.from_mongo(hl) for hl in document["highlights"]
+            phrases=[
+                Phrase.from_mongo(hl) for hl in document["phrases"]
             ],
             user_id=str(document["userId"])
         )
@@ -269,10 +292,13 @@ class SenseRankInput(InputObjectType):
     senseId = String()
 
 
-class HighlightInput(InputObjectType):
+class PhraseInput(InputObjectType):
     position = Int()
     score = Int()
     sense_ranks = List(SenseRankInput)
+    explanation = String()
+    content_id = String()
+    dictionary_entry_ids = List(String())
 
 
 class UpdateContent(Mutation):
@@ -289,8 +315,7 @@ class UpdateContent(Mutation):
         text = String()
         surfaces = List(ContentSurfacesInput)
         ix = List(ContentIxInput)
-        explanations = List(ExplanationInput)
-        highlights = List(HighlightInput)
+        phrases = List(PhraseInput)
 
     ok = Boolean()
     content = Field(lambda: Content)

@@ -55,8 +55,7 @@ def init_database():
     #             "units": units["ix"],
     #             "modifiers": modfs["ix"],
     #         },
-    #         "explanations": [],
-    #         "highlights": [],
+    #         "phrases": [],
     #     })
 
     # contents.create_index(["userId", "timestamp"])

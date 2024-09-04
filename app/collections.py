@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import TypedDict
+from typing import NotRequired, TypedDict
 from bson.objectid import ObjectId
 from pymongo.collection import Collection
 from app.extensions import mongo
@@ -26,6 +26,7 @@ class Sense(TypedDict):
     type: str
     equivalents: list[Equivalent]
     dictionaryEntryId: ObjectId
+    rank: NotRequired[float]
 
 
 class DictionaryEntry(TypedDict):
@@ -37,27 +38,21 @@ class DictionaryEntry(TypedDict):
     partOfSpeech: str
     grade: str
     queryStrs: list[str]  # TODO: Check whether correct in graphql endpoint
-
-
-class DictionaryEntryWithSenses(DictionaryEntry):
-    senses: list[Sense]
+    senses: NotRequired[list[Sense]]
 
 
 class SenseRank(TypedDict):
-    rank: float
     senseId: ObjectId
+    rank: float
 
 
-class Highlight(TypedDict):
+class Phrase(TypedDict):
     position: int
-    score: int
-    senseRanks: list[SenseRank]
-
-
-class Explanation(TypedDict):
-    expression: str
-    position: int
-    description: str
+    dictionaryEntryIds: list[ObjectId]
+    dictionaryEntries: NotRequired[list[DictionaryEntry]]
+    senseRanks: NotRequired[list[SenseRank]]
+    explanation: str
+    contentId: ObjectId
 
 
 class Surfaces(TypedDict):
@@ -84,8 +79,7 @@ class Content(TypedDict):
     # media: file
     surfaces: Surfaces
     ix: Ix
-    explanations: list[Explanation]
-    highlights: list[Highlight]
+    phrases: list[Phrase]
     userId: ObjectId
 
 

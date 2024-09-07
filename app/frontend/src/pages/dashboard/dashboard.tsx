@@ -1,14 +1,13 @@
-import React, { createRef, RefObject, useContext, useEffect, useReducer } from "react";
+import React, { createRef, RefObject, useEffect, useReducer } from "react";
 
-import { IDashboardState, IDictionaryEntry } from "../utils/interfaces";
-import "../styleSheets/styles.css";
-import TextField from "../components/fields/textField";
-import AsyncButton from "../components/buttons/asyncButton";
+import { IDashboardState, IDictionaryEntry } from "../../utils/interfaces";
+import "../../styleSheets/styles.css";
+import TextField from "../../components/fields/textField";
+import AsyncButton from "../../components/buttons/asyncButton";
 import reducer from "./dashboardReducer";
 
-import { dummyText } from "../utils/dummyData";
-import { scrollToMiddle, scrollToTop } from "../utils/utils";
-import AuthContext from "../context/authContext";
+import { dummyText } from "../../utils/dummyData";
+import { scrollToTop } from "../../utils/utils";
 
 const initialState: IDashboardState = {
   inputText: dummyText,

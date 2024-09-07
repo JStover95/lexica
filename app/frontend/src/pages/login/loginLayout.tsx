@@ -1,17 +1,15 @@
 import { Outlet } from "react-router-dom";
 
 
-const Layout = () => {
+const LoginLayout = () => {
   return (
     <main className="wrapper">
       <div className="container">
-        <div className="column grow align-center">
-          <div>
+        <div className="column p2 grow align-center">
+          <div className="mb2">
             <h1>Lexica</h1>
           </div>
-          <div className="flex w100p">
-            <Outlet />
-          </div>
+          <Outlet />
         </div>
       </div>
     </main>
@@ -19,4 +17,4 @@ const Layout = () => {
 };
 
 
-export default Layout;
+export default LoginLayout;

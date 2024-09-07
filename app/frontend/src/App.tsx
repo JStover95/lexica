@@ -1,12 +1,15 @@
-import Dashboard from "./pages/dashboard";
-import Login from "./pages/login";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+
+import Dashboard from "./pages/dashboard/dashboard";
+import Login from "./pages/login/login";
+import LoginLayout from "./pages/login/loginLayout";
 import AuthContext from "./context/authContext";
 import useAuth from "./hooks/useAuth";
 
 import "./styleSheets/App.css";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Layout from "./pages/layout";
+import DashboardLayout from "./pages/dashboard/dashboardLayout";
 import ProtectedRoute from "./pages/protected";
+import SetPassword from "./pages/login/setPassword";
 
 
 const App = () => {
@@ -27,7 +30,7 @@ const App = () => {
       element: <ProtectedRoute />,
       children: [
         {
-          element: <Layout />,
+          element: <DashboardLayout />,
           children: [
             {
               index: true,
@@ -39,7 +42,17 @@ const App = () => {
     },
     {
       path: "/login",
-      element: <Login />
+      element: <LoginLayout />,
+      children: [
+        {
+          index: true,
+          element: <Login />,
+        },
+        {
+          path: "/login/set-password",
+          element: <SetPassword />
+        }
+      ]
     },
   ]);
 

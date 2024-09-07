@@ -1,10 +1,11 @@
 import { Buffer } from "buffer";
 import React, { useContext, useState } from "react";
-import { makeRequest } from "../utils/utils";
-import AsyncButton from "../components/buttons/asyncButton";
-import TextField from "../components/fields/textField";
-import AuthContext from "../context/authContext";
-import "../styleSheets/styles.css";
+import { makeRequest } from "../../utils/utils";
+import AsyncButton from "../../components/buttons/asyncButton";
+import TextField from "../../components/fields/textField";
+import AuthContext from "../../context/authContext";
+import "../../styleSheets/styles.css";
+import { redirect } from "react-router-dom";
 
 /**
  * Login Component
@@ -46,7 +47,12 @@ const Login: React.FC = () => {
 
       // Check if login is successful
       if (!(status === 200 && res.AccessToken && res.RefreshToken)) {
-        setMessage(res.Message ? res.Message : "Login failed.");
+        // If the server is requesting a challenge
+        if (res.Message == "Challenge requested by server.") {
+          redirect("/login/set-password");
+        } else {
+          setMessage(res.Message ? res.Message : "Login failed.");
+        }
         return;
       }
 
@@ -62,7 +68,7 @@ const Login: React.FC = () => {
 
   // Email input field component
   const emailField = (
-    <div className="mb1 input input-m">
+    <div className="input input-m">
       <TextField
         id="login-email"
         placeholder="Email"
@@ -75,7 +81,7 @@ const Login: React.FC = () => {
 
   // Password input field component
   const passwordField = (
-    <div className="mb1 input input-m">
+    <div className="input input-m">
       <TextField
         id="login-password"
         placeholder="Password"
@@ -88,7 +94,7 @@ const Login: React.FC = () => {
 
   // Login button component with Async handling
   const submitButton = (
-    <div className="mb1 justify-center">
+    <div className="justify-center">
       <AsyncButton
         children={<span>Log In</span>}
         type="primary"
@@ -99,21 +105,25 @@ const Login: React.FC = () => {
   )
 
   return (
-    <main className="wrapper">
-      <div className="container">
-        <div className="p1">
-          <h1>Lexica</h1>
-          <div className="align-center column">
-            <div className="mb0-5 font-s">
-              <span>{message}</span>
-            </div>
-            {emailField}
-            {passwordField}
-            {submitButton}
-          </div>
+    <div className="align-center column card shadow w300">
+      <div className="mb2">
+        <span>Please log in to continue</span>
+      </div>
+      <div className={message ? "mb1" : "mb2"}>
+        <div className="mb1">
+          {emailField}
+        </div>
+        <div>
+          {passwordField}
         </div>
       </div>
-    </main>
+      {message &&
+        <div className="mb2 font-s font-red">
+          <span>{message}</span>
+        </div>
+      }
+      {submitButton}
+    </div>
   )
 }
 

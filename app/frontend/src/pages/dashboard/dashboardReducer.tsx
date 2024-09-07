@@ -1,6 +1,6 @@
 import { createRef, RefObject } from "react";
-import { IDashboardState, IDictionaryEntry, IPhrase } from "../utils/interfaces";
-import { scrollToMiddle } from "../utils/utils";
+import { IDashboardState, IDictionaryEntry, IPhrase } from "../../utils/interfaces";
+import { scrollToMiddle } from "../../utils/utils";
 
 type Action =
   | { type: "EDIT_INPUT"; text: string }

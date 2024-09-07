@@ -37,16 +37,16 @@ const Login: React.FC = () => {
       // Encode email and password in base64
       const auth = Buffer.from(`${email}:${password}`).toString("base64");
       const headers = { Authorization: "Basic " + auth };
-      const options = { method: "POST", headers: headers };
+      const options = { headers: headers };
       
       // Send the login request
       const [status, res] = await makeRequest(
-        { url: "/iam/login", accessToken, options }
+        { url: "/login", accessToken, options }
       );
 
       // Check if login is successful
       if (!(status === 200 && res.AccessToken && res.RefreshToken)) {
-        setMessage(res.message ? res.message : "Login failed.");
+        setMessage(res.Message ? res.Message : "Login failed.");
         return;
       }
 

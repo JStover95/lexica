@@ -90,16 +90,16 @@ export const makeRequest = async (opts: {
     // Set the content type and CSRF token headers
     if (options.headers) {
       options.headers["Content-Type"] = "application/json";
-      options.headers["X-CSRF-Token"] = csrfToken;
-    } else
+    } else {
       options.headers = {
         "Content-Type": "application/json",
-        "X-CSRF-Token": csrfToken
       };
+    }
+    if (csrfToken) options.headers["X-CSRF-Token"] = csrfToken;
   }
 
   // Make the request
-  return fetch(process.env.API_ENDPOINT + url, options ? options : {}).then(
+  return fetch(process.env.REACT_APP_API_ENDPOINT + url, options ? options : {}).then(
     async (res) => {
       const body = await res.json();
 

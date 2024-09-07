@@ -6,6 +6,7 @@ import useAuth from "./hooks/useAuth";
 import "./styleSheets/App.css";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Layout from "./pages/layout";
+import ProtectedRoute from "./pages/protected";
 
 
 const App = () => {
@@ -23,11 +24,16 @@ const App = () => {
   const router = createBrowserRouter([
     {
       path: "/",
-      element: <Layout />,
+      element: <ProtectedRoute />,
       children: [
         {
-          index: true,
-          element: <Dashboard />
+          element: <Layout />,
+          children: [
+            {
+              index: true,
+              element: <Dashboard />
+            },
+          ],
         },
       ]
     },

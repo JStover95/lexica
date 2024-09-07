@@ -1,8 +1,8 @@
 import { Buffer } from "buffer";
 import React, { useContext, useState } from "react";
-import { makeRequest } from "../utils";
-import AsyncButton from "./buttons/asyncButton";
-import TextField from "./fields/textField";
+import { makeRequest } from "../utils/utils";
+import AsyncButton from "../components/buttons/asyncButton";
+import TextField from "../components/fields/textField";
 import AuthContext from "../context/authContext";
 import "../styleSheets/styles.css";
 
@@ -99,17 +99,21 @@ const Login: React.FC = () => {
   )
 
   return (
-    <div className="p1">
-      <h1>Lexica</h1>
-      <div className="align-center column">
-        <div className="mb0-5 font-s">
-          <span>{message}</span>
+    <main className="wrapper">
+      <div className="container">
+        <div className="p1">
+          <h1>Lexica</h1>
+          <div className="align-center column">
+            <div className="mb0-5 font-s">
+              <span>{message}</span>
+            </div>
+            {emailField}
+            {passwordField}
+            {submitButton}
+          </div>
         </div>
-        {emailField}
-        {passwordField}
-        {submitButton}
       </div>
-    </div>
+    </main>
   )
 }
 

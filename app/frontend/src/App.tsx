@@ -1,9 +1,11 @@
-import Dashboard from "./components/dashboard";
-import Login from "./components/login";
+import Dashboard from "./pages/dashboard";
+import Login from "./pages/login";
 import AuthContext from "./context/authContext";
 import useAuth from "./hooks/useAuth";
 
 import "./styleSheets/App.css";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import Layout from "./pages/layout";
 
 
 const App = () => {
@@ -30,11 +32,14 @@ const App = () => {
       setRefreshToken
     }}
     >
-      <div className="wrapper">
-        <div className="container">
-          {!isAuthenticated ? <Dashboard /> : <Login />}
-        </div>
-      </div>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index={true} element={<Dashboard />} />
+          </Route>
+          <Route path="/login" element={<Login />} />
+        </Routes>
+      </BrowserRouter>
     </AuthContext.Provider>
   );
 };

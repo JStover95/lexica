@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import { IUser } from "../interfaces";
+import { IUser } from "../utils/interfaces";
 
 interface IAuthContext {
   // The current authenticated user or null if not authenticated

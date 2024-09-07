@@ -1,5 +1,5 @@
 import { useContext, useEffect } from "react";
-import { IUser } from "../interfaces";
+import { IUser } from "../utils/interfaces";
 import AuthContext from "../context/authContext";
 
 // Custom hook to manage authentication state

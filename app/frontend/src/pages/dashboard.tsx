@@ -1,13 +1,13 @@
 import React, { createRef, RefObject, useEffect, useReducer } from "react";
 
-import { IDashboardState, IDictionaryEntry } from "../interfaces";
+import { IDashboardState, IDictionaryEntry } from "../utils/interfaces";
 import "../styleSheets/styles.css";
-import TextField from "./fields/textField";
-import AsyncButton from "./buttons/asyncButton";
+import TextField from "../components/fields/textField";
+import AsyncButton from "../components/buttons/asyncButton";
 import reducer from "./dashboardReducer";
 
-import { dummyText } from "../dummyData";
-import { scrollToMiddle, scrollToTop } from "../utils";
+import { dummyText } from "../utils/dummyData";
+import { scrollToMiddle, scrollToTop } from "../utils/utils";
 
 const initialState: IDashboardState = {
   inputText: dummyText,
@@ -366,52 +366,44 @@ const Dashboard: React.FC = () => {
   });
 
   return (
-    <div className="column grow align-center">
+    <>
+      {/* The text view */}
+      <div className="grow column p2 w50p h800">
+        {showInput ?
 
-      {/* Header */}
-      <div>
-        <h1>Lexica</h1>
-      </div>
-      <div className="flex w100p">
+          // The input field
+          <div className="grow column mb1">
+            <TextField
+              className={"font-l"}
+              type={"textarea"}
+              placeholder={"Paste your content here..."}
+              onKeyup={(text) => dispatch({ type: "EDIT_INPUT", text })}
+              prefill={dummyText}
+            />
+          </div> :
 
-        {/* The text view */}
-        <div className="grow column p2 w50p h800">
-          {showInput ?
-
-            // The input field
-            <div className="grow column mb1">
-              <TextField
-                className={"font-l"}
-                type={"textarea"}
-                placeholder={"Paste your content here..."}
-                onKeyup={(text) => dispatch({ type: "EDIT_INPUT", text })}
-                prefill={dummyText}
-              />
-            </div> :
-
-            // Processed input text for reading
-            <div className="font-height-l scroll pr1">
-              {blocks}
-            </div>
-          }
-
-          {/* The "Start learning" button */}
-          <div className="justify-center">
-            {showInput && <AsyncButton
-              onClick={handleClickStart}
-              children={<span className="font-l">Start learning</span>}
-              type="primary"
-              size="xlarge"
-            />}
+          // Processed input text for reading
+          <div className="font-height-l scroll pr1">
+            {blocks}
           </div>
-        </div>
+        }
 
-        {/* The feedback view */}
-        <div className="grow column p2 w50p h800 scroll pr1">
-          {phraseCards}
+        {/* The "Start learning" button */}
+        <div className="justify-center">
+          {showInput && <AsyncButton
+            onClick={handleClickStart}
+            children={<span className="font-l">Start learning</span>}
+            type="primary"
+            size="xlarge"
+          />}
         </div>
       </div>
-    </div>
+
+      {/* The feedback view */}
+      <div className="grow column p2 w50p h800 scroll pr1">
+        {phraseCards}
+      </div>
+    </>
   )
 }
 

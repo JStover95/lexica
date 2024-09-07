@@ -4,7 +4,7 @@ import AuthContext from "./context/authContext";
 import useAuth from "./hooks/useAuth";
 
 import "./styleSheets/App.css";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Layout from "./pages/layout";
 
 
@@ -20,6 +20,23 @@ const App = () => {
     setRefreshToken
   } = useAuth();
 
+  const router = createBrowserRouter([
+    {
+      path: "/",
+      element: <Layout />,
+      children: [
+        {
+          index: true,
+          element: <Dashboard />
+        },
+      ]
+    },
+    {
+      path: "/login",
+      element: <Login />
+    },
+  ]);
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -32,14 +49,7 @@ const App = () => {
       setRefreshToken
     }}
     >
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index={true} element={<Dashboard />} />
-          </Route>
-          <Route path="/login" element={<Login />} />
-        </Routes>
-      </BrowserRouter>
+      <RouterProvider router={router} />
     </AuthContext.Provider>
   );
 };

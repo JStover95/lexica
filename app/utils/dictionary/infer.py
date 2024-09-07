@@ -4,7 +4,7 @@ import jamotools
 import torch
 from transformers import AutoTokenizer, AutoModelForMultipleChoice
 
-from app.collections import DictionaryEntryWithSenses
+from app.collections import DictionaryEntry
 from app.utils.dictionary.dictionary import query_dictionary
 
 # Initialize the model and tokenizer
@@ -40,7 +40,7 @@ def ends_in_vowel(str: str) -> bool:
 def get_inference(
         query: str,
         context: str | None = None
-    ) -> list[DictionaryEntryWithSenses]:
+    ) -> list[DictionaryEntry]:
     """
     Analyzes the given query sentence and infers the most probable meanings
     (senses) of each word based on the context.
@@ -58,7 +58,7 @@ def get_inference(
             disambiguate the definitions. Default is None.
 
     Returns:
-        list[DictionaryEntryWithSenses]: A list of dictionary entries, each
+        list[DictionaryEntry]: A list of dictionary entries, each
             mapped to its inferred senses with their respective ranks based on 
             the context. Each entry in the list contains the word, its part of 
             speech, and a ranked list of possible meanings.

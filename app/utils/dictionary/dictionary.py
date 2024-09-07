@@ -2,7 +2,7 @@ from itertools import groupby
 
 from app.collections import (
     DictionaryEntry,
-    DictionaryEntryWithSenses,
+    DictionaryEntry,
     dictionary_entries,
     senses
 )
@@ -11,7 +11,7 @@ from app.utils.morphs.parse import get_morph_surface
 from app.utils.morphs.types import exclude_dictionary, is_morph_type
 
 
-type QueryResult = dict[str, list[DictionaryEntryWithSenses]]
+type QueryResult = dict[str, list[DictionaryEntry]]
 
 # Single common words to not return a dictionary entry for
 exclude_words = ["것", "수", "있다", "안", "하다", "되다", ""]
@@ -133,7 +133,7 @@ def get_query_str(
 def query_dictionary(
         query: str,
         context: str | None = None
-    ) -> list[list[DictionaryEntryWithSenses]]:
+    ) -> list[list[DictionaryEntry]]:
     """Query the dictionary for all words, idioms, or proverbs in a string.
     Dictionary entries are only retured if at least one of the entry's
     variations is found in the query string. This is done by checking that the
@@ -158,7 +158,7 @@ def query_dictionary(
         query (str)
 
     Returns:
-        list[list[DictionaryEntryWithSenses]]
+        list[list[DictionaryEntry]]
     """
 
     qstr = get_query_str(query, context=context, punctuation=True)
@@ -175,7 +175,7 @@ def query_dictionary(
     ))
 
     # Add senses to each entry
-    result: list[DictionaryEntryWithSenses] = []
+    result: list[DictionaryEntry] = []
     for entry in entries_filtered:
         entry["senses"] = list(senses.find({"dictionaryEntryId": entry["_id"]}))
         result.append(entry)

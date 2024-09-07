@@ -19,48 +19,48 @@ def init_database():
     if os.getenv("MONGO_HOST") != "localhost":
         raise RuntimeError("The flask init-database command can only be used when MONGO_HOST is set to localhost.")
     
-    # with open("content.json") as f:
-    #     content: list[dict] = json.load(f)
+    with open("content.json") as f:
+        content: list[dict] = json.load(f)
 
     with open("dict.json") as f:
         dictionary: list[dict] = json.load(f)
 
-    # user: User | None = users.find_one()
-    # if user is None:
-    #     raise RuntimeError("No user present in the database. Run flask init-user before running flask init-database")
+    user: User | None = users.find_one()
+    if user is None:
+        raise RuntimeError("No user present in the database. Run flask init-user before running flask init-database")
 
-    # content_data = []
+    content_data = []
 
-    # for row in content:
-    #     text = row["text"].strip()
-    #     morphs = mecab.parse(text)
-    #     units, modfs = get_smap_from_morphs(morphs)
+    for row in content:
+        text = row["text"].strip()
+        morphs = mecab.parse(text)
+        units, modfs = get_smap_from_morphs(morphs)
 
-    #     content_data.append({
-    #         "userId": user["_id"],
-    #         "lastModified": datetime.datetime.now(datetime.UTC),
-    #         "method": "",
-    #         "level": "",
-    #         "length": "",
-    #         "format": "",
-    #         "style": "",
-    #         "prompt": "",
-    #         "title": row["title"],
-    #         "text": text,
-    #         "surfaces": {
-    #             "units": units["surfaces"],
-    #             "modifiers": modfs["surfaces"],
-    #         },
-    #         "ix": {
-    #             "units": units["ix"],
-    #             "modifiers": modfs["ix"],
-    #         },
-    #         "phrases": [],
-    #     })
+        content_data.append({
+            "userId": user["_id"],
+            "lastModified": datetime.datetime.now(datetime.UTC),
+            "method": "",
+            "level": "",
+            "length": "",
+            "format": "",
+            "style": "",
+            "prompt": "",
+            "title": row["title"],
+            "text": text,
+            "surfaces": {
+                "units": units["surfaces"],
+                "modifiers": modfs["surfaces"],
+            },
+            "ix": {
+                "units": units["ix"],
+                "modifiers": modfs["ix"],
+            },
+            "phrases": [],
+        })
 
-    # contents.create_index(["userId", "timestamp"])
-    # contents.create_index({"surfaces": "text"})
-    # result = contents.insert_many(content_data)
+    contents.create_index(["userId", "timestamp"])
+    contents.create_index({"surfaces": "text"})
+    result = contents.insert_many(content_data)
 
     # Initialize the database with the dictionary
     print("Initializing dictionary...")
@@ -88,7 +88,7 @@ def init_database():
             })
 
     dictionary_entries.create_index({"queryStrs": "text"})
-    # return result
+    return result
 
 
 

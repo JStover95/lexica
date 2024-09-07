@@ -96,12 +96,12 @@ class DictionaryEntry(ObjectType):
         )
 
 
-class DictionaryEntryWithSenses(DictionaryEntry):
+class DictionaryEntry(DictionaryEntry):
     senses = List(Sense)
 
     @staticmethod
     def from_mongo(document):
-        return DictionaryEntryWithSenses(
+        return DictionaryEntry(
             id=str(document["_id"]),
             source_id=document["sourceId"],
             source_language=document["sourceLanguage"],
@@ -131,7 +131,7 @@ class Phrase(ObjectType):
     score = Int()
     sense_ranks = List(SenseRank)
     explanation = String()
-    dictionary_entry_ids = List(String())
+    dictionary_entry_ids = List(String)
     content_id = String()
 
     @staticmethod
@@ -149,7 +149,7 @@ class Phrase(ObjectType):
 
 
 class PhraseWithDictionaryEntries(Phrase):
-    dictionary_entries = List(DictionaryEntryWithSenses)
+    dictionary_entries = List(DictionaryEntry)
 
     @staticmethod
     def from_mongo(document):
@@ -163,7 +163,7 @@ class PhraseWithDictionaryEntries(Phrase):
             content_id=document["contentId"],
             dictionary_entry_ids=document["dictionaryEntryIds"],
             dictionary_entries=[
-                DictionaryEntryWithSenses.from_mongo(e)
+                DictionaryEntry.from_mongo(e)
                 for e in document["DictionaryEntries"]
             ]
         )
@@ -298,7 +298,7 @@ class PhraseInput(InputObjectType):
     sense_ranks = List(SenseRankInput)
     explanation = String()
     content_id = String()
-    dictionary_entry_ids = List(String())
+    dictionary_entry_ids = List(String)
 
 
 class UpdateContent(Mutation):

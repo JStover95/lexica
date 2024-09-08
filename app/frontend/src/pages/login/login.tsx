@@ -5,7 +5,7 @@ import AsyncButton from "../../components/buttons/asyncButton";
 import TextField from "../../components/fields/textField";
 import AuthContext from "../../context/authContext";
 import "../../styleSheets/styles.css";
-import { redirect } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 
 /**
  * Login Component
@@ -23,6 +23,8 @@ const Login: React.FC = () => {
   const [message, setMessage] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [challenge, setChallenge] = useState(false);
+  const [challengeUrl, setChallengeUrl] = useState("");
 
   /**
    * Handles the login process
@@ -35,6 +37,19 @@ const Login: React.FC = () => {
    */
   const handleLogin = async () => {
     try {
+
+      // Validate form feilds
+      if (!(email || password)) {
+        setMessage("Login credentials are required");
+        return;
+      } else if (!email) {  // TODO: email address verification
+        setMessage("Please enter a valid email");
+        return;
+      } else if (!password) {
+        setMessage("Please enter a password");
+        return;
+      }
+
       // Encode email and password in base64
       const auth = Buffer.from(`${email}:${password}`).toString("base64");
       const headers = { Authorization: "Basic " + auth };
@@ -49,7 +64,8 @@ const Login: React.FC = () => {
       if (!(status === 200 && res.AccessToken && res.RefreshToken)) {
         // If the server is requesting a challenge
         if (res.Message == "Challenge requested by server.") {
-          redirect("/login/set-password");
+          setChallenge(true);
+          setChallengeUrl(`/login/set-password?ChallengeName=${res.ChallengeName}&Session=${res.Session}`);
         } else {
           setMessage(res.Message ? res.Message : "Login failed.");
         }
@@ -104,10 +120,10 @@ const Login: React.FC = () => {
     </div>
   )
 
-  return (
+  return challenge ? <Navigate to={challengeUrl} replace={true} /> :
     <div className="align-center column card shadow w300">
       <div className="mb2">
-        <span>Please log in to continue</span>
+        <span>Log in to continue</span>
       </div>
       <div className={message ? "mb1" : "mb2"}>
         <div className="mb1">
@@ -124,7 +140,6 @@ const Login: React.FC = () => {
       }
       {submitButton}
     </div>
-  )
 }
 
 export default Login;

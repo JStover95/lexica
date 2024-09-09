@@ -55,7 +55,6 @@ def token_exchange():
 
     response = requests.post(token_url, headers=headers, data=body)
     token_data = response.json()
-    print(token_data)
 
     if "access_token" in token_data:
         # Set HttpOnly Secure cookie

@@ -1,26 +1,33 @@
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import AuthContext from "../context/authContext";
-import useAuth from "../hooks/useAuth";
 
 const ProtectedRoute = () => {
-  const { isAuthenticated, loading, handleAuthRedirect, checkAuth } = useContext(AuthContext);
-
+  const { checkAuth } = useContext(AuthContext);
+  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  
   useEffect(() => {
     const asyncCheckAuth = async () => {
-      await checkAuth();
-    };
+      setIsAuthenticated(await checkAuth());
+      setLoading(false);
+    }
     asyncCheckAuth();
   }, []);
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get("code");
-    if (code && !isAuthenticated) handleAuthRedirect(code);
-  }, [isAuthenticated]);
-
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <main className="wrapper">
+        <div className="container">
+          <div className="column p2 grow align-center">
+            <div className="mb2">
+              <h1>Lexica</h1>
+            </div>
+            <div>Loading...</div>
+          </div>
+        </div>
+      </main>
+    );
   }
 
   return isAuthenticated ? <Outlet /> : <Navigate to="/login" />;

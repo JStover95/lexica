@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { COGNITO_REDIRECT_URI } from "../environment.d";
 
 const authConfig = {
@@ -8,50 +7,35 @@ const authConfig = {
 };
 
 const useAuth = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
-
   const checkAuth = async () => {
     try {
       const response = await fetch(`${process.env.REACT_APP_API_ENDPOINT}/verify-token`, {
         method: "POST",
         credentials: "include",
       });
-
       if (!response.ok) {
         throw new Error("Token invalid or expired");
       }
-
-      setIsAuthenticated(true);
-      setLoading(false);
-
       return true;
     } catch (error) {
-
       // Try refreshing the token
       try {
         const response = await fetch(`${process.env.REACT_APP_API_ENDPOINT}/refresh-token`, {
           method: "POST",
           credentials: "include",
         });
-  
         if (!response.ok) {
           throw new Error("Token expired");
         }
-  
-        setIsAuthenticated(true);
-        setLoading(false);
-  
         return true;
       } catch (error) {
-        setLoading(false);
         console.error("Authentication check failed:", error);
-        return false;
       }
     }
+    return false;
   };
 
-  const handleAuthRedirect = async (code: string) => {
+  const handleAuthCallback = async (code: string) => {
     try {
       const response = await fetch(`${process.env.REACT_APP_API_ENDPOINT}/token-exchange`, {
         method: "POST",
@@ -61,16 +45,15 @@ const useAuth = () => {
         body: JSON.stringify({ code }),
         credentials: "include",
       });
-
-      if (response.ok) {
-        setIsAuthenticated(true);
-        setLoading(false);
-      } else {
-        console.error("Failed to authenticate.");
+      console.log(response);
+      if (!response.ok) {
+        throw Error("Failed to authenticate.");
       }
+      return true;
     } catch (error) {
       console.error("Error:", error);
     }
+    return false;
   };
 
   const login = () => {
@@ -78,11 +61,10 @@ const useAuth = () => {
   };
 
   const logout = () => {
-    setIsAuthenticated(false);
     window.location.href = `https://${authConfig.domain}/logout?client_id=${authConfig.clientId}&logout_uri=${authConfig.redirectUri}`;
   };
 
-  return { isAuthenticated, loading, handleAuthRedirect, checkAuth, login, logout };
+  return { handleAuthCallback, checkAuth, login, logout };
 };
 
 

@@ -9,10 +9,11 @@ import useAuth from "./hooks/useAuth";
 import "./styleSheets/App.css";
 import DashboardLayout from "./pages/dashboard/dashboardLayout";
 import ProtectedRoute from "./pages/protected";
+import AuthCallback from "./pages/authCallback";
 
 
 const App = () => {
-  const { isAuthenticated, loading, handleAuthRedirect, checkAuth, login, logout } = useAuth();
+  const { handleAuthCallback, checkAuth, login, logout } = useAuth();
 
   const router = createBrowserRouter([
     {
@@ -40,10 +41,14 @@ const App = () => {
         }
       ]
     },
+    {
+      path: "/auth/callback",
+      element: <AuthCallback />
+    }
   ]);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, loading, handleAuthRedirect, checkAuth, login, logout }}>
+    <AuthContext.Provider value={{ handleAuthCallback, checkAuth, login, logout }}>
       <RouterProvider router={router} />
     </AuthContext.Provider>
   );

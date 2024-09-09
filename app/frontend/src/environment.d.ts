@@ -19,5 +19,5 @@ export const APP_ENV: Environment = (
 export const COGNITO_REDIRECT_URI = (
   process.env.REACT_APP_APP_ENV === "production"
     ? process.env.REACT_APP_COGNITO_REDIRECT_URI
-    : "http://localhost:3000/"
+    : "http://localhost:3000/auth/callback"
 );

@@ -1,67 +1,89 @@
-import { useContext, useEffect } from "react";
-import { IUser } from "../utils/interfaces";
-import AuthContext from "../context/authContext";
+import { useEffect, useState } from "react";
+import { COGNITO_REDIRECT_URI } from "../environment.d";
 
-// Custom hook to manage authentication state
-const useAuth = () => {
-  const {
-    user,
-    setUser,
-    isAuthenticated,
-    setIsAuthenticated,
-    accessToken,
-    setAccessToken,
-    refreshToken,
-    setRefreshToken
-  } = useContext(AuthContext);
-
-  /**
-   * Logs in the user by updating the context state and local storage with user
-   * information and tokens.
-   *
-   * @param {IUser} user - The user object containing user information and
-   *  tokens.
-   */
-  const login = (user: IUser) => {
-    setUser(user);
-    setIsAuthenticated(true);  // Set authenticated state to true
-    setAccessToken(user.accessToken);  // Store access token
-    setRefreshToken(user.refreshToken);  // Store refresh token
-    localStorage.setItem("user", JSON.stringify(user));  // Save user info to local storage
-  };
-
-  /**
-   * Logs out the user by resetting the context state and local storage.
-   */
-  const logout = () => {
-    setUser(null);  // Clear user information
-    setIsAuthenticated(false);  // Set authenticated state to false
-    setAccessToken("");  // Clear access token
-    setRefreshToken("");  // Clear refresh token
-    localStorage.setItem("user", "");  // Remove user info from local storage
-  };
-
-  /**
-   * useEffect hook to retrieve user information from local storage on
-   * component mount and log in the user if found.
-   */
-  useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (user) login(JSON.parse(user));  // Log in existing user
-  });
-
-  return {
-    user,
-    setUser,
-    isAuthenticated,
-    setIsAuthenticated,
-    accessToken,
-    setAccessToken,
-    refreshToken,
-    setRefreshToken,
-    login,
-    logout,
-  };
+const authConfig = {
+  domain: process.env.REACT_APP_COGNITO_DOMAIN,
+  clientId: process.env.REACT_APP_COGNITO_APP_CLIENT_ID,
+  redirectUri: COGNITO_REDIRECT_URI,
 };
+
+const useAuth = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const checkAuth = async () => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_ENDPOINT}/verify-token`, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Token invalid or expired");
+      }
+
+      setIsAuthenticated(true);
+      setLoading(false);
+
+      return true;
+    } catch (error) {
+
+      // Try refreshing the token
+      try {
+        const response = await fetch(`${process.env.REACT_APP_API_ENDPOINT}/refresh-token`, {
+          method: "POST",
+          credentials: "include",
+        });
+  
+        if (!response.ok) {
+          throw new Error("Token expired");
+        }
+  
+        setIsAuthenticated(true);
+        setLoading(false);
+  
+        return true;
+      } catch (error) {
+        setLoading(false);
+        console.error("Authentication check failed:", error);
+        return false;
+      }
+    }
+  };
+
+  const handleAuthRedirect = async (code: string) => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_ENDPOINT}/token-exchange`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ code }),
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        setIsAuthenticated(true);
+        setLoading(false);
+      } else {
+        console.error("Failed to authenticate.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  const login = () => {
+    window.location.href = `https://${authConfig.domain}/login?client_id=${authConfig.clientId}&scope=email&response_type=code&redirect_uri=${authConfig.redirectUri}`;
+  };
+
+  const logout = () => {
+    setIsAuthenticated(false);
+    window.location.href = `https://${authConfig.domain}/logout?client_id=${authConfig.clientId}&logout_uri=${authConfig.redirectUri}`;
+  };
+
+  return { isAuthenticated, loading, handleAuthRedirect, checkAuth, login, logout };
+};
+
 
 export default useAuth;

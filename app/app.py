@@ -3,11 +3,11 @@ import dotenv
 dotenv.load_dotenv()
 
 import os
-from flask import Flask, Response
+from flask import Flask
 from app.commands import init_database, drop_database, init_user
 from app.extensions import cors, jwt_manager, socketio
 from app.utils.logging import logger
-from app.views import api, base
+from app.views import api, auth
 
 
 def create_app(testing: bool = False) -> Flask:
@@ -33,8 +33,8 @@ def create_app(testing: bool = False) -> Flask:
 
 
 def register_blueprints(app: Flask):
-    app.register_blueprint(base.blueprint)
     app.register_blueprint(api.blueprint)
+    app.register_blueprint(auth.blueprint)
 
 
 def register_commands(app: Flask):

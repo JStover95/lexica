@@ -1,4 +1,4 @@
-import { APP_ENV } from "../environment";
+import { APP_ENV } from "../environment.d";
 import { ILogFn, ILogger } from "./interfaces";
 import { LogLevel } from "./types";
 

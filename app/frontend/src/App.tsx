@@ -9,20 +9,10 @@ import useAuth from "./hooks/useAuth";
 import "./styleSheets/App.css";
 import DashboardLayout from "./pages/dashboard/dashboardLayout";
 import ProtectedRoute from "./pages/protected";
-import SetPassword from "./pages/login/setPassword";
 
 
 const App = () => {
-  const {
-    user,
-    setUser,
-    isAuthenticated,
-    setIsAuthenticated,
-    accessToken,
-    setAccessToken,
-    refreshToken,
-    setRefreshToken
-  } = useAuth();
+  const { isAuthenticated, loading, handleAuthRedirect, checkAuth, login, logout } = useAuth();
 
   const router = createBrowserRouter([
     {
@@ -47,27 +37,13 @@ const App = () => {
         {
           index: true,
           element: <Login />,
-        },
-        {
-          path: "/login/set-password",
-          element: <SetPassword />
         }
       ]
     },
   ]);
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      setUser,
-      isAuthenticated,
-      setIsAuthenticated,
-      accessToken,
-      setAccessToken,
-      refreshToken,
-      setRefreshToken
-    }}
-    >
+    <AuthContext.Provider value={{ isAuthenticated, loading, handleAuthRedirect, checkAuth, login, logout }}>
       <RouterProvider router={router} />
     </AuthContext.Provider>
   );

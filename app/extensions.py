@@ -3,14 +3,12 @@ from flask_jwt_extended import JWTManager
 from flask_socketio import SocketIO
 from mecab import MeCab
 
-from app.utils.cognito import Cognito
 from app.utils.mongo import Mongo
 
-cognito = Cognito()
-
 cors = CORS(
-    allow_headers=["Authorization", "Content-Type"],
-    supports_credentials=True
+    # allow_headers=["Authorization", "Content-Type"],
+    supports_credentials=True,
+    resources={r"/*": {"origins": "http://localhost:3000"}}
 )
 
 mecab = MeCab()

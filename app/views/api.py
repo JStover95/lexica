@@ -20,17 +20,15 @@ def graphql():
     Request Body (JSON):
         - query (str): The GraphQL query string.
         - variables (dict, optional): A dictionary of variables for
-            parameterized queries.
+        parameterized queries.
         - operationName (str, optional): The name of the operation to execute
-            (useful for queries with multiple operations).
+        (useful for queries with multiple operations).
 
     Returns:
         Response: A JSON response containing the query execution result.
-                  The response includes the following keys:
-                  - data (dict): The result data from the GraphQL query
-                    execution.
-                  - errors (list, optional): A list of error messages if any
-                    errors occurred during query execution.
+        - data (dict): The result data from the GraphQL query execution.
+        - errors (list, optional): A list of error messages if any errors
+        occurred during query execution.
 
     Example Request (POST):
         {
@@ -53,7 +51,7 @@ def graphql():
 
     HTTP Status:
         - 200 OK: The request was successfully processed and a valid response
-                  was returned.
+        was returned.
     """
     data = request.get_json()
 
@@ -105,35 +103,35 @@ def infer(validated_data: API.InferRequestType):
 
     Request Body (JSON):
         - Query (list of str): A list of words for which to retrieve
-            dictionary definitions.
+        dictionary definitions.
         - Context (str, optional): A string that provides context for ranking
-            the definitions (e.g., a sentence or paragraph).
+        the definitions (e.g., a sentence or paragraph).
 
     Response (JSON):
         - Message (str): A status message indicating success or failure.
         - Result (list): A list of dictionary entries for each word in "Query".
-            Each entry contains:
+        Each entry contains:
             - writtenForm (str): The word's written form.
             - partOfSpeech (str): The part of speech for the word.
             - senses (list): A list of senses (definitions) for the word. Each
-                sense includes:
+            sense includes:
                 - definition (str): The definition of the sense.
                 - rank (float): The relevance score of the definition to the
-                    provided context (0 to 1).
+                provided context (0 to 1).
                 - equivalents (list): A list of equivalent translations.
-                    Currently this only returns one equivalent in English. Each
-                    equivalent includes:
+                Currently this only returns one equivalent in English. Each
+                equivalent includes:
                     - equivalentLanguage (str): The language of the equivalent
-                        (e.g., "영어" for English).
+                    (e.g., "영어" for English).
                     - equivalent (str): The equivalent translation of the word.
                     - definition (str): The definition of the equivalent
-                        translation.
+                    translation.
 
     Raises:
         - 500 Internal Server Error: If an unexpected error occurs during the
-            inference process.
+        inference process.
 
-    Returns:
+    HTTP Status:
         - 200 OK: If the request is successfully processed.
         - 500 Internal Server Error: If an unexpected error occurs.
     """

@@ -1,6 +1,9 @@
 import { Outlet } from "react-router-dom";
 
 
+/**
+ * The React Router layout for all children of the login component.
+ */
 const LoginLayout = () => {
   return (
     <main className="wrapper">

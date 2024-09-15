@@ -19,13 +19,13 @@ def validate_schema(schema):
     message.
 
     Args:
-        schema (dict): The JSON schema to validate the incoming request data
-                       against.
+        - schema (dict): The JSON schema to validate the incoming request data
+        against.
 
     Returns:
         function: The wrapped Flask route function, which is executed if the
-                  payload is valid. The validated JSON data is passed to the
-                  route function via the `validated_data` keyword argument.
+        payload is valid. The validated JSON data is passed to the route
+        function via the `validated_data` keyword argument.
 
     Example usage:
         @app.route('/example', methods=['POST'])

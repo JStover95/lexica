@@ -8,7 +8,7 @@ import useAuth from "./hooks/useAuth";
 
 import "./styleSheets/App.css";
 import DashboardLayout from "./pages/dashboard/dashboardLayout";
-import ProtectedRoute from "./pages/protected";
+import ProtectedRoute from "./pages/protectedRoute";
 import AuthCallback from "./pages/authCallback";
 
 

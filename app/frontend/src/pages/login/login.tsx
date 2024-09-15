@@ -3,6 +3,9 @@ import AuthContext from "../../context/authContext";
 import "../../styleSheets/styles.css";
 
 
+/**
+ * The login component for directing users to the AWS Cognito hosted UI.
+ */
 const Login: React.FC = () => {
   const { login } = useContext(AuthContext);
 

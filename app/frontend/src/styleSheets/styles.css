@@ -222,7 +222,7 @@
   background-color: #888;
 }
 
-.btn {
+/* .btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -256,7 +256,7 @@
 
 .btn-primary:hover {
   background-color: var(--color-primary-light);
-}
+} */
 
 .input {
   display: flex;

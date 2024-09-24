@@ -14,11 +14,9 @@ const Login: React.FC = () => {
       <div className="mb-8">
         <span>Log in to continue</span>
       </div>
-      <div>
-        <button className="btn btn-primary btn-lg" onClick={login}>
-          Continue to login
-        </button>
-      </div>
+      <button className="btn btn-primary btn-lg" onClick={login}>
+        Continue to login
+      </button>
     </div>
   );
 }

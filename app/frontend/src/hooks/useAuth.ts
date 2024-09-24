@@ -106,6 +106,7 @@ const useAuth = () => {
     params.append("scope", authConfig.scope);
     params.append("response_type", authConfig.responseType);
     params.append("redirect_uri", authConfig.redirectUri);
+    url.search = params.toString();
     window.location.href = url.toString();
   };
 
@@ -115,6 +116,7 @@ const useAuth = () => {
     const params = new URLSearchParams(url.search);
     params.append("client_id", authConfig.clientId);
     params.append("logout_uri", authConfig.logoutUri);
+    url.search = params.toString();
     window.location.href = url.toString();
   };
 

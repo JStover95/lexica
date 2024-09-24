@@ -10,6 +10,8 @@ import "./styleSheets/App.css";
 import DashboardLayout from "./pages/dashboard/dashboardLayout";
 import ProtectedRoute from "./pages/protectedRoute";
 import AuthCallback from "./pages/authCallback";
+import ProtectedLayout from "./layouts/protectedLayout";
+import Read from "./pages/read/read";
 
 
 const App = () => {
@@ -21,11 +23,11 @@ const App = () => {
       element: <ProtectedRoute />,
       children: [
         {
-          element: <DashboardLayout />,
+          element: <ProtectedLayout />,
           children: [
             {
               index: true,
-              element: <Dashboard />
+              element: <Read />
             },
           ],
         },

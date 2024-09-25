@@ -9,9 +9,7 @@ const ProtectedLayout = () => {
   return (
     <main className="flex flex-col h-screen">
       <NavBar />
-      <div className="flex flex-grow items-center justify-center">
-          <Outlet />
-      </div>
+      <Outlet />
     </main>
   );
 };

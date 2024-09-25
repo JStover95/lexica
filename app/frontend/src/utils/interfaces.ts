@@ -50,6 +50,13 @@ export interface IDashboardState {
   phrases: IPhrase[];
 }
 
+export interface IReadState {
+  blocks: React.ReactNode[] | null;
+  blockRefs: (RefObject<HTMLSpanElement> | null)[] | null;
+  selectedIndices: number[];
+  phrases: IPhrase[];
+}
+
 export interface IEquivalent {
   equivalentLanguage: string;
   equivalent: string;

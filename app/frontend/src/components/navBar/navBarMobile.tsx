@@ -5,7 +5,7 @@ import CloseIcon from '@mui/icons-material/Close';
 
 
 const NavBar: React.FC = () => {
-  const [drawerOpen, setDrawerOpen] = useState(true);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const drawerRef = createRef<HTMLDivElement>();
 
   const handleClickMenu = () => {
@@ -22,14 +22,15 @@ const NavBar: React.FC = () => {
     }
   }
 
+  // TODO: Come back and move nav links to a component
   const drawer =
-    <div ref={drawerRef} className="flex flex-col bg-white z-10 shadow-xl absolute w-full top-[80px] h-[292px] overflow-hidden transition-all duration-500">
+    <div ref={drawerRef} className="flex-col bg-white z-10 shadow-xl absolute w-full top-[80px] h-[0px] overflow-hidden transition-all duration-500">
       <div className="py-4 px-8">
         <NavLink
           to="/"
           end
           className={({ isActive }) => {
-            return "btn justify-start px-8 py-3 text-lg" + (isActive ? " btn-primary rounded-4xl" : "")
+            return "btn justify-start px-8 py-3 text-lg" + (isActive ? " text-primary" : "")
           }}>
             Read
         </NavLink>
@@ -37,7 +38,7 @@ const NavBar: React.FC = () => {
           to="/create"
           end
           className={({ isActive }) => {
-            return "btn justify-start px-8 py-3 text-lg" + (isActive ? " btn-primary rounded-4xl" : "")
+            return "btn justify-start px-8 py-3 text-lg" + (isActive ? " text-primary" : "")
           }}>
             Create
         </NavLink>
@@ -45,7 +46,7 @@ const NavBar: React.FC = () => {
           to="/review"
           end
           className={({ isActive }) => {
-            return "btn justify-start px-8 py-3 text-lg" + (isActive ? " btn-primary rounded-4xl" : "")
+            return "btn justify-start px-8 py-3 text-lg" + (isActive ? " text-primary" : "")
           }}>
             Review
         </NavLink>
@@ -53,7 +54,7 @@ const NavBar: React.FC = () => {
           to="/account"
           end
           className={({ isActive }) => {
-            return "btn justify-start px-8 py-3 text-lg" + (isActive ? " btn-primary rounded-4xl" : "")
+            return "btn justify-start px-8 py-3 text-lg" + (isActive ? " text-primary" : "")
           }}>
             Account
         </NavLink>
@@ -61,7 +62,7 @@ const NavBar: React.FC = () => {
           to="/logout"
           end
           className={({ isActive }) => {
-            return "btn justify-start px-8 py-3 text-lg" + (isActive ? " btn-primary rounded-4xl" : "")
+            return "btn justify-start px-8 py-3 text-lg" + (isActive ? " text-primary" : "")
           }}>
             Log Out
         </NavLink>
@@ -70,7 +71,7 @@ const NavBar: React.FC = () => {
 
   return (
     <>
-      <div className="flex items-center justify-between w-screen h-[80px] px-8 shadow-lg">
+      <div className="flex flex-shrink-0 items-center justify-between w-screen h-[80px] px-8 shadow-lg">
         <h1 className="text-4xl font-bold">Lexica</h1>
         {
           drawerOpen ?

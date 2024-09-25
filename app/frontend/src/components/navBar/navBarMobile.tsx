@@ -24,7 +24,7 @@ const NavBar: React.FC = () => {
 
   // TODO: Come back and move nav links to a component
   const drawer =
-    <div ref={drawerRef} className="flex-col bg-white z-10 shadow-xl absolute w-full top-[80px] h-[0px] overflow-hidden transition-all duration-500">
+    <div ref={drawerRef} className="flex-col bg-white z-50 shadow-xl w-full fixed top-[80px] h-[0px] overflow-hidden transition-all duration-500 webkit-overflow-scrolling">
       <div className="py-4 px-8">
         <NavLink
           to="/"
@@ -71,7 +71,7 @@ const NavBar: React.FC = () => {
 
   return (
     <>
-      <div className="flex flex-shrink-0 items-center justify-between w-screen h-[80px] px-8 shadow-lg">
+      <div className="flex flex-shrink-0 items-center justify-between w-screen h-[80px] px-8 sticky top-0 z-40 bg-white shadow-lg">
         <h1 className="text-4xl font-bold">Lexica</h1>
         {
           drawerOpen ?

@@ -24,4 +24,7 @@
   .btn:active {
     @apply scale-95;
   }
+  .webkit-overflow-scrolling {
+    -webkit-overflow-scrolling: touch;
+  }
 }

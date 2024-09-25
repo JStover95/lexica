@@ -7,7 +7,7 @@ import NavBar from "../components/navBar/navBarMobile";
  */
 const ProtectedLayout = () => {
   return (
-    <main className="flex flex-col h-screen">
+    <main className="flex flex-col">
       <NavBar />
       <Outlet />
     </main>

@@ -3,6 +3,7 @@ import { dummyText } from "../../utils/dummyData";
 import { IDictionaryEntry, IReadState } from "../../utils/interfaces";
 import reducer from "./readReducer";
 import { scrollToTop } from "../../utils/utils";
+import ViewPhrasesButton from "../../components/buttons/viewPhrasesButton";
 
 export const initialState: IReadState = {
   blocks: null,
@@ -194,10 +195,15 @@ const Read: React.FC = () => {
     dispatch({ type: "CLICK_SEE_MORE_DEFINITIONS", phraseIx, entryIx });
   };
 
+  const handleClickViewPhrasesButton = () => {}
+
   return (
-    <div className="flex-grow px-8 pt-8 w-full overflow-y-scroll overflow-x-hidden">
-      {blocks}
-    </div>
+    <>
+      <div className="flex-grow px-8 pt-8 w-full overflow-y-scroll overflow-x-hidden">
+        {blocks}
+      </div>
+      <ViewPhrasesButton onClick={handleClickViewPhrasesButton} />
+    </>
   );
 };
 

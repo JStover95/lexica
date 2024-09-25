@@ -10,13 +10,15 @@ const NavBar: React.FC = () => {
 
   const handleClickMenu = () => {
     if (drawerRef.current) {
-      drawerRef.current.style.height = "292px";
+      document.body.classList.toggle("overflow-hidden");
+      drawerRef.current.style.height = "100%";
       setDrawerOpen(true);
     }
   }
 
   const handleClickCloseMenu = () => {
     if (drawerRef.current) {
+      document.body.classList.toggle("overflow-hidden");
       drawerRef.current.style.height = "0px";
       setDrawerOpen(false);
     }

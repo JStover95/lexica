@@ -33,12 +33,12 @@ const Read: React.FC = () => {
     if (blockRefs) {
       blockRefs.forEach((ref, i) => {
 
-        // If the ref's element is not whitespace between two words
-        if (ref && ref.current && ref.current.innerHTML !== "&nbsp;") {
-          ref.current.onclick = () => dispatch(
-            { type: "CLICK_BLOCK", index: i }
-          );
-        }
+        // // If the ref's element is not whitespace between two words
+        // if (ref && ref.current && ref.current.innerHTML !== "&nbsp;") {
+        //   ref.current.onclick = () => dispatch(
+        //     { type: "CLICK_BLOCK", index: i }
+        //   );
+        // }
       });
     }
   }, [blockRefs, dispatch]);

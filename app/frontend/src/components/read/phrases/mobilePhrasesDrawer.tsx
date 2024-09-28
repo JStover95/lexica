@@ -1,10 +1,23 @@
-import React, { createRef, PropsWithChildren } from "react";
+import React, { createRef } from "react";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import { IDictionaryEntry } from "../../../utils/interfaces";
+import PhraseCard from "./phraseCard";
+
+interface IPhrase {
+  text: string;
+  startIndex: number;
+  stopIndex: number;
+  dictionaryEntries: IDictionaryEntry[] | null;
+}
+
+interface IMobilePhrasesDrawer {
+  phrases: IPhrase[];
+}
 
 
-const MobilePhrasesDrawer: React.FC<PropsWithChildren> = ({
-  children
+const MobilePhrasesDrawer: React.FC<IMobilePhrasesDrawer> = ({
+  phrases
 }) => {
   const ref = createRef<HTMLDivElement>();
 
@@ -19,6 +32,13 @@ const MobilePhrasesDrawer: React.FC<PropsWithChildren> = ({
       ref.current.style.height = "0px";
     }
   };
+
+  const phraseCards = phrases.map((phrase, i) =>
+    <PhraseCard
+      key={`phrase-card-${i}`}
+      text={phrase.text}
+      dictionaryEntries={phrase.dictionaryEntries} />
+  );
 
   return (
     <>
@@ -44,7 +64,7 @@ const MobilePhrasesDrawer: React.FC<PropsWithChildren> = ({
 
           {/* Phrases list */}
           <div className="flex flex-col flex-grow bg-white px-8 pt-4 overflow-scroll border-t-2 border-solid border-primary pointer-events-auto">
-            {children}
+            {phraseCards}
           </div>
       </div>
     </>

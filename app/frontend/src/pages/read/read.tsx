@@ -5,11 +5,6 @@ import Block from "../../components/read/block";
 import PageContainer from "../../components/containers/pageContainer";
 import MobilePhrasesDrawer from "../../components/read/phrases/mobilePhrasesDrawer";
 
-interface IBlock {
-  text: string;
-  index: string;
-}
-
 interface IPhrase {
   text: string;
   startIndex: number;
@@ -21,7 +16,6 @@ interface IPhrase {
 const Read: React.FC = () => {
   const [selectedIndices, setSelectedIndices] = useState<Set<number>>(new Set());
   const [phrases, setPhrases] = useState<IPhrase[]>([]);
-  const [phrasesDrawerOpen, setPhrasesDrawerOpen] = useState(false);
 
   // Split the text into paragraphs, and within each paragraph, split by words
   const paragraphs = useMemo(() =>
@@ -131,11 +125,7 @@ const Read: React.FC = () => {
       </PageContainer>
 
       {/* Mobile phrases drawer */}
-      <MobilePhrasesDrawer>
-        {phrases.map((phrase, i) =>
-          <span key={`phrase-${i}`}>{phrase.text}</span>
-        )}
-      </MobilePhrasesDrawer>
+      <MobilePhrasesDrawer phrases={phrases} />
     </>
   );
 };

@@ -1,6 +1,9 @@
 import React, { useMemo, useState } from "react";
 import { dummyText } from "../../utils/dummyData";
 import { IDictionaryEntry } from "../../utils/interfaces";
+import Block from "../../components/read/block";
+import PageContainer from "../../components/containers/pageContainer";
+import MobilePhrasesDrawer from "../../components/read/phrases/mobilePhrasesDrawer";
 
 interface IBlock {
   text: string;
@@ -18,6 +21,7 @@ interface IPhrase {
 const Read: React.FC = () => {
   const [selectedIndices, setSelectedIndices] = useState<Set<number>>(new Set());
   const [phrases, setPhrases] = useState<IPhrase[]>([]);
+  const [phrasesDrawerOpen, setPhrasesDrawerOpen] = useState(false);
 
   // Split the text into paragraphs, and within each paragraph, split by words
   const paragraphs = useMemo(() =>
@@ -102,46 +106,37 @@ const Read: React.FC = () => {
   };
 
   return (
-    <div>
-      <div>
+    <>
+      <PageContainer>
+        {/* Reading view */}
         {paragraphs.map((paragraph, i) => (
           <div key={i} className="mb-4">
             {paragraph.map((word, j) => (
               <React.Fragment key={word.index}>
-                <span
-                  key={word.index}
-                  className={
-                    "text-block text-xl"
-                    + (selectedIndices.has(word.index) ? " text-block-0" : "")
-                  }
+                <Block
+                  active={selectedIndices.has(word.index)}
                   onClick={() => handleClickBlock(word.index, word.text)}>
                     {word.text}
-                </span>
+                </Block>
                 {j < paragraph.length - 1 && (
-                  <span
-                    key={`space-${word.index}`}
-                    className={
-                      "text-block text-xl"+ (
-                        shouldUnderlineSpace(word.index, word.index + 1)
-                        ? " text-block-0" : ""
-                      )
-                    }>
+                  <Block
+                    active={shouldUnderlineSpace(word.index, word.index + 1)}>
                       {" "}
-                  </span>
+                  </Block>
                 )}
               </React.Fragment>
             ))}
           </div>
         ))}
-      </div>
+      </PageContainer>
 
-      <h3>Selected Phrases:</h3>
-      <ul>
-        {phrases.map((phrase, index) => (
-          <li key={index}>{phrase.text}</li>
-        ))}
-      </ul>
-    </div>
+      {/* Mobile phrases drawer */}
+      <MobilePhrasesDrawer>
+        {phrases.map((phrase, i) =>
+          <span key={`phrase-${i}`}>{phrase.text}</span>
+        )}
+      </MobilePhrasesDrawer>
+    </>
   );
 };
 

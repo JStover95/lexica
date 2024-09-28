@@ -4,7 +4,7 @@
 
 @layer components {
   .btn {
-    @apply flex items-center justify-center border-0 select-none transition-all duration-100;
+    @apply flex items-center justify-center border-0 select-none transition-all duration-100 cursor-pointer;
   }
   .btn-primary {
     @apply bg-primary text-white;
@@ -16,7 +16,7 @@
 
 @layer utilities {
   .btn:hover {
-    @apply bg-opacity-90;
+    @apply brightness-[110%];
   }
   .btn:focus {
     @apply ring-2 ring-offset-2 ring-primary;

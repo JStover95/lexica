@@ -31,3 +31,5 @@ content.json
 
 /node_modules/
 yarn.lock
+
+**/output.css

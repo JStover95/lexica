@@ -15,7 +15,7 @@ const DictioanryEntryCard: React.FC<IDictionaryEntryCardProps> = ({
   )[0];
 
   return (
-    <>
+    <div className="mb-4">
       <div className="flex items-center mb-1">
         <span className="text-lg font-bold mr-2">{dictionaryEntry.writtenForm}</span>
         <span className="text-sm">{dictionaryEntry.partOfSpeech}</span>
@@ -25,7 +25,7 @@ const DictioanryEntryCard: React.FC<IDictionaryEntryCardProps> = ({
         dictionaryEntry.senses.length > 1 &&
         <span className="text-sm underline">Choose a different definition...</span>
       }
-    </>
+    </div>
   );
 };
 

@@ -24,7 +24,7 @@ const MobilePhrasesDrawer: React.FC<IMobilePhrasesDrawer> = ({
 
   const handleClickOpen = () => {
     if (ref.current) {
-      ref.current.style.height = "18rem";
+      ref.current.style.height = `calc(${window.innerHeight - 80}px/2)`;
     }
   };
 

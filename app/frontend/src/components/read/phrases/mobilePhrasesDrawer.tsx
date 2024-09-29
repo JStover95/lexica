@@ -38,7 +38,7 @@ const MobilePhrasesDrawer: React.FC<IMobilePhrasesDrawer> = ({
     <PhraseCard
       key={`phrase-card-${i}`}
       text={phrase.text}
-      dictionaryEntries={phrase.dictionaryEntries} />
+      dictionaryEntries={phrase.dictionaryEntries || []} />
   );
 
   return (

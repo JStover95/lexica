@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { dummyText } from "../../utils/dummyData";
 import { IDictionaryEntry } from "../../utils/interfaces";
 import Block from "../../components/read/block";
@@ -7,9 +7,11 @@ import MobilePhrasesDrawer from "../../components/read/phrases/mobilePhrasesDraw
 
 interface IPhrase {
   text: string;
+  context: string;
+  previousText: string;
   startIndex: number;
   stopIndex: number;
-  dictionaryEntries: IDictionaryEntry[] | null;
+  dictionaryEntries: IDictionaryEntry[];
 }
 
 
@@ -26,6 +28,35 @@ const Read: React.FC = () => {
       }))
     ), [dummyText]);
 
+  useEffect(() => {
+    const updatedPhrases = [...phrases];
+    updatedPhrases.forEach(async phrase => {
+
+      // If the phrase does not have any new words to query, skip querying the dictionary
+      if (phrase.previousText === phrase.text) {
+        return;
+      };
+
+      // Query only the newly selected words
+      const query = phrase.text.replace(phrase.previousText, "").trim();
+
+      // Get the inference
+      const inference = await fetch(
+        process.env.REACT_APP_API_ENDPOINT + "/infer",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ "Query": query, "Context": phrase.context })
+        }
+      );
+
+      const result = await inference.json();
+      const entries: IDictionaryEntry[] = result.Result;
+      phrase.dictionaryEntries.push(...entries);
+      phrase.previousText = phrase.text;
+    });
+  }, [phrases]);
+
   const handleClickBlock = (index: number, text: string) => {
     if (selectedIndices.has(index)) {
       return;
@@ -38,9 +69,11 @@ const Read: React.FC = () => {
     // Always create a new phrase on each click of a new block
     const newPhrase: IPhrase = {
       text,
+      context: "",
+      previousText: "",
       startIndex: index,
       stopIndex: index,
-      dictionaryEntries: null,
+      dictionaryEntries: [],
     };
 
     // Check for an adjacent block to the left
@@ -57,6 +90,7 @@ const Read: React.FC = () => {
 
         // Merge the adjacent phrase with the new phrase
         newPhrase.text = leftPhrase.text + " " + newPhrase.text;
+        newPhrase.context = leftPhrase.context;
         newPhrase.startIndex = leftPhrase.startIndex;
         newPhrase.dictionaryEntries = leftPhrase.dictionaryEntries;
 
@@ -75,9 +109,26 @@ const Read: React.FC = () => {
       // If the current block is not the end of a sentence
       if (!text.endsWith(".")) {
         newPhrase.text = newPhrase.text + " " + rightPhrase.text;
+        newPhrase.context = rightPhrase.context;
         newPhrase.stopIndex = rightPhrase.stopIndex;
         newPhrase.dictionaryEntries = rightPhrase.dictionaryEntries;
         updatedPhrases.splice(rightPhraseIx, 1);
+      }
+    }
+
+    if (newPhrase.context === "") {
+      const p = paragraphs[Math.floor(index / 10000)];
+      let i = index % 10000;
+      newPhrase.context = p[i].text;
+      // TODO: Handle quotes
+      while (i > 0 && !p[i - 1].text.endsWith(".")) {
+        newPhrase.context = p[i - 1].text + " " + newPhrase.context;
+        i--;
+      }
+      i = index % 10000;
+      while (i < p.length - 1 && !p[i].text.endsWith(".")) {
+        newPhrase.context = newPhrase.context + " " + p[i + 1].text;
+        i++;
       }
     }
 

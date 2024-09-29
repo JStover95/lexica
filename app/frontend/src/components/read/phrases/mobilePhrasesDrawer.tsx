@@ -6,6 +6,7 @@ import PhraseCard from "./phraseCard";
 
 interface IPhrase {
   text: string;
+  context: string;
   startIndex: number;
   stopIndex: number;
   dictionaryEntries: IDictionaryEntry[] | null;

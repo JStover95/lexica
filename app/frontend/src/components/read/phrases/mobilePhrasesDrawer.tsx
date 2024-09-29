@@ -1,12 +1,14 @@
-import React, { createRef, useState } from "react";
+import React, { createRef, useEffect, useState } from "react";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { IDictionaryEntry } from "../../../utils/interfaces";
 import PhraseCard from "./phraseCard";
+import { scrollToBottom } from "../../../utils/utils";
 
 interface IPhrase {
   text: string;
   context: string;
+  active: boolean;
   startIndex: number;
   stopIndex: number;
   dictionaryEntries: IDictionaryEntry[] | null;
@@ -21,18 +23,26 @@ const MobilePhrasesDrawer: React.FC<IMobilePhrasesDrawer> = ({
   phrases
 }) => {
   const [open, setOpen] = useState(false);
-  const ref = createRef<HTMLDivElement>();
+  const activePhraseRef = createRef<HTMLDivElement>();
+  const phraseContainerRef = createRef<HTMLDivElement>();
+  const drawerRef = createRef<HTMLDivElement>();
+
+  useEffect(() => {
+    if (phraseContainerRef.current && activePhraseRef.current) {
+      scrollToBottom(phraseContainerRef.current, activePhraseRef.current)
+    }
+  }, [phraseContainerRef, activePhraseRef]);
 
   const handleClickOpen = () => {
-    if (ref.current) {
-      ref.current.style.height = `calc(${window.innerHeight - 48}px/2)`;
+    if (drawerRef.current) {
+      drawerRef.current.style.height = `calc(${window.innerHeight - 48}px/2)`;
       setOpen(true);
     }
   };
 
   const handleClickClose = () => {
-    if (ref.current) {
-      ref.current.style.height = "0px";
+    if (drawerRef.current) {
+      drawerRef.current.style.height = "0px";
       setOpen(false);
     }
   };
@@ -41,7 +51,8 @@ const MobilePhrasesDrawer: React.FC<IMobilePhrasesDrawer> = ({
     <PhraseCard
       key={`phrase-card-${i}`}
       text={phrase.text}
-      dictionaryEntries={phrase.dictionaryEntries || []} />
+      dictionaryEntries={phrase.dictionaryEntries || []}
+      activePhraseRef={phrase.active ? activePhraseRef : null} />
   );
 
   return (
@@ -57,7 +68,7 @@ const MobilePhrasesDrawer: React.FC<IMobilePhrasesDrawer> = ({
       }
 
       <div
-        ref={ref}
+        ref={drawerRef}
         className="flex flex-col sticky bottom-0 z-10 h-0 overflow-hidden transition-all duration-500 pointer-events-none">
 
           {/* Close drawer button */}
@@ -70,12 +81,14 @@ const MobilePhrasesDrawer: React.FC<IMobilePhrasesDrawer> = ({
           </div>
 
           {/* Phrases list */}
-          <div className="flex flex-col flex-grow bg-white px-8 pt-4 overflow-scroll border-t-2 border-solid border-primary pointer-events-auto">
-            {
-              phraseCards.length ?
-              phraseCards :
-              <span className="italic">No phrases selected yet.</span>
-            }
+          <div
+            ref={phraseContainerRef}
+            className="flex flex-col flex-grow bg-white px-8 pt-4 overflow-scroll border-t-2 border-solid border-primary pointer-events-auto">
+              {
+                phraseCards.length ?
+                phraseCards :
+                <span className="italic">No phrases selected yet.</span>
+              }
           </div>
       </div>
     </>

@@ -49,6 +49,21 @@ export const scrollToTop = (container: HTMLElement, element: HTMLElement) => {
   });
 }
 
+export const scrollToBottom = (container: HTMLElement, element: HTMLElement) => {
+  // Get the container's dimensions and scroll position
+  const containerRect = container.getBoundingClientRect();
+  const elementRect = element.getBoundingClientRect();
+  
+  // Calculate the offset to align the element with the top of the container
+  const offsetBottom = elementRect.bottom - containerRect.bottom;
+  
+  // Scroll the container to the calculated offset
+  container.scrollBy({
+      top: offsetBottom,
+      behavior: "smooth"
+  });
+}
+
 /**
  * Makes a network request with the specified options and returns the response
  * status and body.

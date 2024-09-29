@@ -9,6 +9,7 @@ interface IPhrase {
   text: string;
   context: string;
   previousText: string;
+  active: boolean;
   startIndex: number;
   stopIndex: number;
   dictionaryEntries: IDictionaryEntry[];
@@ -71,6 +72,7 @@ const Read: React.FC = () => {
 
     const updatedSelectedIndices = new Set(selectedIndices);
     const updatedPhrases = [...phrases];
+    updatedPhrases.forEach(phrase => phrase.active = false);
     updatedSelectedIndices.add(index);
 
     // Always create a new phrase on each click of a new block
@@ -78,6 +80,7 @@ const Read: React.FC = () => {
       text,
       context: "",
       previousText: "",
+      active: true,
       startIndex: index,
       stopIndex: index,
       dictionaryEntries: [],

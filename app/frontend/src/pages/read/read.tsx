@@ -62,13 +62,15 @@ const Read: React.FC = () => {
           const entries: IDictionaryEntry[] = result.Result;
           phrase.dictionaryEntries.push(...entries);
           phrase.previousText = phrase.text;
+          setPhrases(updatedPhrases);
+          return;
         } catch (error) {
           console.error(error);
         }
       }
     }
 
-    getInferences().then(() => setPhrases(updatedPhrases));
+    getInferences();
   }, [phrases]);
 
   const handleClickBlock = (index: number, text: string) => {
@@ -154,11 +156,7 @@ const Read: React.FC = () => {
     updatedPhrases.push(newPhrase);
 
     // Sort phrases by start index
-    updatedPhrases.sort((a, b) => {
-      if (a.startIndex > b.startIndex) return 1;
-      else if (a.startIndex < b.startIndex) return -1;
-      return 0;
-    });
+    updatedPhrases.sort((a, b) => a.startIndex - b.startIndex);
 
     setSelectedIndices(updatedSelectedIndices);
     setPhrases(updatedPhrases);

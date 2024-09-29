@@ -73,8 +73,8 @@ const NavBar: React.FC = () => {
 
   return (
     <>
-      <div className="flex flex-shrink-0 items-center justify-between w-screen h-[80px] px-8 sticky top-0 z-40 bg-white shadow-lg">
-        <h1 className="text-4xl font-bold">Lexica</h1>
+      <div className="flex flex-shrink-0 items-center justify-between w-screen h-[60px] px-8 sticky top-0 z-40 bg-white shadow-lg">
+        <h1 className="text-2xl font-bold">Lexica</h1>
         {
           drawerOpen ?
           <div

@@ -1,4 +1,4 @@
-import React, { createRef } from "react";
+import React, { createRef, useState } from "react";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { IDictionaryEntry } from "../../../utils/interfaces";
@@ -20,17 +20,20 @@ interface IMobilePhrasesDrawer {
 const MobilePhrasesDrawer: React.FC<IMobilePhrasesDrawer> = ({
   phrases
 }) => {
+  const [open, setOpen] = useState(false);
   const ref = createRef<HTMLDivElement>();
 
   const handleClickOpen = () => {
     if (ref.current) {
-      ref.current.style.height = `calc(${window.innerHeight - 80}px/2)`;
+      ref.current.style.height = `calc(${window.innerHeight - 60}px/2)`;
+      setOpen(true);
     }
   };
 
   const handleClickClose = () => {
     if (ref.current) {
       ref.current.style.height = "0px";
+      setOpen(false);
     }
   };
 
@@ -44,11 +47,14 @@ const MobilePhrasesDrawer: React.FC<IMobilePhrasesDrawer> = ({
   return (
     <>
       {/* Open drawer button */}
-      <button
-        className="btn btn-primary w-12 h-12 rounded-4xl sticky bottom-[2rem] left-[calc(50%-1.5rem)] shadow-lg"
-        onClick={handleClickOpen}>
-          <KeyboardArrowUpIcon fontSize="large" />
-      </button>
+      {
+        !open &&
+        <button
+          className="btn btn-primary w-12 h-12 rounded-4xl sticky bottom-[2rem] left-[calc(50%-1.5rem)] shadow-lg"
+          onClick={handleClickOpen}>
+            <KeyboardArrowUpIcon fontSize="large" />
+        </button>
+      }
 
       <div
         ref={ref}

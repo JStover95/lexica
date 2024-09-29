@@ -25,7 +25,11 @@ const PhraseCard: React.FC<IPhraseCardProps> = ({
           <CloseIcon fontSize="small" />
         </div>
       </div>
-      {dictionaryEntryCards}
+      {
+        dictionaryEntryCards.length ?
+        dictionaryEntryCards :
+        <span className="italic">No dictionary entries found</span>
+      }
     </div>
   );
 };

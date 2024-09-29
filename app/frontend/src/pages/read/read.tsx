@@ -30,47 +30,38 @@ const Read: React.FC = () => {
 
   useEffect(() => {
     const updatedPhrases = [...phrases];
+    updatedPhrases.forEach(async phrase => {
+      // If the phrase does not have any new words to query, skip querying the dictionary
+      if (phrase.previousText === phrase.text) {
+        return;
+      };
 
-    const getInferences = async () => {
-      for (const phrase of updatedPhrases) {
+      // Query only the newly selected words
+      let query = phrase.text;
+      phrase.previousText.split(" ").forEach(s => {
+        query = query.replace(s, "").trim();
+      });
 
-        // If the phrase does not have any new words to query, skip querying the dictionary
-        if (phrase.previousText === phrase.text) {
-          return;
-        };
+      try {
+        // Get the inference
+        const inference = await fetch(
+          process.env.REACT_APP_API_ENDPOINT + "/infer",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ "Query": query, "Context": phrase.context })
+          }
+        );
 
-        // Query only the newly selected words
-        let query = phrase.text;
-        phrase.previousText.split(" ").forEach(s => {
-          query = query.replace(s, "").trim();
-        });
-
-        try {
-          // Get the inference
-          const inference = await fetch(
-            process.env.REACT_APP_API_ENDPOINT + "/infer",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                "Query": query, "Context": phrase.context
-              })
-            }
-          );
-
-          const result = await inference.json();
-          const entries: IDictionaryEntry[] = result.Result;
-          phrase.dictionaryEntries.push(...entries);
-          phrase.previousText = phrase.text;
-          setPhrases(updatedPhrases);
-          return;
-        } catch (error) {
-          console.error(error);
-        }
+        const result = await inference.json();
+        const entries: IDictionaryEntry[] = result.Result;
+        phrase.dictionaryEntries.push(...entries);
+        phrase.previousText = phrase.text;
+        setPhrases(updatedPhrases);
+      } catch (error) {
+        console.error(error);
       }
-    }
-
-    getInferences();
+    });
   }, [phrases]);
 
   const handleClickBlock = (index: number, text: string) => {

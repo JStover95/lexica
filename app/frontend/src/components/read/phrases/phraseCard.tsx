@@ -7,6 +7,7 @@ interface IPhraseCardProps {
   text: string;
   dictionaryEntries: IDictionaryEntry[];
   activePhraseRef: RefObject<HTMLDivElement> | null;
+  onClick: () => void;
 }
 
 
@@ -14,6 +15,7 @@ const PhraseCard: React.FC<IPhraseCardProps> = ({
   text,
   dictionaryEntries,
   activePhraseRef,
+  onClick,
 }) => {
   const dictionaryEntryCards = dictionaryEntries.map((de, i) =>
     <DictioanryEntryCard key={`de-${i}`} dictionaryEntry={de} />
@@ -23,7 +25,7 @@ const PhraseCard: React.FC<IPhraseCardProps> = ({
     <div ref={activePhraseRef} className="mb-4">
       <div className="flex items-center justify-between mb-2 border-b border-solid border-black text-lg">
         <span>{text}</span>
-        <div className="p-2 cursor-pointer">
+        <div className="p-2 cursor-pointer" onClick={onClick}>
           <CloseIcon fontSize="small" />
         </div>
       </div>

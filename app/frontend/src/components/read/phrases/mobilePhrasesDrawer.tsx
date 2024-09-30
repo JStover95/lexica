@@ -17,12 +17,14 @@ interface IPhrase {
 interface IMobilePhrasesDrawerProps {
   phrases: IPhrase[];
   clickedBlockIndex: number;
+  handleDeletePhrase: (index: number) => void;
 }
 
 
 const MobilePhrasesDrawer: React.FC<IMobilePhrasesDrawerProps> = ({
   phrases,
   clickedBlockIndex,
+  handleDeletePhrase,
 }) => {
   const [open, setOpen] = useState(false);
   const activePhraseRef = createRef<HTMLDivElement>();
@@ -69,7 +71,8 @@ const MobilePhrasesDrawer: React.FC<IMobilePhrasesDrawerProps> = ({
         ) ?
         activePhraseRef :
         null
-      } />
+      }
+      onClick={() => handleDeletePhrase(i)} />
   );
 
   return (

@@ -161,6 +161,22 @@ const Read: React.FC = () => {
     setPhrases(updatedPhrases);
   };
 
+  const handleDeletePhrase = (index: number) => {
+    const updatedPhrases = [...phrases];
+    const updatedSelectedIndices = new Set(selectedIndices);
+    const start = updatedPhrases[index].startIndex;
+    const stop = updatedPhrases[index].stopIndex;
+
+    for (let i = start; i <= stop; i++) {
+      updatedSelectedIndices.delete(i);
+    }
+
+    updatedPhrases.splice(index, 1);
+
+    setPhrases(updatedPhrases);
+    setSelectedIndices(updatedSelectedIndices);
+  }
+
   const shouldUnderlineSpace = (prevIndex: number, nextIndex: number) => {
     return selectedIndices.has(prevIndex) && selectedIndices.has(nextIndex);
   };
@@ -196,7 +212,8 @@ const Read: React.FC = () => {
       {/* Mobile phrases drawer */}
       <MobilePhrasesDrawer
         phrases={phrases}
-        clickedBlockIndex={clickedBlockIndex} />
+        clickedBlockIndex={clickedBlockIndex}
+        handleDeletePhrase={handleDeletePhrase} />
     </>
   );
 };

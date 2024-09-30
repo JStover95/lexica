@@ -27,6 +27,7 @@ const Read: React.FC = () => {
       paragraph.split(" ").map((word, wIndex) => ({
         text: word,
         index: pIndex * 10000 + wIndex, // Use a unique index by combining paragraph and word indices
+        isSentenceFinal: word.endsWith("."),
       }))
     ), [dummyText]);
 
@@ -179,7 +180,10 @@ const Read: React.FC = () => {
                 </Block>
                 {j < paragraph.length - 1 && (
                   <Block
-                    active={shouldUnderlineSpace(word.index, word.index + 1)}>
+                    active={
+                      !word.isSentenceFinal &&
+                      shouldUnderlineSpace(word.index, word.index + 1)
+                    }>
                       {" "}
                   </Block>
                 )}

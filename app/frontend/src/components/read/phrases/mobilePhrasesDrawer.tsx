@@ -3,7 +3,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { IDictionaryEntry } from "../../../utils/interfaces";
 import PhraseCard from "./phraseCard";
-import { scrollToBottom } from "../../../utils/utils";
+import { scrollToBottom, scrollToTop } from "../../../utils/utils";
 
 interface IPhrase {
   text: string;
@@ -14,13 +14,15 @@ interface IPhrase {
   dictionaryEntries: IDictionaryEntry[] | null;
 }
 
-interface IMobilePhrasesDrawer {
+interface IMobilePhrasesDrawerProps {
   phrases: IPhrase[];
+  clickedBlockIndex: number;
 }
 
 
-const MobilePhrasesDrawer: React.FC<IMobilePhrasesDrawer> = ({
-  phrases
+const MobilePhrasesDrawer: React.FC<IMobilePhrasesDrawerProps> = ({
+  phrases,
+  clickedBlockIndex,
 }) => {
   const [open, setOpen] = useState(false);
   const activePhraseRef = createRef<HTMLDivElement>();
@@ -29,7 +31,11 @@ const MobilePhrasesDrawer: React.FC<IMobilePhrasesDrawer> = ({
 
   useEffect(() => {
     if (phraseContainerRef.current && activePhraseRef.current) {
-      scrollToBottom(phraseContainerRef.current, activePhraseRef.current)
+      if (clickedBlockIndex !== -1) {
+        scrollToTop(phraseContainerRef.current, activePhraseRef.current);
+      } else {
+        scrollToBottom(phraseContainerRef.current, activePhraseRef.current);
+      }
     }
   }, [phraseContainerRef, activePhraseRef]);
 
@@ -52,7 +58,18 @@ const MobilePhrasesDrawer: React.FC<IMobilePhrasesDrawer> = ({
       key={`phrase-card-${i}`}
       text={phrase.text}
       dictionaryEntries={phrase.dictionaryEntries || []}
-      activePhraseRef={phrase.active ? activePhraseRef : null} />
+      activePhraseRef={
+        (
+          (
+            clickedBlockIndex !== -1
+            && phrase.startIndex <= clickedBlockIndex
+            && clickedBlockIndex <= phrase.stopIndex
+          )
+          || clickedBlockIndex === -1 && phrase.active
+        ) ?
+        activePhraseRef :
+        null
+      } />
   );
 
   return (

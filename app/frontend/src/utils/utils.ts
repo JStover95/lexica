@@ -2,30 +2,6 @@ const crossorigin = Boolean(process.env.CROSSORIGIN);
 
 
 /**
- * Scrolls the given container so that the specified element is centered
- * vertically within the container.
- * 
- * @param {HTMLElement} container - The container element that should be
- *  scrolled.
- * @param {HTMLElement} element - The target element to be centered within the
- *  container.
- */
-export const scrollToMiddle = (container: HTMLElement, element: HTMLElement) => {
-  // Get the container's dimensions and scroll position
-  const containerRect = container.getBoundingClientRect();
-  const elementRect = element.getBoundingClientRect();
-  
-  // Calculate the offset to center the element within the container
-  const offsetTop = elementRect.top - containerRect.top - containerRect.height / 2 + elementRect.height / 2;
-  
-  // Scroll the container to the calculated offset
-  container.scrollBy({
-      top: offsetTop,
-      behavior: "smooth"
-  });
-}
-
-/**
  * Scrolls the given container so that the specified element is aligned with the
  * top edge of the container.
  * 
@@ -35,31 +11,9 @@ export const scrollToMiddle = (container: HTMLElement, element: HTMLElement) => 
  *  of the container.
  */
 export const scrollToTop = (container: HTMLElement, element: HTMLElement) => {
-  // Get the container's dimensions and scroll position
-  const containerRect = container.getBoundingClientRect();
   const elementRect = element.getBoundingClientRect();
-  
-  // Calculate the offset to align the element with the top of the container
-  const offsetTop = elementRect.top - containerRect.top;
-  
-  // Scroll the container to the calculated offset
   container.scrollTo({
       top: elementRect.top,
-      behavior: "smooth"
-  });
-}
-
-export const scrollToBottom = (container: HTMLElement, element: HTMLElement) => {
-  // Get the container's dimensions and scroll position
-  const containerRect = container.getBoundingClientRect();
-  const elementRect = element.getBoundingClientRect();
-  
-  // Calculate the offset to align the element with the top of the container
-  const offsetBottom = elementRect.bottom - containerRect.bottom;
-  
-  // Scroll the container to the calculated offset
-  container.scrollBy({
-      top: offsetBottom,
       behavior: "smooth"
   });
 }

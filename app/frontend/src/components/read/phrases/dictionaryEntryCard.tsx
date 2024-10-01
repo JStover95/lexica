@@ -22,7 +22,7 @@ const DictioanryEntryCard: React.FC<IDictionaryEntryCardProps> = ({
         scrollToTop(parent, ref.current);
       }
     }
-  }, []);
+  }, [ref]);
 
   const handleClickSelectDefinition = () => {
     setSelectingDefinition(true);

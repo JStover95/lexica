@@ -1,4 +1,4 @@
-import React, { createRef, PropsWithChildren, RefObject, useEffect, useState } from "react";
+import React, { createRef, PropsWithChildren, useCallback, useEffect, useState } from "react";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
@@ -16,28 +16,28 @@ const MobilePhrasesDrawer: React.FC<IMobilePhraseDrawer> = ({
   const [open, setOpen] = useState(false);
   const drawerRef = createRef<HTMLDivElement>();
 
+  const handleClickOpen = useCallback(() => {
+    if (drawerRef.current) {
+      drawerRef.current.style.height = `calc(${window.innerHeight - 16}px/2)`;
+      setOpen(true);
+    }
+  }, [drawerRef, setOpen]);
+
+  const handleClickClose = useCallback(() => {
+    if (drawerRef.current) {
+      drawerRef.current.style.height = "0px";
+      onClose();
+      setOpen(false);
+    }
+  }, [drawerRef, onClose, setOpen]);
+
   useEffect(() => {
     if (clickedBlockIndex !== -1) {
       handleClickOpen();
     } else {
       handleClickClose();
     }
-  }, [clickedBlockIndex]);
-
-  const handleClickOpen = () => {
-    if (drawerRef.current) {
-      drawerRef.current.style.height = `calc(${window.innerHeight - 16}px/2)`;
-      setOpen(true);
-    }
-  };
-
-  const handleClickClose = () => {
-    if (drawerRef.current) {
-      drawerRef.current.style.height = "0px";
-      onClose();
-      setOpen(false);
-    }
-  };
+  }, [clickedBlockIndex, handleClickClose, handleClickOpen]);
 
   return (
     <>

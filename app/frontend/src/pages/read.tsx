@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { dummyText } from "../../utils/dummyData";
-import { IDictionaryEntry } from "../../utils/interfaces";
-import Block from "../../components/read/block";
-import PageContainer from "../../components/containers/pageContainer";
-import MobilePhrasesDrawer from "../../components/read/phrases/mobilePhrasesDrawer";
-import PhraseCardsContent from "../../components/read/phrases/phraseCardsContent";
-import PhraseCardsContainer from "../../components/read/phrases/phraseCardsContainer";
+import { dummyText } from "../utils/dummyData";
+import { IDictionaryEntry } from "../utils/interfaces";
+import Block from "../components/read/block";
+import PageContainer from "../components/containers/pageContainer";
+import MobilePhrasesDrawer from "../components/read/phrases/mobilePhrasesDrawer";
+import PhraseCardsContent from "../components/read/phrases/phraseCardsContent";
+import PhraseCardsContainer from "../components/read/phrases/phraseCardsContainer";
 
 interface IPhrase {
   text: string;
@@ -32,7 +32,7 @@ const Read: React.FC = () => {
         index: pIndex * 10000 + wIndex, // Use a unique index by combining paragraph and word indices
         isSentenceFinal: word.endsWith("."),
       }))
-    ), [dummyText]);
+    ), []);
 
   useEffect(() => {
     const updatedPhrases = [...phrases];
@@ -144,10 +144,10 @@ const Read: React.FC = () => {
     }
 
     let phraseIx = 0;
-    if (leftPhraseIx != -1) {
+    if (leftPhraseIx !== -1) {
       phraseIx = leftPhraseIx;
       updatedPhrases.splice(leftPhraseIx, 0, newPhrase);
-    } else if (rightPhraseIx != -1) {
+    } else if (rightPhraseIx !== -1) {
       phraseIx = rightPhraseIx;
       updatedPhrases.splice(rightPhraseIx, 0, newPhrase);
     } else {
@@ -157,7 +157,7 @@ const Read: React.FC = () => {
       ) {
         phraseIx++;
       }
-      if (phraseIx == updatedPhrases.length) {
+      if (phraseIx === updatedPhrases.length) {
         updatedPhrases.push(newPhrase);
       } else {
         updatedPhrases.splice(phraseIx, 0, newPhrase);
@@ -203,7 +203,7 @@ const Read: React.FC = () => {
 
     if (!updatedPhrases.length) {
       setActivePhraseIndex(-1);
-    } else if (index == updatedPhrases.length) {
+    } else if (index === updatedPhrases.length) {
       setActivePhraseIndex(index - 1);
     }
   }

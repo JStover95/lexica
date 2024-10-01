@@ -1,5 +1,4 @@
-import React, { createRef, PropsWithChildren, useEffect, useState } from "react";
-import { IDictionaryEntry } from "../../../utils/interfaces";
+import React, { createRef, PropsWithChildren, useEffect } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 
 interface IPhraseCardProps extends PropsWithChildren {
@@ -22,7 +21,7 @@ const PhraseCard: React.FC<IPhraseCardProps> = ({
       sensesListRef.current.style.height =
         `calc(100% - ${headerHeight + 32}px)`;
     }
-  }, [headerRef])
+  }, [headerRef, sensesListRef])
 
   return (
     <div className="h-full">

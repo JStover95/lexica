@@ -1,4 +1,4 @@
-import React, { PropsWithChildren, RefObject } from "react";
+import React, { PropsWithChildren } from "react";
 import { IDictionaryEntry } from "../../../utils/interfaces";
 import CloseIcon from '@mui/icons-material/Close';
 

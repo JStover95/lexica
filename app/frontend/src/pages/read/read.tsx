@@ -1,13 +1,11 @@
-import React, { createRef, RefObject, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { dummyText } from "../../utils/dummyData";
 import { IDictionaryEntry } from "../../utils/interfaces";
 import Block from "../../components/read/block";
 import PageContainer from "../../components/containers/pageContainer";
 import MobilePhrasesDrawer from "../../components/read/phrases/mobilePhrasesDrawer";
-import { scrollToBottom, scrollToTop } from "../../utils/utils";
-import PhraseCard from "../../components/read/phrases/phraseCard";
+import PhraseCardContent from "../../components/read/phrases/phraseCardContent";
 import PhraseCardContainer from "../../components/read/phrases/phraseCardContainer";
-import DictioanryEntryCard from "../../components/read/phrases/dictionaryEntryCard";
 
 interface IPhrase {
   text: string;
@@ -179,12 +177,6 @@ const Read: React.FC = () => {
       }
     }
 
-    // Add the new phrase
-    // updatedPhrases.push(newPhrase);
-
-    // Sort phrases by start index
-    // updatedPhrases.sort((a, b) => a.startIndex - b.startIndex);
-
     setSelectedIndices(updatedSelectedIndices);
     setPhrases(updatedPhrases);
     setActivePhraseIndex(phraseIx);
@@ -215,29 +207,6 @@ const Read: React.FC = () => {
   const shouldUnderlineSpace = (prevIndex: number, nextIndex: number) => {
     return selectedIndices.has(prevIndex) && selectedIndices.has(nextIndex);
   };
-
-  let phraseCard;
-  if (activePhraseIndex !== -1) {
-    const dictionaryEntryCards = phrases[activePhraseIndex].dictionaryEntries
-      .map((de, i) =>
-        <DictioanryEntryCard
-          key={`dictionary-entry-${i}`}
-          dictionaryEntry={de} />
-      );
-
-    phraseCard =
-      <PhraseCard
-        text={phrases[activePhraseIndex].text}
-        onDeletePhrase={() => handleDeletePhrase(activePhraseIndex)}>
-          {
-            dictionaryEntryCards.length ?
-            dictionaryEntryCards :
-            <span className="italic">No dictionary entries found</span>
-          }
-      </PhraseCard>
-  } else {
-    phraseCard = <span className="italic pt-4">No phrases selected yet.</span>;
-  }
 
   return (
     <>
@@ -270,7 +239,10 @@ const Read: React.FC = () => {
       {/* Mobile phrases drawer */}
       <MobilePhrasesDrawer>
         <PhraseCardContainer>
-          {phraseCard}
+          <PhraseCardContent
+            activePhraseIndex={activePhraseIndex}
+            phrases={phrases}
+            handleDeletePhrase={handleDeletePhrase} />
         </PhraseCardContainer>
       </MobilePhrasesDrawer>
     </>

@@ -1,18 +1,8 @@
-import React, { PropsWithChildren, RefObject } from "react";
+import React, { PropsWithChildren } from "react";
 
-interface IPhraseCardCotainerProps extends PropsWithChildren {
-  phraseContainerRef?: RefObject<HTMLDivElement>;
-}
-
-
-const PhraseCardContainer: React.FC<IPhraseCardCotainerProps> = ({
-  children,
-  phraseContainerRef,
-}) => {
+const PhraseCardContainer: React.FC<PropsWithChildren> = ({ children }) => {
   return (
-    <div
-      ref={phraseContainerRef}
-      className="flex flex-col flex-grow bg-white px-8 overflow-scroll border-t-2 border-solid border-primary pointer-events-auto">
+    <div className="flex flex-col flex-grow bg-white px-8 overflow-scroll border-t-2 border-solid border-primary pointer-events-auto">
         {children}
     </div>
   );

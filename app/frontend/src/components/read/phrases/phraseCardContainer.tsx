@@ -12,7 +12,7 @@ const PhraseCardContainer: React.FC<IPhraseCardCotainerProps> = ({
   return (
     <div
       ref={phraseContainerRef}
-      className="flex flex-col flex-grow bg-white px-8 pt-4 overflow-scroll border-t-2 border-solid border-primary pointer-events-auto">
+      className="flex flex-col flex-grow bg-white px-8 overflow-scroll border-t-2 border-solid border-primary pointer-events-auto">
         {children}
     </div>
   );

@@ -23,19 +23,7 @@ interface IPhrase {
 const Read: React.FC = () => {
   const [selectedIndices, setSelectedIndices] = useState<Set<number>>(new Set());
   const [phrases, setPhrases] = useState<IPhrase[]>([]);
-  const [clickedBlockIndex, setClickedBlockIndex] = useState(-1);
-  const phraseContainerRef = createRef<HTMLDivElement>();
-
-  const phraseCardRefs: { [key: number]: RefObject<HTMLDivElement>} = {};
-
-  useEffect(() => {
-    if (clickedBlockIndex !== -1 && phraseContainerRef.current) {
-      const phraseCardRef = phraseCardRefs[clickedBlockIndex];
-      if (phraseCardRef.current) {
-        scrollToTop(phraseContainerRef.current, phraseCardRef.current);
-      }
-    }
-  }, [clickedBlockIndex, phraseContainerRef]);
+  const [activePhraseIndex, setActivePhraseIndex] = useState(-1);
 
   // Split the text into paragraphs, and within each paragraph, split by words
   const paragraphs = useMemo(() =>
@@ -84,6 +72,14 @@ const Read: React.FC = () => {
   }, [phrases]);
 
   const handleClickBlock = (index: number, text: string) => {
+    if (selectedIndices.has(index)) {
+      const phraseIndex = phrases.findIndex(phrase =>
+        phrase.startIndex <= index && index <= phrase.stopIndex
+      );
+      setActivePhraseIndex(phraseIndex);
+      return;
+    }
+
     const updatedSelectedIndices = new Set(selectedIndices);
     const updatedPhrases = [...phrases];
     updatedPhrases.forEach(phrase => phrase.active = false);
@@ -100,11 +96,12 @@ const Read: React.FC = () => {
       dictionaryEntries: [],
     };
 
+    let leftPhraseIx = -1;
     // Check for an adjacent block to the left
     if (selectedIndices.has(index - 1)) {
 
       // Get the phrase that contains the adjacent block
-      const leftPhraseIx = updatedPhrases.findIndex(
+      leftPhraseIx = updatedPhrases.findIndex(
         phrase => phrase.stopIndex === index - 1
       );
       const leftPhrase = updatedPhrases[leftPhraseIx];
@@ -125,8 +122,9 @@ const Read: React.FC = () => {
     }
 
     // Check for an adjacent block to the right as before
+    let rightPhraseIx = -1;
     if (selectedIndices.has(index + 1)) {
-      const rightPhraseIx = updatedPhrases.findIndex(
+      rightPhraseIx = updatedPhrases.findIndex(
         phrase => phrase.startIndex === index + 1
       );
       const rightPhrase = updatedPhrases[rightPhraseIx];
@@ -141,6 +139,27 @@ const Read: React.FC = () => {
         newPhrase.stopIndex = rightPhrase.stopIndex;
         newPhrase.dictionaryEntries = rightPhrase.dictionaryEntries;
         updatedPhrases.splice(rightPhraseIx, 1);
+      }
+    }
+
+    let phraseIx = 0;
+    if (leftPhraseIx != -1) {
+      phraseIx = leftPhraseIx;
+      updatedPhrases.splice(leftPhraseIx, 0, newPhrase);
+    } else if (rightPhraseIx != -1) {
+      phraseIx = rightPhraseIx;
+      updatedPhrases.splice(rightPhraseIx, 0, newPhrase);
+    } else {
+      while (
+        phraseIx < updatedPhrases.length
+        && updatedPhrases[phraseIx].stopIndex > index
+      ) {
+        phraseIx++;
+      }
+      if (phraseIx == updatedPhrases.length) {
+        updatedPhrases.push(newPhrase);
+      } else {
+        updatedPhrases.splice(phraseIx, 0, newPhrase);
       }
     }
 
@@ -161,14 +180,14 @@ const Read: React.FC = () => {
     }
 
     // Add the new phrase
-    updatedPhrases.push(newPhrase);
+    // updatedPhrases.push(newPhrase);
 
     // Sort phrases by start index
-    updatedPhrases.sort((a, b) => a.startIndex - b.startIndex);
+    // updatedPhrases.sort((a, b) => a.startIndex - b.startIndex);
 
     setSelectedIndices(updatedSelectedIndices);
     setPhrases(updatedPhrases);
-    setClickedBlockIndex(index);
+    setActivePhraseIndex(phraseIx);
   };
 
   const handleDeletePhrase = (index: number) => {
@@ -185,39 +204,40 @@ const Read: React.FC = () => {
 
     setPhrases(updatedPhrases);
     setSelectedIndices(updatedSelectedIndices);
+
+    if (!updatedPhrases.length) {
+      setActivePhraseIndex(-1);
+    } else if (index == updatedPhrases.length) {
+      setActivePhraseIndex(index - 1);
+    }
   }
 
   const shouldUnderlineSpace = (prevIndex: number, nextIndex: number) => {
     return selectedIndices.has(prevIndex) && selectedIndices.has(nextIndex);
   };
 
-  const phraseCards = phrases.map((phrase, i) => {
-    const dictionaryEntryCards = phrase.dictionaryEntries.map((de, i) =>
-      <DictioanryEntryCard
-        key={`de-${i}`}
-        dictionaryEntry={de}
-        onSelectDefinition={() => setClickedBlockIndex(phrase.startIndex)} />
-    );
+  let phraseCard;
+  if (activePhraseIndex !== -1) {
+    const dictionaryEntryCards = phrases[activePhraseIndex].dictionaryEntries
+      .map((de, i) =>
+        <DictioanryEntryCard
+          key={`dictionary-entry-${i}`}
+          dictionaryEntry={de} />
+      );
 
-    const ref = createRef<HTMLDivElement>();
-    for (let i = phrase.startIndex; i <= phrase.stopIndex; i++) {
-      phraseCardRefs[i] = ref;
-    }
-
-    return (
+    phraseCard =
       <PhraseCard
-        key={`phrase-card-${i}`}
-        text={phrase.text}
-        onDeletePhrase={() => handleDeletePhrase(i)}
-        phraseCardRef={ref}>
+        text={phrases[activePhraseIndex].text}
+        onDeletePhrase={() => handleDeletePhrase(activePhraseIndex)}>
           {
             dictionaryEntryCards.length ?
             dictionaryEntryCards :
             <span className="italic">No dictionary entries found</span>
           }
       </PhraseCard>
-    );
-  });
+  } else {
+    phraseCard = <span className="italic pt-4">No phrases selected yet.</span>;
+  }
 
   return (
     <>
@@ -249,12 +269,8 @@ const Read: React.FC = () => {
 
       {/* Mobile phrases drawer */}
       <MobilePhrasesDrawer>
-        <PhraseCardContainer phraseContainerRef={phraseContainerRef}>
-          {
-            phraseCards.length ?
-            phraseCards :
-            <span className="italic">No phrases selected yet.</span>
-          }
+        <PhraseCardContainer>
+          {phraseCard}
         </PhraseCardContainer>
       </MobilePhrasesDrawer>
     </>

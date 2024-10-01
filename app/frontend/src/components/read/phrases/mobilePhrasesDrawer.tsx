@@ -103,7 +103,7 @@ const MobilePhrasesDrawer: React.FC<IMobilePhrasesDrawerProps> = ({
           </div>
 
           {/* Phrases list */}
-          <PhraseCardContainer ref={phraseContainerRef}>
+          <PhraseCardContainer phraseContainerRef={phraseContainerRef}>
             {
               phraseCards.length ?
               phraseCards :

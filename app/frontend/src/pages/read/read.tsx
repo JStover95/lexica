@@ -1,9 +1,12 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { createRef, useEffect, useMemo, useState } from "react";
 import { dummyText } from "../../utils/dummyData";
 import { IDictionaryEntry } from "../../utils/interfaces";
 import Block from "../../components/read/block";
 import PageContainer from "../../components/containers/pageContainer";
 import MobilePhrasesDrawer from "../../components/read/phrases/mobilePhrasesDrawer";
+import { scrollToBottom, scrollToTop } from "../../utils/utils";
+import PhraseCard from "../../components/read/phrases/phraseCard";
+import PhraseCardContainer from "../../components/read/phrases/phraseCardContainer";
 
 interface IPhrase {
   text: string;
@@ -20,6 +23,18 @@ const Read: React.FC = () => {
   const [selectedIndices, setSelectedIndices] = useState<Set<number>>(new Set());
   const [phrases, setPhrases] = useState<IPhrase[]>([]);
   const [clickedBlockIndex, setClickedBlockIndex] = useState(-1);
+  const activePhraseRef = createRef<HTMLDivElement>();
+  const phraseContainerRef = createRef<HTMLDivElement>();
+
+  useEffect(() => {
+    if (phraseContainerRef.current && activePhraseRef.current) {
+      if (clickedBlockIndex !== -1) {
+        scrollToTop(phraseContainerRef.current, activePhraseRef.current);
+      } else {
+        scrollToBottom(phraseContainerRef.current, activePhraseRef.current);
+      }
+    }
+  }, [phraseContainerRef, activePhraseRef]);
 
   // Split the text into paragraphs, and within each paragraph, split by words
   const paragraphs = useMemo(() =>
@@ -181,6 +196,26 @@ const Read: React.FC = () => {
     return selectedIndices.has(prevIndex) && selectedIndices.has(nextIndex);
   };
 
+  const phraseCards = phrases.map((phrase, i) =>
+    <PhraseCard
+      key={`phrase-card-${i}`}
+      text={phrase.text}
+      dictionaryEntries={phrase.dictionaryEntries || []}
+      activePhraseRef={
+        (
+          (
+            clickedBlockIndex !== -1
+            && phrase.startIndex <= clickedBlockIndex
+            && clickedBlockIndex <= phrase.stopIndex
+          )
+          || clickedBlockIndex === -1 && phrase.active
+        ) ?
+        activePhraseRef :
+        null
+      }
+      onDeletePhrase={() => handleDeletePhrase(i)} />
+  );
+
   return (
     <>
       <PageContainer>
@@ -210,10 +245,15 @@ const Read: React.FC = () => {
       </PageContainer>
 
       {/* Mobile phrases drawer */}
-      <MobilePhrasesDrawer
-        phrases={phrases}
-        clickedBlockIndex={clickedBlockIndex}
-        handleDeletePhrase={handleDeletePhrase} />
+      <MobilePhrasesDrawer>
+        <PhraseCardContainer phraseContainerRef={phraseContainerRef}>
+          {
+            phraseCards.length ?
+            phraseCards :
+            <span className="italic">No phrases selected yet.</span>
+          }
+        </PhraseCardContainer>
+      </MobilePhrasesDrawer>
     </>
   );
 };

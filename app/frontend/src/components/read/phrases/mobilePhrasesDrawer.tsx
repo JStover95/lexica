@@ -1,46 +1,11 @@
-import React, { createRef, useEffect, useState } from "react";
+import React, { createRef, PropsWithChildren, useState } from "react";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import { IDictionaryEntry } from "../../../utils/interfaces";
-import PhraseCard from "./phraseCard";
-import { scrollToBottom, scrollToTop } from "../../../utils/utils";
-import PhraseCardContainer from "./phraseCardContainer";
-
-interface IPhrase {
-  text: string;
-  context: string;
-  active: boolean;
-  startIndex: number;
-  stopIndex: number;
-  dictionaryEntries: IDictionaryEntry[] | null;
-}
-
-interface IMobilePhrasesDrawerProps {
-  phrases: IPhrase[];
-  clickedBlockIndex: number;
-  handleDeletePhrase: (index: number) => void;
-}
 
 
-const MobilePhrasesDrawer: React.FC<IMobilePhrasesDrawerProps> = ({
-  phrases,
-  clickedBlockIndex,
-  handleDeletePhrase,
-}) => {
+const MobilePhrasesDrawer: React.FC<PropsWithChildren> = ({ children }) => {
   const [open, setOpen] = useState(false);
-  const activePhraseRef = createRef<HTMLDivElement>();
-  const phraseContainerRef = createRef<HTMLDivElement>();
   const drawerRef = createRef<HTMLDivElement>();
-
-  useEffect(() => {
-    if (phraseContainerRef.current && activePhraseRef.current) {
-      if (clickedBlockIndex !== -1) {
-        scrollToTop(phraseContainerRef.current, activePhraseRef.current);
-      } else {
-        scrollToBottom(phraseContainerRef.current, activePhraseRef.current);
-      }
-    }
-  }, [phraseContainerRef, activePhraseRef]);
 
   const handleClickOpen = () => {
     if (drawerRef.current) {
@@ -55,26 +20,6 @@ const MobilePhrasesDrawer: React.FC<IMobilePhrasesDrawerProps> = ({
       setOpen(false);
     }
   };
-
-  const phraseCards = phrases.map((phrase, i) =>
-    <PhraseCard
-      key={`phrase-card-${i}`}
-      text={phrase.text}
-      dictionaryEntries={phrase.dictionaryEntries || []}
-      activePhraseRef={
-        (
-          (
-            clickedBlockIndex !== -1
-            && phrase.startIndex <= clickedBlockIndex
-            && clickedBlockIndex <= phrase.stopIndex
-          )
-          || clickedBlockIndex === -1 && phrase.active
-        ) ?
-        activePhraseRef :
-        null
-      }
-      onDeletePhrase={() => handleDeletePhrase(i)} />
-  );
 
   return (
     <>
@@ -101,15 +46,7 @@ const MobilePhrasesDrawer: React.FC<IMobilePhrasesDrawerProps> = ({
                 <KeyboardArrowDownIcon fontSize="large" />
             </div>
           </div>
-
-          {/* Phrases list */}
-          <PhraseCardContainer phraseContainerRef={phraseContainerRef}>
-            {
-              phraseCards.length ?
-              phraseCards :
-              <span className="italic">No phrases selected yet.</span>
-            }
-          </PhraseCardContainer>
+          {children}
       </div>
     </>
   );

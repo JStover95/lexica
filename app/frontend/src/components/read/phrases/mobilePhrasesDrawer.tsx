@@ -28,7 +28,6 @@ const MobilePhrasesDrawer: React.FC<IMobilePhrasesDrawerProps> = ({
   handleDeletePhrase,
 }) => {
   const [open, setOpen] = useState(false);
-  const [selectDefinitionIndex, setSelectDefinitionIndex] = useState(-1);
   const activePhraseRef = createRef<HTMLDivElement>();
   const phraseContainerRef = createRef<HTMLDivElement>();
   const drawerRef = createRef<HTMLDivElement>();
@@ -57,10 +56,6 @@ const MobilePhrasesDrawer: React.FC<IMobilePhrasesDrawerProps> = ({
     }
   };
 
-  const handleClickSelectDefinition = (index: number) => {
-    setSelectDefinitionIndex(index);
-  };
-
   const phraseCards = phrases.map((phrase, i) =>
     <PhraseCard
       key={`phrase-card-${i}`}
@@ -78,7 +73,7 @@ const MobilePhrasesDrawer: React.FC<IMobilePhrasesDrawerProps> = ({
         activePhraseRef :
         null
       }
-      onClick={() => handleDeletePhrase(i)} />
+      onClose={() => handleDeletePhrase(i)} />
   );
 
   return (

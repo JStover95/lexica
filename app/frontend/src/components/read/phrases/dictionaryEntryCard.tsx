@@ -4,11 +4,13 @@ import SenseCard from "./senseCard";
 
 interface IDictionaryEntryCardProps {
   dictionaryEntry: IDictionaryEntry;
+  onSelectDefinition: () => void;
 }
 
 
 const DictioanryEntryCard: React.FC<IDictionaryEntryCardProps> = ({
   dictionaryEntry,
+  onSelectDefinition
 }) => {
   const [selectingDefinition, setSelectingDefinition] = useState(false);
   const [selectedDefinitionIndex, setSelectedDefinitionIndex] = useState(-1);
@@ -18,6 +20,7 @@ const DictioanryEntryCard: React.FC<IDictionaryEntryCardProps> = ({
   };
 
   const handleSelectDefinition = (index: number) => {
+    onSelectDefinition();
     setSelectedDefinitionIndex(index);
     setSelectingDefinition(false);
   }

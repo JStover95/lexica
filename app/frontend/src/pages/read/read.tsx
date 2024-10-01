@@ -1,4 +1,4 @@
-import React, { createRef, useEffect, useMemo, useState } from "react";
+import React, { createRef, RefObject, useEffect, useMemo, useState } from "react";
 import { dummyText } from "../../utils/dummyData";
 import { IDictionaryEntry } from "../../utils/interfaces";
 import Block from "../../components/read/block";
@@ -24,18 +24,18 @@ const Read: React.FC = () => {
   const [selectedIndices, setSelectedIndices] = useState<Set<number>>(new Set());
   const [phrases, setPhrases] = useState<IPhrase[]>([]);
   const [clickedBlockIndex, setClickedBlockIndex] = useState(-1);
-  const activePhraseRef = createRef<HTMLDivElement>();
   const phraseContainerRef = createRef<HTMLDivElement>();
 
+  const phraseCardRefs: { [key: number]: RefObject<HTMLDivElement>} = {};
+
   useEffect(() => {
-    if (phraseContainerRef.current && activePhraseRef.current) {
-      if (clickedBlockIndex !== -1) {
-        scrollToTop(phraseContainerRef.current, activePhraseRef.current);
-      } else {
-        scrollToBottom(phraseContainerRef.current, activePhraseRef.current);
+    if (clickedBlockIndex !== -1 && phraseContainerRef.current) {
+      const phraseCardRef = phraseCardRefs[clickedBlockIndex];
+      if (phraseCardRef.current) {
+        scrollToTop(phraseContainerRef.current, phraseCardRef.current);
       }
     }
-  }, [phraseContainerRef, activePhraseRef]);
+  }, [clickedBlockIndex, phraseContainerRef]);
 
   // Split the text into paragraphs, and within each paragraph, split by words
   const paragraphs = useMemo(() =>
@@ -84,13 +84,6 @@ const Read: React.FC = () => {
   }, [phrases]);
 
   const handleClickBlock = (index: number, text: string) => {
-    if (selectedIndices.has(index)) {
-      setClickedBlockIndex(index);
-      return;
-    }
-
-    setClickedBlockIndex(-1);
-
     const updatedSelectedIndices = new Set(selectedIndices);
     const updatedPhrases = [...phrases];
     updatedPhrases.forEach(phrase => phrase.active = false);
@@ -175,6 +168,7 @@ const Read: React.FC = () => {
 
     setSelectedIndices(updatedSelectedIndices);
     setPhrases(updatedPhrases);
+    setClickedBlockIndex(index);
   };
 
   const handleDeletePhrase = (index: number) => {
@@ -201,24 +195,21 @@ const Read: React.FC = () => {
     const dictionaryEntryCards = phrase.dictionaryEntries.map((de, i) =>
       <DictioanryEntryCard
         key={`de-${i}`}
-        dictionaryEntry={de} />
+        dictionaryEntry={de}
+        onSelectDefinition={() => setClickedBlockIndex(phrase.startIndex)} />
     );
 
-    const isActivePhrase = (
-      (
-        clickedBlockIndex !== -1
-        && phrase.startIndex <= clickedBlockIndex
-        && clickedBlockIndex <= phrase.stopIndex
-      )
-      || clickedBlockIndex === -1 && phrase.active
-    );
+    const ref = createRef<HTMLDivElement>();
+    for (let i = phrase.startIndex; i <= phrase.stopIndex; i++) {
+      phraseCardRefs[i] = ref;
+    }
 
     return (
       <PhraseCard
         key={`phrase-card-${i}`}
         text={phrase.text}
-        activePhraseRef={isActivePhrase ? activePhraseRef : null}
-        onDeletePhrase={() => handleDeletePhrase(i)}>
+        onDeletePhrase={() => handleDeletePhrase(i)}
+        phraseCardRef={ref}>
           {
             dictionaryEntryCards.length ?
             dictionaryEntryCards :

@@ -4,20 +4,20 @@ import CloseIcon from '@mui/icons-material/Close';
 
 interface IPhraseCardProps extends PropsWithChildren {
   text: string;
-  activePhraseRef: RefObject<HTMLDivElement> | null;
+  phraseCardRef: RefObject<HTMLDivElement>;
   onDeletePhrase: () => void;
 }
 
 
 const PhraseCard: React.FC<IPhraseCardProps> = ({
   text,
-  activePhraseRef,
+  phraseCardRef,
   onDeletePhrase,
   children,
 }) => {
 
   return (
-    <div ref={activePhraseRef} className="mb-4">
+    <div ref={phraseCardRef} className="mb-4">
       <div className="flex items-center justify-between mb-2 border-b border-solid border-black text-lg">
         <span>{text}</span>
         <div className="p-2 cursor-pointer" onClick={onDeletePhrase}>

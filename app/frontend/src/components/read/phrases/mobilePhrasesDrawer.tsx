@@ -4,6 +4,7 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { IDictionaryEntry } from "../../../utils/interfaces";
 import PhraseCard from "./phraseCard";
 import { scrollToBottom, scrollToTop } from "../../../utils/utils";
+import PhraseCardContainer from "./phraseCardContainer";
 
 interface IPhrase {
   text: string;
@@ -27,6 +28,7 @@ const MobilePhrasesDrawer: React.FC<IMobilePhrasesDrawerProps> = ({
   handleDeletePhrase,
 }) => {
   const [open, setOpen] = useState(false);
+  const [selectDefinitionIndex, setSelectDefinitionIndex] = useState(-1);
   const activePhraseRef = createRef<HTMLDivElement>();
   const phraseContainerRef = createRef<HTMLDivElement>();
   const drawerRef = createRef<HTMLDivElement>();
@@ -53,6 +55,10 @@ const MobilePhrasesDrawer: React.FC<IMobilePhrasesDrawerProps> = ({
       drawerRef.current.style.height = "0px";
       setOpen(false);
     }
+  };
+
+  const handleClickSelectDefinition = (index: number) => {
+    setSelectDefinitionIndex(index);
   };
 
   const phraseCards = phrases.map((phrase, i) =>
@@ -87,6 +93,7 @@ const MobilePhrasesDrawer: React.FC<IMobilePhrasesDrawerProps> = ({
         </button>
       }
 
+      {/* Phrases */}
       <div
         ref={drawerRef}
         className="flex flex-col sticky bottom-0 z-10 h-0 overflow-hidden transition-all duration-500 pointer-events-none">
@@ -101,15 +108,13 @@ const MobilePhrasesDrawer: React.FC<IMobilePhrasesDrawerProps> = ({
           </div>
 
           {/* Phrases list */}
-          <div
-            ref={phraseContainerRef}
-            className="flex flex-col flex-grow bg-white px-8 pt-4 overflow-scroll border-t-2 border-solid border-primary pointer-events-auto">
-              {
-                phraseCards.length ?
-                phraseCards :
-                <span className="italic">No phrases selected yet.</span>
-              }
-          </div>
+          <PhraseCardContainer ref={phraseContainerRef}>
+            {
+              phraseCards.length ?
+              phraseCards :
+              <span className="italic">No phrases selected yet.</span>
+            }
+          </PhraseCardContainer>
       </div>
     </>
   );

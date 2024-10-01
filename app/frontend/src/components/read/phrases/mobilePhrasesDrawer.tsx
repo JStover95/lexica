@@ -28,6 +28,7 @@ const MobilePhrasesDrawer: React.FC<IMobilePhrasesDrawerProps> = ({
   handleDeletePhrase,
 }) => {
   const [open, setOpen] = useState(false);
+  const [openTall, setOpenTall] = useState(false);
   const activePhraseRef = createRef<HTMLDivElement>();
   const phraseContainerRef = createRef<HTMLDivElement>();
   const drawerRef = createRef<HTMLDivElement>();
@@ -44,7 +45,11 @@ const MobilePhrasesDrawer: React.FC<IMobilePhrasesDrawerProps> = ({
 
   const handleClickOpen = () => {
     if (drawerRef.current) {
-      drawerRef.current.style.height = `calc(${window.innerHeight - 48}px/2)`;
+      if (openTall) {
+        drawerRef.current.style.height = `${window.innerHeight - 80}px`;
+      } else {
+        drawerRef.current.style.height = `calc(${window.innerHeight - 48}px/2)`;
+      }
       setOpen(true);
     }
   };
@@ -55,6 +60,20 @@ const MobilePhrasesDrawer: React.FC<IMobilePhrasesDrawerProps> = ({
       setOpen(false);
     }
   };
+
+  const handleClickSelectDefinition = () => {
+    if (drawerRef.current) {
+      setOpenTall(true);
+      drawerRef.current.style.height = `${window.innerHeight - 80}px`;
+    }
+  }
+
+  const handleSelectDefinition = () => {
+    if (drawerRef.current) {
+      setOpenTall(false);
+      drawerRef.current.style.height = `calc(${window.innerHeight - 48}px/2)`;
+    }
+  }
 
   const phraseCards = phrases.map((phrase, i) =>
     <PhraseCard
@@ -73,7 +92,9 @@ const MobilePhrasesDrawer: React.FC<IMobilePhrasesDrawerProps> = ({
         activePhraseRef :
         null
       }
-      onClose={() => handleDeletePhrase(i)} />
+      onDeletePhrase={() => handleDeletePhrase(i)}
+      onClickSelectDefinition={handleClickSelectDefinition}
+      onSelectDefinition={handleSelectDefinition} />
   );
 
   return (

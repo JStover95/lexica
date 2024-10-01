@@ -4,10 +4,11 @@ import { ISense } from "../../../utils/interfaces";
 interface ISenseCardProps {
   sense: ISense;
   senseNum: number;
+  onClick?: () => void;
 }
 
 
-const SenseCard: React.FC<ISenseCardProps> = ({ sense, senseNum }) => {
+const SenseCard: React.FC<ISenseCardProps> = ({ sense, senseNum, onClick }) => {
   // For now hard code English only
   const equivalent = sense.equivalents?.filter(eq => eq.equivalentLanguage == "영어")[0];
 
@@ -23,7 +24,7 @@ const SenseCard: React.FC<ISenseCardProps> = ({ sense, senseNum }) => {
 
   return (
     <ol className="mb-1 list-decimal pl-8" start={senseNum}>
-      <li>
+      <li onClick={onClick}>
         <p className="text-sm">{equivalent.equivalent}</p>
         <p className="text-sm">{sense.definition}</p>
         <p className="text-sm">{equivalent.definition}</p>

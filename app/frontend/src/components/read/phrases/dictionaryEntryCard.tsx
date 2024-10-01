@@ -4,26 +4,36 @@ import SenseCard from "./senseCard";
 
 interface IDictionaryEntryCardProps {
   dictionaryEntry: IDictionaryEntry;
-  onClickSelectDefinition: () => void;
-  onSelectDefinition: () => void;
 }
 
 
 const DictioanryEntryCard: React.FC<IDictionaryEntryCardProps> = ({
   dictionaryEntry,
-  onClickSelectDefinition,
-  onSelectDefinition,
 }) => {
   const [selectingDefinition, setSelectingDefinition] = useState(false);
+  const [selectedDefinitionIndex, setSelectedDefinitionIndex] = useState(-1);
 
   const handleClickSelectDefinition = () => {
-    onClickSelectDefinition();
     setSelectingDefinition(true);
   };
+
+  const handleSelectDefinition = (index: number) => {
+    setSelectedDefinitionIndex(index);
+    setSelectingDefinition(false);
+  }
 
   const sensesWithNums = dictionaryEntry.senses.map((sense, i) => (
     { sense, num: i + 1 }
   ));
+
+  let topSenseWithNum;
+  if (selectedDefinitionIndex !== -1) {
+    topSenseWithNum = sensesWithNums[selectedDefinitionIndex];
+  } else {
+    topSenseWithNum = sensesWithNums.sort(
+      (l, r) => (l.sense.rank || 0) - (r.sense.rank || 0)
+    )[0];
+  }
 
   let senseCards;
   if (selectingDefinition) {
@@ -31,14 +41,15 @@ const DictioanryEntryCard: React.FC<IDictionaryEntryCardProps> = ({
       <SenseCard
         key={`sense-card-${i}`}
         sense={sense.sense}
-        senseNum={sense.num} />
+        senseNum={sense.num}
+        onClick={() => handleSelectDefinition(i)} />
     );
   } else {
-    const topSenseWithNum = sensesWithNums.sort(
-      (l, r) => (l.sense.rank || 0) - (r.sense.rank || 0)
-    )[0];
     senseCards = [
-      <SenseCard sense={topSenseWithNum.sense} senseNum={topSenseWithNum.num} />
+      <SenseCard
+        key={"sense-card-0"}
+        sense={topSenseWithNum.sense}
+        senseNum={topSenseWithNum.num} />
     ];
   }
 
@@ -49,7 +60,18 @@ const DictioanryEntryCard: React.FC<IDictionaryEntryCardProps> = ({
           <span className="text-lg font-bold mr-2">{dictionaryEntry.writtenForm}</span>
           <span className="text-sm">{dictionaryEntry.partOfSpeech}</span>
         </div>
-        {senseCards}
+        {
+          selectingDefinition &&
+          <>
+            <p className="text-sm font-bold pt-2">Previous definition</p>
+            <SenseCard
+              key={"sense-card-0"}
+              sense={topSenseWithNum.sense}
+              senseNum={topSenseWithNum.num} />
+            <p className="text-sm font-bold pt-2">Select a new definition</p>
+          </>
+        }
+        {senseCards.filter((_, i) => i !== selectedDefinitionIndex)}
         {
           (dictionaryEntry.senses.length > 1 && !selectingDefinition) &&
           <span

@@ -8,8 +8,6 @@ interface IPhraseCardProps {
   dictionaryEntries: IDictionaryEntry[];
   activePhraseRef: RefObject<HTMLDivElement> | null;
   onDeletePhrase: () => void;
-  onClickSelectDefinition: () => void;
-  onSelectDefinition: () => void;
 }
 
 
@@ -18,15 +16,11 @@ const PhraseCard: React.FC<IPhraseCardProps> = ({
   dictionaryEntries,
   activePhraseRef,
   onDeletePhrase,
-  onClickSelectDefinition,
-  onSelectDefinition,
 }) => {
   const dictionaryEntryCards = dictionaryEntries.map((de, i) =>
     <DictioanryEntryCard
       key={`de-${i}`}
-      dictionaryEntry={de}
-      onClickSelectDefinition={onClickSelectDefinition}
-      onSelectDefinition={onSelectDefinition} />
+      dictionaryEntry={de} />
   );
 
   return (

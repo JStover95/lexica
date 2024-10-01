@@ -7,6 +7,7 @@ import MobilePhrasesDrawer from "../../components/read/phrases/mobilePhrasesDraw
 import { scrollToBottom, scrollToTop } from "../../utils/utils";
 import PhraseCard from "../../components/read/phrases/phraseCard";
 import PhraseCardContainer from "../../components/read/phrases/phraseCardContainer";
+import DictioanryEntryCard from "../../components/read/phrases/dictionaryEntryCard";
 
 interface IPhrase {
   text: string;
@@ -196,25 +197,36 @@ const Read: React.FC = () => {
     return selectedIndices.has(prevIndex) && selectedIndices.has(nextIndex);
   };
 
-  const phraseCards = phrases.map((phrase, i) =>
-    <PhraseCard
-      key={`phrase-card-${i}`}
-      text={phrase.text}
-      dictionaryEntries={phrase.dictionaryEntries || []}
-      activePhraseRef={
-        (
-          (
-            clickedBlockIndex !== -1
-            && phrase.startIndex <= clickedBlockIndex
-            && clickedBlockIndex <= phrase.stopIndex
-          )
-          || clickedBlockIndex === -1 && phrase.active
-        ) ?
-        activePhraseRef :
-        null
-      }
-      onDeletePhrase={() => handleDeletePhrase(i)} />
-  );
+  const phraseCards = phrases.map((phrase, i) => {
+    const dictionaryEntryCards = phrase.dictionaryEntries.map((de, i) =>
+      <DictioanryEntryCard
+        key={`de-${i}`}
+        dictionaryEntry={de} />
+    );
+
+    const isActivePhrase = (
+      (
+        clickedBlockIndex !== -1
+        && phrase.startIndex <= clickedBlockIndex
+        && clickedBlockIndex <= phrase.stopIndex
+      )
+      || clickedBlockIndex === -1 && phrase.active
+    );
+
+    return (
+      <PhraseCard
+        key={`phrase-card-${i}`}
+        text={phrase.text}
+        activePhraseRef={isActivePhrase ? activePhraseRef : null}
+        onDeletePhrase={() => handleDeletePhrase(i)}>
+          {
+            dictionaryEntryCards.length ?
+            dictionaryEntryCards :
+            <span className="italic">No dictionary entries found</span>
+          }
+      </PhraseCard>
+    );
+  });
 
   return (
     <>

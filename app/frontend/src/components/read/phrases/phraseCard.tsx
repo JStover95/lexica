@@ -1,11 +1,9 @@
-import React, { RefObject } from "react";
+import React, { PropsWithChildren, RefObject } from "react";
 import { IDictionaryEntry } from "../../../utils/interfaces";
 import CloseIcon from '@mui/icons-material/Close';
-import DictioanryEntryCard from "./dictionaryEntryCard";
 
-interface IPhraseCardProps {
+interface IPhraseCardProps extends PropsWithChildren {
   text: string;
-  dictionaryEntries: IDictionaryEntry[];
   activePhraseRef: RefObject<HTMLDivElement> | null;
   onDeletePhrase: () => void;
 }
@@ -13,15 +11,10 @@ interface IPhraseCardProps {
 
 const PhraseCard: React.FC<IPhraseCardProps> = ({
   text,
-  dictionaryEntries,
   activePhraseRef,
   onDeletePhrase,
+  children,
 }) => {
-  const dictionaryEntryCards = dictionaryEntries.map((de, i) =>
-    <DictioanryEntryCard
-      key={`de-${i}`}
-      dictionaryEntry={de} />
-  );
 
   return (
     <div ref={activePhraseRef} className="mb-4">
@@ -31,11 +24,7 @@ const PhraseCard: React.FC<IPhraseCardProps> = ({
           <CloseIcon fontSize="small" />
         </div>
       </div>
-      {
-        dictionaryEntryCards.length ?
-        dictionaryEntryCards :
-        <span className="italic">No dictionary entries found</span>
-      }
+      {children}
     </div>
   );
 };

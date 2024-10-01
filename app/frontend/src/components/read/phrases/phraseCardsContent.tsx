@@ -1,7 +1,7 @@
 import React from "react";
 import { IDictionaryEntry } from "../../../utils/interfaces";
 import PhraseCard from "./phraseCard";
-import DictionaryEntryCardContent from "./dictionaryEntryCardContent";
+import DictionaryEntryCardsContent from "./dictionaryEntryCardsContent";
 
 interface IPhrase {
   text: string;
@@ -13,14 +13,14 @@ interface IPhrase {
   dictionaryEntries: IDictionaryEntry[];
 }
 
-interface IPhraseCardContentProps {
+interface IPhraseCardsContentProps {
   activePhraseIndex: number;
   phrases: IPhrase[];
   handleDeletePhrase: (index: number) => void;
 }
 
 
-const PhraseCardContent: React.FC<IPhraseCardContentProps> = ({
+const PhraseCardsContent: React.FC<IPhraseCardsContentProps> = ({
   activePhraseIndex,
   phrases,
   handleDeletePhrase,
@@ -33,11 +33,11 @@ const PhraseCardContent: React.FC<IPhraseCardContentProps> = ({
     <PhraseCard
       text={phrases[activePhraseIndex].text}
       onDeletePhrase={() => handleDeletePhrase(activePhraseIndex)}>
-        <DictionaryEntryCardContent
+        <DictionaryEntryCardsContent
           dictionaryEntries={phrases[activePhraseIndex].dictionaryEntries} />
     </PhraseCard>
   );
 };
 
 
-export default PhraseCardContent;
+export default PhraseCardsContent;

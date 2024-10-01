@@ -4,8 +4,8 @@ import { IDictionaryEntry } from "../../utils/interfaces";
 import Block from "../../components/read/block";
 import PageContainer from "../../components/containers/pageContainer";
 import MobilePhrasesDrawer from "../../components/read/phrases/mobilePhrasesDrawer";
-import PhraseCardContent from "../../components/read/phrases/phraseCardContent";
-import PhraseCardContainer from "../../components/read/phrases/phraseCardContainer";
+import PhraseCardsContent from "../../components/read/phrases/phraseCardsContent";
+import PhraseCardsContainer from "../../components/read/phrases/phraseCardsContainer";
 
 interface IPhrase {
   text: string;
@@ -238,12 +238,12 @@ const Read: React.FC = () => {
 
       {/* Mobile phrases drawer */}
       <MobilePhrasesDrawer>
-        <PhraseCardContainer>
-          <PhraseCardContent
+        <PhraseCardsContainer>
+          <PhraseCardsContent
             activePhraseIndex={activePhraseIndex}
             phrases={phrases}
             handleDeletePhrase={handleDeletePhrase} />
-        </PhraseCardContainer>
+        </PhraseCardsContainer>
       </MobilePhrasesDrawer>
     </>
   );

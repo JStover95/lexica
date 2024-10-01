@@ -2,12 +2,12 @@ import React from "react";
 import { IDictionaryEntry } from "../../../utils/interfaces";
 import DictioanryEntryCard from "./dictionaryEntryCard";
 
-interface IDictionaryEntryCardContent {
+interface IDictionaryEntryCardsContent {
   dictionaryEntries: IDictionaryEntry[];
 }
 
 
-const DictionaryEntryCardContent: React.FC<IDictionaryEntryCardContent> = ({
+const DictionaryEntryCardsContent: React.FC<IDictionaryEntryCardsContent> = ({
   dictionaryEntries,
 }) => {
   if (!dictionaryEntries.length) {
@@ -28,4 +28,4 @@ const DictionaryEntryCardContent: React.FC<IDictionaryEntryCardContent> = ({
 }
 
 
-export default DictionaryEntryCardContent;
+export default DictionaryEntryCardsContent;

@@ -44,7 +44,7 @@ const MobilePhrasesDrawer: React.FC<IMobilePhrasesDrawerProps> = ({
 
   const handleClickOpen = () => {
     if (drawerRef.current) {
-      drawerRef.current.style.height = `calc(${window.innerHeight - 48}px/2)`;
+      drawerRef.current.style.height = `calc(${window.innerHeight - 16}px/2)`;
       setOpen(true);
     }
   };

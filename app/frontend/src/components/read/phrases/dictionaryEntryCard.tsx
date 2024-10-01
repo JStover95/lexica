@@ -30,7 +30,7 @@ const DictioanryEntryCard: React.FC<IDictionaryEntryCardProps> = ({
   if (selectedDefinitionIndex !== -1) {
     topSenseWithNum = sensesWithNums[selectedDefinitionIndex];
   } else {
-    topSenseWithNum = sensesWithNums.sort(
+    topSenseWithNum = [...sensesWithNums].sort(
       (l, r) => (l.sense.rank || 0) - (r.sense.rank || 0)
     )[0];
   }
@@ -67,11 +67,16 @@ const DictioanryEntryCard: React.FC<IDictionaryEntryCardProps> = ({
             <SenseCard
               key={"sense-card-0"}
               sense={topSenseWithNum.sense}
-              senseNum={topSenseWithNum.num} />
+              senseNum={topSenseWithNum.num}
+              onClick={() => handleSelectDefinition(selectedDefinitionIndex)} />
             <p className="text-sm font-bold pt-2">Select a new definition</p>
           </>
         }
-        {senseCards.filter((_, i) => i !== selectedDefinitionIndex)}
+        {
+          selectingDefinition ?
+          senseCards.filter((_, i) => i !== selectedDefinitionIndex) :
+          senseCards
+        }
         {
           (dictionaryEntry.senses.length > 1 && !selectingDefinition) &&
           <span

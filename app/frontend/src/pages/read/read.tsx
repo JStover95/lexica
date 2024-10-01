@@ -21,6 +21,7 @@ interface IPhrase {
 const Read: React.FC = () => {
   const [selectedIndices, setSelectedIndices] = useState<Set<number>>(new Set());
   const [phrases, setPhrases] = useState<IPhrase[]>([]);
+  const [clickedBlockIndex, setClickedBlockIndex] = useState(-1);
   const [activePhraseIndex, setActivePhraseIndex] = useState(-1);
 
   // Split the text into paragraphs, and within each paragraph, split by words
@@ -70,6 +71,8 @@ const Read: React.FC = () => {
   }, [phrases]);
 
   const handleClickBlock = (index: number, text: string) => {
+    setClickedBlockIndex(index);
+
     if (selectedIndices.has(index)) {
       const phraseIndex = phrases.findIndex(phrase =>
         phrase.startIndex <= index && index <= phrase.stopIndex
@@ -196,6 +199,7 @@ const Read: React.FC = () => {
 
     setPhrases(updatedPhrases);
     setSelectedIndices(updatedSelectedIndices);
+    setClickedBlockIndex(-1);
 
     if (!updatedPhrases.length) {
       setActivePhraseIndex(-1);
@@ -237,7 +241,7 @@ const Read: React.FC = () => {
       </PageContainer>
 
       {/* Mobile phrases drawer */}
-      <MobilePhrasesDrawer>
+      <MobilePhrasesDrawer clickedBlockIndex={clickedBlockIndex} onClose={() => setClickedBlockIndex(-1)}>
         <PhraseCardsContainer>
           <PhraseCardsContent
             activePhraseIndex={activePhraseIndex}

@@ -1,11 +1,28 @@
-import React, { createRef, PropsWithChildren, useState } from "react";
+import React, { createRef, PropsWithChildren, RefObject, useEffect, useState } from "react";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
+interface IMobilePhraseDrawer extends PropsWithChildren {
+  clickedBlockIndex: number;
+  onClose: () => void;
+}
 
-const MobilePhrasesDrawer: React.FC<PropsWithChildren> = ({ children }) => {
+
+const MobilePhrasesDrawer: React.FC<IMobilePhraseDrawer> = ({
+  clickedBlockIndex,
+  onClose,
+  children,
+}) => {
   const [open, setOpen] = useState(false);
   const drawerRef = createRef<HTMLDivElement>();
+
+  useEffect(() => {
+    if (clickedBlockIndex !== -1) {
+      handleClickOpen();
+    } else {
+      handleClickClose();
+    }
+  }, [clickedBlockIndex]);
 
   const handleClickOpen = () => {
     if (drawerRef.current) {
@@ -17,6 +34,7 @@ const MobilePhrasesDrawer: React.FC<PropsWithChildren> = ({ children }) => {
   const handleClickClose = () => {
     if (drawerRef.current) {
       drawerRef.current.style.height = "0px";
+      onClose();
       setOpen(false);
     }
   };

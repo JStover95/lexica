@@ -14,14 +14,16 @@ const PhraseCard: React.FC<IPhraseCardProps> = ({
   children,
 }) => {
   return (
-    <div className="mb-4">
-      <div className="flex items-center justify-between sticky top-0 mb-2 pt-4 border-b border-solid border-black text-lg bg-white">
+    <div className="h-full">
+      <div className="flex items-center justify-between sticky top-0 pt-4 border-b border-solid border-black text-lg bg-white">
         <span>{text}</span>
         <div className="p-2 cursor-pointer" onClick={onDeletePhrase}>
           <CloseIcon fontSize="small" />
         </div>
       </div>
-      {children}
+      <div className="py-2 overflow-scroll h-[calc(100%-5.75rem)]">
+        {children}
+      </div>
     </div>
   );
 };

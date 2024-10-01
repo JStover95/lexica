@@ -43,8 +43,8 @@ export const scrollToTop = (container: HTMLElement, element: HTMLElement) => {
   const offsetTop = elementRect.top - containerRect.top;
   
   // Scroll the container to the calculated offset
-  container.scrollBy({
-      top: offsetTop,
+  container.scrollTo({
+      top: elementRect.top,
       behavior: "smooth"
   });
 }

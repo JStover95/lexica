@@ -1,4 +1,4 @@
-import React, { createRef, PropsWithChildren, useEffect } from "react";
+import React, { createRef, PropsWithChildren, useEffect, useState } from "react";
 import { IDictionaryEntry } from "../../../utils/interfaces";
 import CloseIcon from '@mui/icons-material/Close';
 
@@ -13,16 +13,31 @@ const PhraseCard: React.FC<IPhraseCardProps> = ({
   onDeletePhrase,
   children,
 }) => {
+  const headerRef = createRef<HTMLDivElement>();
+  const sensesListRef = createRef<HTMLDivElement>();
+
+  useEffect(() => {
+    if (headerRef.current && sensesListRef.current) {
+      const headerHeight = headerRef.current.scrollHeight;
+      sensesListRef.current.style.height =
+        `calc(100% - ${headerHeight + 32}px)`;
+    }
+  }, [headerRef])
+
   return (
     <div className="h-full">
-      <div className="flex items-center justify-between sticky top-0 pt-4 border-b border-solid border-black text-lg bg-white">
-        <span>{text}</span>
-        <div className="p-2 cursor-pointer" onClick={onDeletePhrase}>
-          <CloseIcon fontSize="small" />
-        </div>
+      <div
+        ref={headerRef}
+        className="flex items-center justify-between sticky top-0 pt-4 border-b border-solid border-black text-lg bg-white">
+          <span>{text}</span>
+          <div className="p-2 cursor-pointer" onClick={onDeletePhrase}>
+            <CloseIcon fontSize="small" />
+          </div>
       </div>
-      <div className="py-2 overflow-scroll h-[calc(100%-5.75rem)]">
-        {children}
+      <div
+        ref={sensesListRef}
+        className={"py-2 overflow-scroll"}>
+          {children}
       </div>
     </div>
   );

@@ -16,9 +16,9 @@ export const highlightSubstrings = (s: string, indices: number[][]) => {
     const right = s.slice(stop + 1, sentenceEnd);
 
     return (
-      <p key={`seen-content-highlight-${index}`} className="mb-2">
+      <span key={`seen-content-highlight-${index}`} className="mb-2">
           {left}<b>{highlightText}</b>{right}
-      </p>
+      </span>
     );
   });
 };

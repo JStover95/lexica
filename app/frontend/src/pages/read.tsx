@@ -62,7 +62,8 @@ const Read: React.FC = () => {
         const inferenceResult: IInferResponseBody = await inference.json();
         const contentResult: ISeenContentResponseBody = await content.json();
         const entries = inferenceResult.Result;
-        phrase.dictionaryEntries.push({ query, entries });
+        const seenContent = contentResult.Result;
+        phrase.dictionaryEntries.push({ query, entries, seenContent });
         phrase.previousText = phrase.text;
         setPhrases(updatedPhrases);
       } catch (error) {

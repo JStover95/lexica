@@ -42,7 +42,11 @@ export interface IPhrase {
   active: boolean;
   startIndex: number;
   stopIndex: number;
-  dictionaryEntries: { query: string; entries: IDictionaryEntry[] }[];
+  dictionaryEntries: {
+    query: string;
+    entries: IDictionaryEntry[];
+    seenContent: ISeenContent[];
+  }[];
 }
 
 export interface IDashboardState {
@@ -93,7 +97,6 @@ export interface IDictionaryEntry {
   queryStrs?: string[];
   senses: ISense[];
   showAll?: boolean;
-  seenContent?: ISeenContent[];
 }
 
 export interface IInferResponseBody extends IBaseResponseBody {

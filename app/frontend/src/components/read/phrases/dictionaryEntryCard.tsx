@@ -2,6 +2,7 @@ import React, { createRef, useEffect, useState } from "react";
 import { IDictionaryEntry } from "../../../utils/interfaces";
 import SenseCard from "./senseCard";
 import { scrollToTop } from "../../../utils/utils";
+import ElipsisLoader from "../../elipsisLoader";
 
 interface IDictionaryEntryCardProps {
   dictionaryEntry: IDictionaryEntry;
@@ -67,9 +68,12 @@ const DictioanryEntryCard: React.FC<IDictionaryEntryCardProps> = ({
   return (
     <>
       <div className="mb-4" ref={ref}>
-        <div className="flex items-center mb-1">
-          <span className="text-lg font-bold mr-2">{dictionaryEntry.writtenForm}</span>
-          <span className="text-sm">{dictionaryEntry.partOfSpeech}</span>
+        <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center">
+            <span className="text-lg font-bold mr-2">{dictionaryEntry.writtenForm}</span>
+            <span className="text-sm">{dictionaryEntry.partOfSpeech}</span>
+          </div>
+          <ElipsisLoader />
         </div>
         {
           selectingDefinition &&

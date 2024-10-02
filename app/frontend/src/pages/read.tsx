@@ -1,21 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { dummyText } from "../utils/dummyData";
-import { IDictionaryEntry } from "../utils/interfaces";
+import { IInferResponseBody, IPhrase, ISeenContentResponseBody } from "../utils/interfaces";
 import Block from "../components/read/block";
 import PageContainer from "../components/containers/pageContainer";
 import MobilePhrasesDrawer from "../components/read/phrases/mobilePhrasesDrawer";
 import PhraseCardsContent from "../components/read/phrases/phraseCardsContent";
 import PhraseCardsContainer from "../components/read/phrases/phraseCardsContainer";
-
-interface IPhrase {
-  text: string;
-  context: string;
-  previousText: string;
-  active: boolean;
-  startIndex: number;
-  stopIndex: number;
-  dictionaryEntries: IDictionaryEntry[];
-}
 
 
 const Read: React.FC = () => {
@@ -50,7 +40,7 @@ const Read: React.FC = () => {
 
       try {
         // Get the inference
-        const inference = await fetch(
+        const inferencePromise = fetch(
           process.env.REACT_APP_API_ENDPOINT + "/infer",
           {
             method: "POST",
@@ -59,9 +49,20 @@ const Read: React.FC = () => {
           }
         );
 
-        const result = await inference.json();
-        const entries: IDictionaryEntry[] = result.Result;
-        phrase.dictionaryEntries.push(...entries);
+        const url = new URL(process.env.REACT_APP_API_ENDPOINT + "/seen-content")
+        const params = new URLSearchParams();
+        params.append("q", query);
+        url.search = params.toString();
+        const contentPromise = fetch(url);
+
+        const [inference, content] = await Promise.all(
+          [inferencePromise, contentPromise]
+        )
+
+        const inferenceResult: IInferResponseBody = await inference.json();
+        const contentResult: ISeenContentResponseBody = await content.json();
+        const entries = inferenceResult.Result;
+        phrase.dictionaryEntries.push({ query, entries });
         phrase.previousText = phrase.text;
         setPhrases(updatedPhrases);
       } catch (error) {

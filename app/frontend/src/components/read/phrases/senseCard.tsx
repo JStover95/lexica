@@ -23,7 +23,7 @@ const SenseCard: React.FC<ISenseCardProps> = ({ sense, senseNum, onClick }) => {
   }
 
   return (
-    <ol className="mb-1 list-decimal pl-8" start={senseNum}>
+    <ol className="mb-1 text-sm list-decimal pl-8" start={senseNum}>
       <li onClick={onClick}>
         <p className="text-sm">{equivalent.equivalent}</p>
         <p className="text-sm">{sense.definition}</p>

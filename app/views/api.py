@@ -1,9 +1,14 @@
+import re
+
 from flask import Blueprint, make_response, request, jsonify
 
-from app.json_schemas import API, validate_schema
+from app.extensions import mecab
+from app.json_schemas import API, validate_parameters, validate_schema
 from app.schema import schema
 from app.utils.dictionary.infer import get_inference
 from app.utils.logging import logger
+from app.utils.morphs.parse import get_smap_from_morphs
+from app.utils.morphs.search import get_search_results, query_content
 
 blueprint = Blueprint("api", __name__)
 
@@ -144,6 +149,7 @@ def infer(validated_data: API.InferRequestType):
 
         # Execute the query
         inference = get_inference(query, context=context)
+        print(len(inference))
 
         # Transform the query results into the correct response format
         result = []
@@ -171,3 +177,25 @@ def infer(validated_data: API.InferRequestType):
         return make_response({"Message": "An unexpected error occured."}, 500)
 
     return make_response({"Message": "Success.", "Result": result}, 200)
+
+
+@blueprint.route("/seen-content")
+@validate_parameters(API.content_schema)
+def content(validated_params: API.ContentRequestType):
+    try:
+        qmorphs = mecab.parse(validated_params["q"])
+        qunits, qmodfs = get_smap_from_morphs(qmorphs)
+        qresult = query_content(qunits, qmodfs)
+        result = get_search_results(qunits, qmodfs, qresult)
+
+        res = [{
+            "_id": str(content["_id"]),
+            "text": content["text"],
+            "indices": indexes,
+        } for content, indexes in result]
+
+    except Exception as e:
+        logger.exception(e)
+        return make_response({"Message": "An unexpected error occured."}, 500)
+
+    return make_response({"Message": "Success.", "Result": res}, 200)

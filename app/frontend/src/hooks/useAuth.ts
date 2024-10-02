@@ -101,7 +101,7 @@ const useAuth = () => {
   // Redirect the user to the AWS Cognito hosted UI for logging in.
   const login = () => {
     const url = new URL(`https://${authConfig.domain}/login`);
-    const params = new URLSearchParams(url.search);
+    const params = new URLSearchParams();
     params.append("client_id", authConfig.clientId);
     params.append("scope", authConfig.scope);
     params.append("response_type", authConfig.responseType);
@@ -113,7 +113,7 @@ const useAuth = () => {
   // Redirect the user to the AWS Cognito logout endpoint.
   const logout = () => {
     const url = new URL(`https://${authConfig.domain}/logout`);
-    const params = new URLSearchParams(url.search);
+    const params = new URLSearchParams();
     params.append("client_id", authConfig.clientId);
     params.append("logout_uri", authConfig.logoutUri);
     url.search = params.toString();

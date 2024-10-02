@@ -2,7 +2,6 @@ import React, { createRef, useEffect, useState } from "react";
 import { IDictionaryEntry } from "../../../utils/interfaces";
 import SenseCard from "./senseCard";
 import { scrollToTop } from "../../../utils/utils";
-import ElipsisLoader from "../../elipsisLoader";
 
 interface IDictionaryEntryCardProps {
   dictionaryEntry: IDictionaryEntry;
@@ -73,7 +72,6 @@ const DictioanryEntryCard: React.FC<IDictionaryEntryCardProps> = ({
             <span className="text-lg font-bold mr-2">{dictionaryEntry.writtenForm}</span>
             <span className="text-sm">{dictionaryEntry.partOfSpeech}</span>
           </div>
-          <ElipsisLoader />
         </div>
         {
           selectingDefinition &&

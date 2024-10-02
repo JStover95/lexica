@@ -4,6 +4,7 @@ from typing import Mapping, TypedDict, NotRequired
 from flask import make_response, request
 from jsonschema import validate, ValidationError
 from mypy_boto3_cognito_idp.literals import ChallengeNameType
+from werkzeug.datastructures import MultiDict
 
 from app.utils.handlers import handle_server_error
 
@@ -55,6 +56,28 @@ def validate_schema(schema):
     return wrapped_func
 
 
+def validate_parameters(schema):
+    def wrapped_func(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            # Check if the incoming request has a JSON payload
+            if not request.args.to_dict():
+                return make_response({"Message": "Missing parameters."}, 401)
+            try:
+                # Validate the request JSON data against the provided schema
+                validate(request.args.to_dict(), schema)
+            except ValidationError as e:
+                # Handle validation errors by returning a 401 Unauthorized response
+                return handle_server_error("Invalid parameters.", 401, e)
+
+            # If validation is successful, pass the validated data to the route function
+            return f(*args, validated_params=request.args.to_dict(), **kwargs)
+
+        return wrapper
+
+    return wrapped_func
+
+
 class API:
     InferRequestType = TypedDict(
         "InferRequestType",
@@ -73,6 +96,23 @@ class API:
         "required": [
             "Query",
         ],
+    }
+
+    ContentRequestType = TypedDict(
+        "ContentRequestType",
+        {
+            "q": str
+        }
+    )
+
+    content_schema = {
+        "type": "object",
+        "properties": {
+            "q": {"type": "string"}
+        },
+        "required": [
+            "q"
+        ]
     }
 
 

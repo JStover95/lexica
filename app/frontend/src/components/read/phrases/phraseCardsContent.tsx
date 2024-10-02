@@ -1,17 +1,7 @@
 import React from "react";
-import { IDictionaryEntry } from "../../../utils/interfaces";
+import { IPhrase } from "../../../utils/interfaces";
 import PhraseCard from "./phraseCard";
 import DictionaryEntryCardsContent from "./dictionaryEntryCardsContent";
-
-interface IPhrase {
-  text: string;
-  context: string;
-  previousText: string;
-  active: boolean;
-  startIndex: number;
-  stopIndex: number;
-  dictionaryEntries: IDictionaryEntry[];
-}
 
 interface IPhraseCardsContentProps {
   activePhraseIndex: number;

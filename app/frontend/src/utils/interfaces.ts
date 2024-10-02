@@ -1,5 +1,9 @@
 import { RefObject } from "react";
 
+export interface IBaseResponseBody {
+  Message: string;
+}
+
 export interface IUser {
   id: string;
   username: string;
@@ -32,13 +36,13 @@ export interface IExplanation {
 }
 
 export interface IPhrase {
+  text: string;
+  context: string;
+  previousText: string;
   active: boolean;
   startIndex: number;
   stopIndex: number;
-  refs: RefObject<HTMLSpanElement>[];
-  dictionaryEntries: IDictionaryEntry[] | null;
-  explanation: string;
-  previousText: string;
+  dictionaryEntries: { query: string; entries: IDictionaryEntry[] }[];
 }
 
 export interface IDashboardState {
@@ -73,6 +77,12 @@ export interface ISense {
   rank?: number;
 }
 
+export interface ISeenContent {
+  _id: string;
+  text: string;
+  indices: number[][];
+}
+
 export interface IDictionaryEntry {
   sourceId?: string;
   sourceLanguage?: string;
@@ -83,4 +93,13 @@ export interface IDictionaryEntry {
   queryStrs?: string[];
   senses: ISense[];
   showAll?: boolean;
+  seenContent?: ISeenContent[];
+}
+
+export interface IInferResponseBody extends IBaseResponseBody {
+  Result: IDictionaryEntry[];
+}
+
+export interface ISeenContentResponseBody extends IBaseResponseBody {
+  Result: ISeenContent[];
 }

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { IDictionaryQuery } from "../../../utils/interfaces";
 import { highlightSubstrings } from "../../../utils/utils";
 import SeenContent from "./seenContent";
@@ -12,7 +12,11 @@ interface IDictionaryQueryProps {
 const DictionaryQuery: React.FC<IDictionaryQueryProps> = ({
   dictionaryQuery,
 }) => {
+  const [openSeenContent, setOpenSeenContent] = useState(false);
   const { query, entries, seenContent } = dictionaryQuery;
+
+  const handleClickSeenContent = () => setOpenSeenContent(true);
+  const handleCloseSeenContent = () => setOpenSeenContent(false);
 
   const seen =  seenContent.map((sc, i) =>
     highlightSubstrings(sc.text, sc.indices).map((elem, j) =>
@@ -32,12 +36,18 @@ const DictionaryQuery: React.FC<IDictionaryQueryProps> = ({
         <span className="text-lg">{query}</span>
         {
           Boolean(seenContent.length) &&
-          <span className="text-sm underline">
-            Seen {numSeen} time{numSeen > 1 && "s"}
+          <span
+            onClick={handleClickSeenContent}
+            className="text-sm underline">
+              Seen {numSeen} time{numSeen > 1 && "s"}
           </span>
         }
       </div>
-      <SeenContent>{seen}</SeenContent>
+      <SeenContent
+        open={openSeenContent}
+        onClose={handleCloseSeenContent}>
+          {seen}
+      </SeenContent>
       <DictionaryEntriesContainer entries={entries} />
     </>
   );

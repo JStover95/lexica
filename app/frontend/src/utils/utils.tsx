@@ -23,23 +23,40 @@ export const highlightSubstrings = (s: string, indices: number[][]) => {
   });
 };
 
-
 /**
- * Scrolls the given container so that the specified element is aligned with the
- * top edge of the container.
+ * Scrolls the given container so that the specified element is aligned either 
+ * with the top edge of the container (if the element is larger than the container),
+ * or ensures the entire element is visible (if the element is smaller).
  * 
- * @param {HTMLElement} container - The container element that should be
- *  scrolled.
- * @param {HTMLElement} element - The target element to be aligned with the top
- *  of the container.
+ * @param {HTMLElement} container - The container element that should be scrolled.
+ * @param {HTMLElement} element - The target element to be aligned with the top of the container.
  */
 export const scrollToTop = (container: HTMLElement, element: HTMLElement) => {
+  const containerRect = container.getBoundingClientRect();
   const elementRect = element.getBoundingClientRect();
-  container.scrollTo({
-      top: elementRect.top,
-      behavior: "smooth"
-  });
-}
+  
+  const relativeOffset = elementRect.top - containerRect.top;
+  
+  // Check if the element is smaller than the container
+  const elementHeight = elementRect.height;
+  const containerHeight = containerRect.height;
+
+  // If the element is smaller, scroll just enough to bring the bottom of the element into view
+  if (elementHeight < containerHeight) {
+    const scrollAmount = relativeOffset - (containerHeight - elementHeight);
+    container.scrollBy({
+      top: scrollAmount + 16,
+      behavior: "smooth",
+    });
+  } else {
+    // Default behavior, scroll to the top of the element
+    container.scrollBy({
+      top: relativeOffset - 8,
+      behavior: "smooth",
+    });
+  }
+};
+
 
 /**
  * Makes a network request with the specified options and returns the response

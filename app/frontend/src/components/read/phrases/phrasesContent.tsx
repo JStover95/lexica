@@ -1,7 +1,6 @@
 import React from "react";
 import { IPhrase } from "../../../utils/interfaces";
 import Phrase from "./phrase";
-import DictionaryQuery from "./dictionaryQuery";
 
 interface IPhrasesContentProps {
   activePhraseIndex: number;
@@ -22,13 +21,8 @@ const PhrasesContent: React.FC<IPhrasesContentProps> = ({
   return (
     <Phrase
       text={phrases[activePhraseIndex].text}
-      onDeletePhrase={() => handleDeletePhrase(activePhraseIndex)}>
-        {
-          phrases[activePhraseIndex].dictionaryQueries.map((dq, i) =>
-            <DictionaryQuery key={i} dictionaryQuery={dq} />
-          )
-        }
-    </Phrase>
+      onDeletePhrase={() => handleDeletePhrase(activePhraseIndex)}
+      queries={phrases[activePhraseIndex].dictionaryQueries} />
   );
 };
 

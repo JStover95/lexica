@@ -1,7 +1,6 @@
 import React, { createRef, useEffect, useState } from "react";
 import { IDictionaryEntry } from "../../../utils/interfaces";
 import Sense from "./sense";
-import { scrollToTop } from "../../../utils/utils";
 
 interface IDictionaryEntryProps {
   dictionaryEntry: IDictionaryEntry;
@@ -13,16 +12,6 @@ const DictioanryEntryCard: React.FC<IDictionaryEntryProps> = ({
 }) => {
   const [selectingDefinition, setSelectingDefinition] = useState(false);
   const [selectedDefinitionIndex, setSelectedDefinitionIndex] = useState(-1);
-  const ref = createRef<HTMLDivElement>();
-
-  useEffect(() => {
-    if (ref.current) {
-      const parent = ref.current.parentElement;
-      if (parent) {
-        scrollToTop(parent, ref.current);
-      }
-    }
-  }, [ref]);
 
   const handleClickSelectDefinition = () => {
     setSelectingDefinition(true);
@@ -66,7 +55,7 @@ const DictioanryEntryCard: React.FC<IDictionaryEntryProps> = ({
 
   return (
     <>
-      <div className="mb-4" ref={ref}>
+      <div className="mb-4">
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center">
             <span className="text-lg font-bold mr-2">{dictionaryEntry.writtenForm}</span>

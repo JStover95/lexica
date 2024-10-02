@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { RefObject, useState } from "react";
 import { IDictionaryQuery } from "../../../utils/interfaces";
 import { highlightSubstrings } from "../../../utils/utils";
 import SeenContent from "./seenContent";
@@ -6,11 +6,13 @@ import DictionaryEntriesContainer from "./dictionaryEntriesContainer";
 
 interface IDictionaryQueryProps {
   dictionaryQuery: IDictionaryQuery;
+  lastQueryRef?: RefObject<HTMLDivElement> | null;
 }
 
 
 const DictionaryQuery: React.FC<IDictionaryQueryProps> = ({
   dictionaryQuery,
+  lastQueryRef,
 }) => {
   const [openSeenContent, setOpenSeenContent] = useState(false);
   const { query, entries, seenContent } = dictionaryQuery;
@@ -31,7 +33,7 @@ const DictionaryQuery: React.FC<IDictionaryQueryProps> = ({
   const numSeen = seen.reduce((l, r) => l + r.length, 0);
 
   return (
-    <>
+    <div ref={lastQueryRef}>
       <div className="flex items-center justify-between mb-1">
         <span className="text-lg">{query}</span>
         {
@@ -49,7 +51,7 @@ const DictionaryQuery: React.FC<IDictionaryQueryProps> = ({
           {seen}
       </SeenContent>
       <DictionaryEntriesContainer entries={entries} />
-    </>
+    </div>
   );
 };
 

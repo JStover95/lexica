@@ -1,27 +1,38 @@
 import React, { createRef, PropsWithChildren, useEffect } from "react";
 import CloseIcon from '@mui/icons-material/Close';
+import { IDictionaryQuery } from "../../../utils/interfaces";
+import DictionaryQuery from "./dictionaryQuery";
+import { scrollToTop } from "../../../utils/utils";
 
-interface IPhraseProps extends PropsWithChildren {
+interface IPhraseProps {
   text: string;
+  queries: IDictionaryQuery[];
   onDeletePhrase: () => void;
 }
 
 
 const Phrase: React.FC<IPhraseProps> = ({
   text,
-  onDeletePhrase,
-  children,
+  queries,
+  onDeletePhrase
 }) => {
   const headerRef = createRef<HTMLDivElement>();
-  const sensesListRef = createRef<HTMLDivElement>();
+  const queriesContainerRef = createRef<HTMLDivElement>();
+  const lastQueryRef = createRef<HTMLDivElement>();
 
   useEffect(() => {
-    if (headerRef.current && sensesListRef.current) {
+    if (queriesContainerRef.current && lastQueryRef.current) {
+      scrollToTop(queriesContainerRef.current, lastQueryRef.current);
+    }
+  }, [queriesContainerRef, lastQueryRef]);
+
+  useEffect(() => {
+    if (headerRef.current && queriesContainerRef.current) {
       const headerHeight = headerRef.current.scrollHeight;
-      sensesListRef.current.style.height =
+      queriesContainerRef.current.style.height =
         `calc(100% - ${headerHeight + 32}px)`;
     }
-  }, [headerRef, sensesListRef])
+  }, [headerRef, queriesContainerRef])
 
   return (
     <div className="h-full">
@@ -34,9 +45,16 @@ const Phrase: React.FC<IPhraseProps> = ({
           </div>
       </div>
       <div
-        ref={sensesListRef}
+        ref={queriesContainerRef}
         className="p-2 overflow-scroll">
-          {children}
+          {
+            queries.map((dq, i) =>
+              <DictionaryQuery
+                key={i}
+                dictionaryQuery={dq}
+                lastQueryRef={i === queries.length - 1 ? lastQueryRef : null} />
+            )
+          }
       </div>
     </div>
   );

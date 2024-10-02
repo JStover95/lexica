@@ -1,14 +1,14 @@
 import React from "react";
 import { ISense } from "../../../utils/interfaces";
 
-interface ISenseCardProps {
+interface ISenseProps {
   sense: ISense;
   senseNum: number;
   onClick?: () => void;
 }
 
 
-const SenseCard: React.FC<ISenseCardProps> = ({ sense, senseNum, onClick }) => {
+const Sense: React.FC<ISenseProps> = ({ sense, senseNum, onClick }) => {
   // For now hard code English only
   const equivalent = sense.equivalents?.filter(eq => eq.equivalentLanguage == "영어")[0];
 
@@ -34,4 +34,4 @@ const SenseCard: React.FC<ISenseCardProps> = ({ sense, senseNum, onClick }) => {
 }
 
 
-export default SenseCard;
+export default Sense;

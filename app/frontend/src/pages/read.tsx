@@ -4,8 +4,8 @@ import { IInferResponseBody, IPhrase, ISeenContentResponseBody } from "../utils/
 import Block from "../components/read/block";
 import PageContainer from "../components/containers/pageContainer";
 import MobilePhrasesDrawer from "../components/read/phrases/mobilePhrasesDrawer";
-import PhraseCardsContent from "../components/read/phrases/phraseCardsContent";
-import PhraseCardsContainer from "../components/read/phrases/phraseCardsContainer";
+import PhrasesContent from "../components/read/phrases/phrasesContent";
+import PhrasesContainer from "../components/read/phrases/phrasesContainer";
 
 
 const Read: React.FC = () => {
@@ -63,7 +63,7 @@ const Read: React.FC = () => {
         const contentResult: ISeenContentResponseBody = await content.json();
         const entries = inferenceResult.Result;
         const seenContent = contentResult.Result;
-        phrase.dictionaryEntries.push({ query, entries, seenContent });
+        phrase.dictionaryQueries.push({ query, entries, seenContent });
         phrase.previousText = phrase.text;
         setPhrases(updatedPhrases);
       } catch (error) {
@@ -96,7 +96,7 @@ const Read: React.FC = () => {
       active: true,
       startIndex: index,
       stopIndex: index,
-      dictionaryEntries: [],
+      dictionaryQueries: [],
     };
 
     // Check for an adjacent block to the left
@@ -116,7 +116,7 @@ const Read: React.FC = () => {
         newPhrase.previousText = leftPhrase.previousText;
         newPhrase.context = leftPhrase.context;
         newPhrase.startIndex = leftPhrase.startIndex;
-        newPhrase.dictionaryEntries = leftPhrase.dictionaryEntries;
+        newPhrase.dictionaryQueries = leftPhrase.dictionaryQueries;
 
         // Delete the adjacent phrase
         updatedPhrases.splice(leftPhraseIx, 1);
@@ -138,8 +138,8 @@ const Read: React.FC = () => {
         ).trim();
         newPhrase.context = rightPhrase.context;
         newPhrase.stopIndex = rightPhrase.stopIndex;
-        newPhrase.dictionaryEntries = [
-          ...newPhrase.dictionaryEntries, ...rightPhrase.dictionaryEntries
+        newPhrase.dictionaryQueries = [
+          ...newPhrase.dictionaryQueries, ...rightPhrase.dictionaryQueries
         ];
       }
     }
@@ -223,12 +223,12 @@ const Read: React.FC = () => {
 
       {/* Mobile phrases drawer */}
       <MobilePhrasesDrawer clickedBlockIndex={clickedBlockIndex} onClose={() => setClickedBlockIndex(-1)}>
-        <PhraseCardsContainer>
-          <PhraseCardsContent
+        <PhrasesContainer>
+          <PhrasesContent
             activePhraseIndex={activePhraseIndex}
             phrases={phrases}
             handleDeletePhrase={handleDeletePhrase} />
-        </PhraseCardsContainer>
+        </PhrasesContainer>
       </MobilePhrasesDrawer>
     </>
   );

@@ -1,13 +1,13 @@
 import React, { createRef, PropsWithChildren, useEffect } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 
-interface IPhraseCardProps extends PropsWithChildren {
+interface IPhraseProps extends PropsWithChildren {
   text: string;
   onDeletePhrase: () => void;
 }
 
 
-const PhraseCard: React.FC<IPhraseCardProps> = ({
+const Phrase: React.FC<IPhraseProps> = ({
   text,
   onDeletePhrase,
   children,
@@ -43,4 +43,4 @@ const PhraseCard: React.FC<IPhraseCardProps> = ({
 };
 
 
-export default PhraseCard;
+export default Phrase;

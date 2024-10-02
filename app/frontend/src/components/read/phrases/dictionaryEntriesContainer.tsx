@@ -1,13 +1,13 @@
 import React from "react";
 import { IDictionaryEntry } from "../../../utils/interfaces";
-import DictioanryEntryCard from "./dictionaryEntryCard";
+import DictioanryEntry from "./dictionaryEntry";
 
-interface IDictionaryEntryCardContainer {
+interface IDictionaryEntriesContainerProps {
   entries: IDictionaryEntry[];
 }
 
 
-const DictionaryEntryCardContainer: React.FC<IDictionaryEntryCardContainer> = ({
+const DictionaryEntriesContainer: React.FC<IDictionaryEntriesContainerProps> = ({
   entries,
 }) => {
   if (!entries.length) {
@@ -18,7 +18,7 @@ const DictionaryEntryCardContainer: React.FC<IDictionaryEntryCardContainer> = ({
     <>
       {
         entries.map((entry, j) => 
-          <DictioanryEntryCard
+          <DictioanryEntry
             key={`dictionary-entry-${j}`}
             dictionaryEntry={entry} />
         )
@@ -28,4 +28,4 @@ const DictionaryEntryCardContainer: React.FC<IDictionaryEntryCardContainer> = ({
 }
 
 
-export default DictionaryEntryCardContainer;
+export default DictionaryEntriesContainer;

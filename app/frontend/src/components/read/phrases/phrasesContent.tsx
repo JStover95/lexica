@@ -1,16 +1,16 @@
 import React from "react";
 import { IPhrase } from "../../../utils/interfaces";
-import PhraseCard from "./phraseCard";
-import DictionaryEntryCardsContent from "./dictionaryEntryCardsContent";
+import Phrase from "./phrase";
+import DictionaryQuery from "./dictionaryQuery";
 
-interface IPhraseCardsContentProps {
+interface IPhrasesContentProps {
   activePhraseIndex: number;
   phrases: IPhrase[];
   handleDeletePhrase: (index: number) => void;
 }
 
 
-const PhraseCardsContent: React.FC<IPhraseCardsContentProps> = ({
+const PhrasesContent: React.FC<IPhrasesContentProps> = ({
   activePhraseIndex,
   phrases,
   handleDeletePhrase,
@@ -20,14 +20,17 @@ const PhraseCardsContent: React.FC<IPhraseCardsContentProps> = ({
   }
 
   return (
-    <PhraseCard
+    <Phrase
       text={phrases[activePhraseIndex].text}
       onDeletePhrase={() => handleDeletePhrase(activePhraseIndex)}>
-        <DictionaryEntryCardsContent
-          dictionaryEntries={phrases[activePhraseIndex].dictionaryEntries} />
-    </PhraseCard>
+        {
+          phrases[activePhraseIndex].dictionaryQueries.map((dq, i) =>
+            <DictionaryQuery key={i} dictionaryQuery={dq} />
+          )
+        }
+    </Phrase>
   );
 };
 
 
-export default PhraseCardsContent;
+export default PhrasesContent;

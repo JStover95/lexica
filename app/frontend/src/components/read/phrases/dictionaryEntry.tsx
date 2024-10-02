@@ -1,14 +1,14 @@
 import React, { createRef, useEffect, useState } from "react";
 import { IDictionaryEntry } from "../../../utils/interfaces";
-import SenseCard from "./senseCard";
+import Sense from "./sense";
 import { scrollToTop } from "../../../utils/utils";
 
-interface IDictionaryEntryCardProps {
+interface IDictionaryEntryProps {
   dictionaryEntry: IDictionaryEntry;
 }
 
 
-const DictioanryEntryCard: React.FC<IDictionaryEntryCardProps> = ({
+const DictioanryEntryCard: React.FC<IDictionaryEntryProps> = ({
   dictionaryEntry,
 }) => {
   const [selectingDefinition, setSelectingDefinition] = useState(false);
@@ -49,7 +49,7 @@ const DictioanryEntryCard: React.FC<IDictionaryEntryCardProps> = ({
   let senseCards;
   if (selectingDefinition) {
     senseCards = sensesWithNums.map((sense, i) =>
-      <SenseCard
+      <Sense
         key={`sense-card-${i}`}
         sense={sense.sense}
         senseNum={sense.num}
@@ -57,7 +57,7 @@ const DictioanryEntryCard: React.FC<IDictionaryEntryCardProps> = ({
     );
   } else {
     senseCards = [
-      <SenseCard
+      <Sense
         key={"sense-card-0"}
         sense={topSenseWithNum.sense}
         senseNum={topSenseWithNum.num} />
@@ -77,7 +77,7 @@ const DictioanryEntryCard: React.FC<IDictionaryEntryCardProps> = ({
           selectingDefinition &&
           <>
             <p className="text-sm font-bold pt-2">Previous definition</p>
-            <SenseCard
+            <Sense
               key={"sense-card-0"}
               sense={topSenseWithNum.sense}
               senseNum={topSenseWithNum.num}

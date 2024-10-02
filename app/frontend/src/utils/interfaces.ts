@@ -35,6 +35,12 @@ export interface IExplanation {
   Description?: string;
 }
 
+export interface IDictionaryQuery {
+  query: string;
+  entries: IDictionaryEntry[];
+  seenContent: ISeenContent[];
+}
+
 export interface IPhrase {
   text: string;
   context: string;
@@ -42,11 +48,7 @@ export interface IPhrase {
   active: boolean;
   startIndex: number;
   stopIndex: number;
-  dictionaryEntries: {
-    query: string;
-    entries: IDictionaryEntry[];
-    seenContent: ISeenContent[];
-  }[];
+  dictionaryQueries: IDictionaryQuery[];
 }
 
 export interface IDashboardState {

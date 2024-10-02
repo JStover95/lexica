@@ -35,7 +35,7 @@ const PhraseCard: React.FC<IPhraseCardProps> = ({
       </div>
       <div
         ref={sensesListRef}
-        className={"py-2 overflow-scroll"}>
+        className="p-2 overflow-scroll">
           {children}
       </div>
     </div>

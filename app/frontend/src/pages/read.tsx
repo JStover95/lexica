@@ -99,12 +99,11 @@ const Read: React.FC = () => {
       dictionaryEntries: [],
     };
 
-    let leftPhraseIx = -1;
     // Check for an adjacent block to the left
     if (selectedIndices.has(index - 1)) {
 
       // Get the phrase that contains the adjacent block
-      leftPhraseIx = updatedPhrases.findIndex(
+      const leftPhraseIx = updatedPhrases.findIndex(
         phrase => phrase.stopIndex === index - 1
       );
       const leftPhrase = updatedPhrases[leftPhraseIx];
@@ -125,9 +124,8 @@ const Read: React.FC = () => {
     }
 
     // Check for an adjacent block to the right as before
-    let rightPhraseIx = -1;
     if (selectedIndices.has(index + 1)) {
-      rightPhraseIx = updatedPhrases.findIndex(
+      const rightPhraseIx = updatedPhrases.findIndex(
         phrase => phrase.startIndex === index + 1
       );
       const rightPhrase = updatedPhrases[rightPhraseIx];
@@ -140,29 +138,9 @@ const Read: React.FC = () => {
         ).trim();
         newPhrase.context = rightPhrase.context;
         newPhrase.stopIndex = rightPhrase.stopIndex;
-        newPhrase.dictionaryEntries = rightPhrase.dictionaryEntries;
-        updatedPhrases.splice(rightPhraseIx, 1);
-      }
-    }
-
-    let phraseIx = 0;
-    if (leftPhraseIx !== -1) {
-      phraseIx = leftPhraseIx;
-      updatedPhrases.splice(leftPhraseIx, 0, newPhrase);
-    } else if (rightPhraseIx !== -1) {
-      phraseIx = rightPhraseIx;
-      updatedPhrases.splice(rightPhraseIx, 0, newPhrase);
-    } else {
-      while (
-        phraseIx < updatedPhrases.length
-        && updatedPhrases[phraseIx].stopIndex > index
-      ) {
-        phraseIx++;
-      }
-      if (phraseIx === updatedPhrases.length) {
-        updatedPhrases.push(newPhrase);
-      } else {
-        updatedPhrases.splice(phraseIx, 0, newPhrase);
+        newPhrase.dictionaryEntries = [
+          ...newPhrase.dictionaryEntries, ...rightPhrase.dictionaryEntries
+        ];
       }
     }
 
@@ -182,9 +160,10 @@ const Read: React.FC = () => {
       }
     }
 
+    updatedPhrases.push(newPhrase);
     setSelectedIndices(updatedSelectedIndices);
     setPhrases(updatedPhrases);
-    setActivePhraseIndex(phraseIx);
+    setActivePhraseIndex(updatedPhrases.length - 1);
   };
 
   const handleDeletePhrase = (index: number) => {

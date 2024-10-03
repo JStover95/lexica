@@ -56,7 +56,7 @@ const MobilePhrasesDrawer: React.FC<IMobilePhraseDrawer> = ({
         ref={drawerRef}
         className="flex flex-col sticky bottom-0 z-10 h-0 overflow-hidden transition-all duration-500 pointer-events-none">
           {/* Close drawer button */}
-          <div className="flex justify-center">
+          <div className="flex justify-center border-b-2 border-primary">
             <div
               className="flex items-center justify-center w-20 h-8 rounded-t-lg bg-primary text-white pointer-events-auto cursor-pointer hover:brightness-[110%] active:brightness-[110%]"
               onClick={handleClickClose}>

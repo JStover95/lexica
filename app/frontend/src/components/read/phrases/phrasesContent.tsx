@@ -15,7 +15,7 @@ const PhrasesContent: React.FC<IPhrasesContentProps> = ({
   handleDeletePhrase,
 }) => {
   if (!phrases.length) {
-    return <span className="italic pt-6">No phrases selected yet.</span>;
+    return <span className="italic pt-4 px-8">No phrases selected yet.</span>;
   }
 
   const phrase = phrases[activePhraseIndex];

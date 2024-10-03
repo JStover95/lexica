@@ -17,7 +17,6 @@ const Phrase: React.FC<IPhraseProps> = ({
   onDeletePhrase
 }) => {
   const [scroll, setScroll] = useState(false);
-  const headerRef = createRef<HTMLDivElement>();
   const queriesContainerRef = createRef<HTMLDivElement>();
   const lastQueryRef = createRef<HTMLDivElement>();
   const prevText = useRef<string | null>(null);
@@ -39,36 +38,25 @@ const Phrase: React.FC<IPhraseProps> = ({
     }
   }, [queriesContainerRef, lastQueryRef]);
 
-  useEffect(() => {
-    if (headerRef.current && queriesContainerRef.current) {
-      const headerHeight = headerRef.current.scrollHeight;
-      queriesContainerRef.current.style.height =
-        `calc(100% - ${headerHeight + 32}px)`;
-    }
-  }, [headerRef, queriesContainerRef])
-
   return (
-    <div className="h-full">
-      <div
-        ref={headerRef}
-        className="flex items-center justify-between sticky top-0 pt-4 border-b border-solid border-black text-lg bg-white">
-          <span>{text}</span>
-          <div className="p-2 cursor-pointer" onClick={onDeletePhrase}>
-            <CloseIcon fontSize="small" />
-          </div>
-      </div>
-      <div
-        ref={queriesContainerRef}
-        className="p-2 overflow-scroll">
-          {
-            queries.map((dq, i) =>
-              <DictionaryQuery
-                key={i}
-                dictionaryQuery={dq}
-                lastQueryRef={i === queries.length - 1 ? lastQueryRef : null} />
-            )
-          }
-      </div>
+    <div
+      ref={queriesContainerRef}
+      className="px-8 h-[calc(100%-32px)] overflow-scroll">
+        <div
+          className="flex items-center pt-4 pb-2 mb-4 justify-between border-b border-solid border-black text-lg bg-white">
+            <span>{text}</span>
+            <div className="cursor-pointer" onClick={onDeletePhrase}>
+              <CloseIcon fontSize="small" />
+            </div>
+        </div>
+        {
+          queries.map((dq, i) =>
+            <DictionaryQuery
+              key={i}
+              dictionaryQuery={dq}
+              lastQueryRef={i === queries.length - 1 ? lastQueryRef : null} />
+          )
+        }
     </div>
   );
 };

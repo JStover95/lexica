@@ -7,7 +7,7 @@ from app.json_schemas import API, validate_parameters, validate_schema
 from app.schema import schema
 from app.utils.dictionary.infer import get_inference
 from app.utils.logging import logger
-from app.utils.morphs.parse import get_smap_from_morphs
+from app.utils.morphs.parse import get_smap_from_morphs, highlight_substrings
 from app.utils.morphs.search import get_search_results, query_content
 
 blueprint = Blueprint("api", __name__)
@@ -188,11 +188,14 @@ def content(validated_params: API.ContentRequestType):
         qresult = query_content(qunits, qmodfs)
         result = get_search_results(qunits, qmodfs, qresult)
 
-        res = [{
-            "_id": str(content["_id"]),
-            "text": content["text"],
-            "indices": indexes,
-        } for content, indexes in result]
+        res = []
+        for content, indices in result:
+            sentences = highlight_substrings(content["text"], indices)
+            res.append({
+                "_id": str(content["_id"]),
+                "title": content["title"],
+                "sentences": sentences,
+            })
 
     except Exception as e:
         logger.exception(e)

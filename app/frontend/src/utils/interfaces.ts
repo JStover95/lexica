@@ -85,8 +85,13 @@ export interface ISense {
 
 export interface ISeenContent {
   _id: string;
+  title: string;
   text: string;
-  indices: number[][];
+  sentences: {
+    text: string;
+    start: number;
+    stop: number;
+  }[];
 }
 
 export interface IDictionaryEntry {

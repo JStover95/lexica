@@ -1,28 +1,5 @@
 const crossorigin = Boolean(process.env.CROSSORIGIN);
 
-export const highlightSubstrings = (s: string, indices: number[][]) => {
-  return indices.map(([start, stop], index) => {
-    const highlightText = s.slice(start, stop + 1);
-
-    // Find the start of the sentence containing the highlight by going backwards to the previous period
-    let sentenceStart = s.lastIndexOf('.', start) + 1;
-    // Move the index past any spaces after the period
-    while (s[sentenceStart] === ' ' || s[sentenceStart] === "\"") sentenceStart++;
-
-    let sentenceEnd = s.indexOf('.', stop) + 1;
-    while (s[sentenceEnd] === "\"") sentenceEnd++;
-
-    // Get the surrounding text with highlight centered when possible
-    const left = s.slice(sentenceStart, start);
-    const right = s.slice(stop + 1, sentenceEnd);
-
-    return (
-      <span key={`seen-content-highlight-${index}`} className="mb-2">
-          {left}<b>{highlightText}</b>{right}
-      </span>
-    );
-  });
-};
 
 /**
  * Scrolls the given container so that the specified element is aligned either 

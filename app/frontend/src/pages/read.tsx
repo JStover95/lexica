@@ -61,6 +61,7 @@ const Read: React.FC = () => {
 
         const inferenceResult: IInferResponseBody = await inference.json();
         const contentResult: ISeenContentResponseBody = await content.json();
+        console.log(contentResult);
         const entries = inferenceResult.Result;
         const seenContent = contentResult.Result;
         phrase.dictionaryQueries.push({ query, entries, seenContent });

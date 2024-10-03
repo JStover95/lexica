@@ -1,6 +1,5 @@
 import React, { createRef, RefObject, useState } from "react";
 import { IDictionaryQuery } from "../../../utils/interfaces";
-import { highlightSubstrings } from "../../../utils/utils";
 import SeenContent from "./seenContent";
 import DictionaryEntriesContainer from "./dictionaryEntriesContainer";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
@@ -31,11 +30,15 @@ const DictionaryQuery: React.FC<IDictionaryQueryProps> = ({
   };
 
   const seen = seenContent.map((sc, i) =>
-    highlightSubstrings(sc.text, sc.indices).map((elem, j) =>
+    sc.sentences.map(({ text, start, stop }, j) =>
       <div
         key={`seen-content-${i * 10000 + j}`}
         className="mb-2">
-        {elem}
+          <span>
+            {text.substring(0, start)}
+            <b>{text.substring(start, stop + 1)}</b>
+            {text.substring(stop + 1)}
+          </span>
       </div>
     )
   )

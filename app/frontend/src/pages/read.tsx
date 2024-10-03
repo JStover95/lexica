@@ -11,7 +11,7 @@ import PhrasesContainer from "../components/read/phrases/phrasesContainer";
 const Read: React.FC = () => {
   const [selectedIndices, setSelectedIndices] = useState<Set<number>>(new Set());
   const [phrases, setPhrases] = useState<IPhrase[]>([]);
-  const [clickedBlockIndex, setClickedBlockIndex] = useState(-1);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [activePhraseIndex, setActivePhraseIndex] = useState(-1);
 
   // Split the text into paragraphs, and within each paragraph, split by words
@@ -73,7 +73,7 @@ const Read: React.FC = () => {
   }, [phrases]);
 
   const handleClickBlock = (index: number, text: string) => {
-    setClickedBlockIndex(index);
+    setDrawerOpen(true);
 
     if (selectedIndices.has(index)) {
       const phraseIndex = phrases.findIndex(phrase =>
@@ -180,7 +180,6 @@ const Read: React.FC = () => {
 
     setPhrases(updatedPhrases);
     setSelectedIndices(updatedSelectedIndices);
-    setClickedBlockIndex(-1);
 
     if (!updatedPhrases.length) {
       setActivePhraseIndex(-1);
@@ -222,13 +221,16 @@ const Read: React.FC = () => {
       </PageContainer>
 
       {/* Mobile phrases drawer */}
-      <MobilePhrasesDrawer clickedBlockIndex={clickedBlockIndex} onClose={() => setClickedBlockIndex(-1)}>
-        <PhrasesContainer>
-          <PhrasesContent
-            activePhraseIndex={activePhraseIndex}
-            phrases={phrases}
-            handleDeletePhrase={handleDeletePhrase} />
-        </PhrasesContainer>
+      <MobilePhrasesDrawer
+        open={drawerOpen}
+        onOpen={() => setDrawerOpen(true)}
+        onClose={() => setDrawerOpen(false)}>
+          <PhrasesContainer>
+            <PhrasesContent
+              activePhraseIndex={activePhraseIndex}
+              phrases={phrases}
+              handleDeletePhrase={handleDeletePhrase} />
+          </PhrasesContainer>
       </MobilePhrasesDrawer>
     </>
   );

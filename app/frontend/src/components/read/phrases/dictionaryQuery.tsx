@@ -17,10 +17,7 @@ const DictionaryQuery: React.FC<IDictionaryQueryProps> = ({
   const [openSeenContent, setOpenSeenContent] = useState(false);
   const { query, entries, seenContent } = dictionaryQuery;
 
-  const handleClickSeenContent = () => setOpenSeenContent(true);
-  const handleCloseSeenContent = () => setOpenSeenContent(false);
-
-  const seen =  seenContent.map((sc, i) =>
+  const seen = seenContent.map((sc, i) =>
     highlightSubstrings(sc.text, sc.indices).map((elem, j) =>
       <div
         key={`seen-content-${i * 10000 + j}`}
@@ -39,15 +36,13 @@ const DictionaryQuery: React.FC<IDictionaryQueryProps> = ({
         {
           Boolean(seenContent.length) &&
           <span
-            onClick={handleClickSeenContent}
+            onClick={() => setOpenSeenContent(!openSeenContent)}
             className="text-sm underline">
               Seen {numSeen} time{numSeen > 1 && "s"}
           </span>
         }
       </div>
-      <SeenContent
-        open={openSeenContent}
-        onClose={handleCloseSeenContent}>
+      <SeenContent open={openSeenContent}>
           {seen}
       </SeenContent>
       <DictionaryEntriesContainer entries={entries} />

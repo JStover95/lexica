@@ -1,4 +1,4 @@
-import React, { createRef, PropsWithChildren, useEffect } from "react";
+import React, { createRef, PropsWithChildren, useEffect, useRef, useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import { IDictionaryQuery } from "../../../utils/interfaces";
 import DictionaryQuery from "./dictionaryQuery";
@@ -16,13 +16,26 @@ const Phrase: React.FC<IPhraseProps> = ({
   queries,
   onDeletePhrase
 }) => {
+  const [scroll, setScroll] = useState(false);
   const headerRef = createRef<HTMLDivElement>();
   const queriesContainerRef = createRef<HTMLDivElement>();
   const lastQueryRef = createRef<HTMLDivElement>();
+  const prevText = useRef<string | null>(null);
+  const prevQueries = useRef<IDictionaryQuery[] | null>(null);
+
+  useEffect(() => {
+    setScroll(prevQueries.current === queries || prevText.current === text);
+    prevQueries.current = queries;
+    prevText.current = text;
+  }, [text, queries]);
 
   useEffect(() => {
     if (queriesContainerRef.current && lastQueryRef.current) {
-      scrollToTop(queriesContainerRef.current, lastQueryRef.current);
+      if (scroll) {
+        scrollToTop(queriesContainerRef.current, lastQueryRef.current);
+      } else {
+        queriesContainerRef.current.scrollTo({ top: 0 });
+      }
     }
   }, [queriesContainerRef, lastQueryRef]);
 

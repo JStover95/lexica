@@ -18,11 +18,13 @@ const PhrasesContent: React.FC<IPhrasesContentProps> = ({
     return <span className="italic pt-6">No phrases selected yet.</span>;
   }
 
+  const phrase = phrases[activePhraseIndex];
+
   return (
     <Phrase
-      text={phrases[activePhraseIndex].text}
-      onDeletePhrase={() => handleDeletePhrase(activePhraseIndex)}
-      queries={phrases[activePhraseIndex].dictionaryQueries} />
+      text={phrase.text}
+      queries={phrase.dictionaryQueries}
+      onDeletePhrase={() => handleDeletePhrase(activePhraseIndex)} />
   );
 };
 

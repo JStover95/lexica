@@ -130,3 +130,14 @@ export interface IContent {
   phrases?: IPhrase[];
   user_id?: string;
 }
+
+export interface IContentByIdResponseBody {
+  data: {
+    contentById: {
+      id: string;
+      text: string;
+      title: string;
+    };
+  };
+  errors: string[];
+}

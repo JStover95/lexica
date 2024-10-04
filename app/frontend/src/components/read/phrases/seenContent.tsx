@@ -6,7 +6,6 @@ interface ISeenContentProps extends PropsWithChildren {
 
 
 const SeenContent: React.FC<ISeenContentProps> = ({ open, children }) => {
-  console.log(open);
   const ref = createRef<HTMLDivElement>();
 
   useEffect(() => {
@@ -15,9 +14,11 @@ const SeenContent: React.FC<ISeenContentProps> = ({ open, children }) => {
         const height = [...ref.current.children].reduce(
           (l, r) => l + r.scrollHeight + 8, 0
         );
-        ref.current.style.height = `${height}px`;
+        ref.current.style.height = `${height + 16}px`;
+        ref.current.style.paddingBottom = "1rem";
       } else {
-        ref.current.style.height = "0px";
+        ref.current.style.height = "0";
+        ref.current.style.paddingBottom = "0";
       }
     }
   }, [open, ref]);

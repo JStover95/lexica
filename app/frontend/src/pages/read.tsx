@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { dummyText } from "../utils/dummyData";
-import { IContent, IInferResponseBody, IPhrase, ISeenContentResponseBody } from "../utils/interfaces";
+import { IContent, IContentByIdResponseBody, IInferResponseBody, IPhrase, ISeenContentResponseBody } from "../utils/interfaces";
 import Block from "../components/read/block";
 import PageContainer from "../components/containers/pageContainer";
 import MobilePhrasesDrawer from "../components/read/phrases/mobilePhrasesDrawer";
@@ -10,17 +10,17 @@ import { Location, useLocation } from "react-router-dom";
 
 
 const Read: React.FC = () => {
-  const [text, setText] = useState<string | null>(null);
+  const [text, setText] = useState(dummyText);
   const [selectedIndices, setSelectedIndices] = useState<Set<number>>(new Set());
   const [phrases, setPhrases] = useState<IPhrase[]>([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activePhraseIndex, setActivePhraseIndex] = useState(-1);
   const location: Location<{ id: string }> | null = useLocation();
 
-  const getContent = async (id: string): Promise<IContent | null> => {
+  const getContent = async (id: string) => {
     const query = `
       query getContentById($id: String!) {
-        content_by_id(id: $id) {
+        contentById(id: $id) {
           id
           title
           text
@@ -43,35 +43,33 @@ const Read: React.FC = () => {
         }),
       });
   
-      const result = await response.json();
+      const result: IContentByIdResponseBody = await response.json();
   
       if (response.ok && result.data) {
-        return result.data.content_by_id;
+        setText(result.data.contentById.text);
       } else {
         console.error("Error fetching content:", result.errors);
-        return null;
       }
     } catch (error) {
       console.error("Error fetching content:", error);
-      return null;
     }
   };
 
   useEffect(() => {
     if (location.state?.id) {
-      console.log(location.state.id);
+      getContent(location.state.id);
     }
   }, [location]);
 
   // Split the text into paragraphs, and within each paragraph, split by words
   const paragraphs = useMemo(() =>
-    dummyText.split(/[\n]+/).map((paragraph, pIndex) =>
+    text.split(/[\n]+/).map((paragraph, pIndex) =>
       paragraph.split(" ").map((word, wIndex) => ({
         text: word,
         index: pIndex * 10000 + wIndex, // Use a unique index by combining paragraph and word indices
         isSentenceFinal: word.endsWith("."),
       }))
-    ), []);
+    ), [text]);
 
   useEffect(() => {
     const updatedPhrases = [...phrases];
@@ -110,7 +108,6 @@ const Read: React.FC = () => {
 
         const inferenceResult: IInferResponseBody = await inference.json();
         const contentResult: ISeenContentResponseBody = await content.json();
-        console.log(contentResult);
         const entries = inferenceResult.Result;
         const seenContent = contentResult.Result;
         phrase.dictionaryQueries.push({ query, entries, seenContent });

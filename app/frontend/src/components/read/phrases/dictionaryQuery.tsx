@@ -3,6 +3,7 @@ import { IDictionaryQuery } from "../../../utils/interfaces";
 import SeenContent from "./seenContent";
 import DictionaryEntriesContainer from "./dictionaryEntriesContainer";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import { useNavigate } from "react-router-dom";
 
 interface IDictionaryQueryProps {
   dictionaryQuery: IDictionaryQuery;
@@ -17,6 +18,7 @@ const DictionaryQuery: React.FC<IDictionaryQueryProps> = ({
   const [openSeenContent, setOpenSeenContent] = useState(false);
   const { query, entries, seenContent } = dictionaryQuery;
   const arrowRef = createRef<HTMLDivElement>();
+  const navigate = useNavigate();
 
   const handleClickSeenContent = () => {
     if (arrowRef.current) {
@@ -30,20 +32,25 @@ const DictionaryQuery: React.FC<IDictionaryQueryProps> = ({
   };
 
   const seen = seenContent.map((sc, i) =>
-    sc.sentences.map(({ text, start, stop }, j) =>
-      <div
-        key={`seen-content-${i * 10000 + j}`}
-        className="mb-2">
-          <span>
-            {text.substring(0, start)}
-            <b>{text.substring(start, stop + 1)}</b>
-            {text.substring(stop + 1)}
-          </span>
+    <div key={`seen-content-${i}`} className="mb-2">
+      <div onClick={() => navigate("/", { state: { id: sc._id } })}>
+        <span className="underline">{sc.title}</span>
       </div>
-    )
+      {
+        sc.sentences.map(({ text, start, stop }, j) =>
+          <div key={`seen-content-${i * 10000 + j}`}>
+              <span>
+                {text.substring(0, start)}
+                <b>{text.substring(start, stop + 1)}</b>
+                {text.substring(stop + 1)}
+              </span>
+          </div>
+        )
+      }
+    </div>
   )
 
-  const numSeen = seen.reduce((l, r) => l + r.length, 0);
+  const numSeen = seenContent.reduce((l, r) => l + r.sentences.length, 0);
 
   return (
     <div ref={lastQueryRef}>

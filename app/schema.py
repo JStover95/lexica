@@ -16,6 +16,7 @@ from graphene import (
 )
 
 from app.collections import contents, dictionary_entries
+from app.utils.logging import logger
 
 
 class User(ObjectType):
@@ -227,7 +228,7 @@ class Content(ObjectType):
     def from_mongo(document):
         return Content(
             id=str(document["_id"]),
-            last_modified=document["last_modified"],
+            last_modified=document["lastModified"],
             method=document["method"],
             level=document["level"],
             length=document["length"],
@@ -236,11 +237,8 @@ class Content(ObjectType):
             prompt=document["prompt"],
             title=document["title"],
             text=document["text"],
-            surfaces=[
-                Surfaces.from_mongo(surface)
-                for surface in document["surfaces"]
-            ],
-            ix=[Ix.from_mongo(ix) for ix in document["ix"]],
+            surfaces=Surfaces.from_mongo(document["surfaces"]),
+            ix=Ix.from_mongo(document["ix"]),
             phrases=[
                 Phrase.from_mongo(hl) for hl in document["phrases"]
             ],
@@ -279,6 +277,7 @@ class Query(ObjectType):
                 return Content.from_mongo(content)
             return None
         except Exception as e:
+            logger.error(e)
             raise Exception(f"Error retrieving content by ID: {str(e)}")
 
 

@@ -113,3 +113,20 @@ export interface IInferResponseBody extends IBaseResponseBody {
 export interface ISeenContentResponseBody extends IBaseResponseBody {
   Result: ISeenContent[];
 }
+
+export interface IContent {
+  id?: string;
+  last_modified?: Date;
+  method?: string;
+  level?: string;
+  length?: string;
+  format?: string;
+  style?: string;
+  prompt?: string;
+  title: string;
+  text: string;
+  surfaces?: string;
+  ix?: string;
+  phrases?: IPhrase[];
+  user_id?: string;
+}

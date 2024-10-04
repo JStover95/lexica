@@ -1,5 +1,3 @@
-import re
-
 from flask import Blueprint, make_response, request, jsonify
 
 from app.extensions import mecab

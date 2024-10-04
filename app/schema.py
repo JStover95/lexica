@@ -253,6 +253,7 @@ class Query(ObjectType):
     senses = List(Sense)
     dictionary_entries = List(DictionaryEntry)
     contents = List(Content)
+    content_by_id = Field(Content, id=String(required=True))
 
     def resolve_users(self, info):
         users = users.find()
@@ -269,6 +270,16 @@ class Query(ObjectType):
     def resolve_contents(self, info):
         contents = contents.find()
         return [Content.from_mongo(c) for c in contents]
+
+    def resolve_content_by_id(self, info, id):
+        try:
+            # Query the MongoDB collection by ObjectId
+            content = contents.find_one({"_id": ObjectId(id)})
+            if content:
+                return Content.from_mongo(content)
+            return None
+        except Exception as e:
+            raise Exception(f"Error retrieving content by ID: {str(e)}")
 
 
 class ContentSurfacesInput(InputObjectType):
